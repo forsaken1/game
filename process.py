@@ -1,5 +1,5 @@
 from flask import jsonify, session
-import MySQLdb, re
+import MySQLdb, re, os, hashlib
 
 class Process:
 	def __init__(self):
@@ -7,6 +7,11 @@ class Process:
 		
 	def __del__(self):
 		self.db.close()
+		
+	def md5(self, body):
+		m = hashlib.md5()
+		m.update(body)
+		return m.hexdigest()
 	
 	def process(self, req):
 		params = req['params']
@@ -39,17 +44,25 @@ class Process:
 			return jsonify(result='badPassword', message='Bad password')
 		
 		cur = self.db.cursor()
-		cur.execute('SELECT `login` FROM `user` WHERE `login` = %s', (par['login'],))
-		login = cur.fetchall()
+		cur.execute('SELECT login FROM user WHERE login = %s', (par['login'],))
+		login = cur.fetchone()
 		if login:
 			return jsonify(result='userExists', message='User exists')
 		
-		cur.execute('INSERT INTO `user` (`login`, `password`) VALUES (%s, %s)', (par['login'], par['password'],))
+		cur.execute('INSERT INTO user (login, password) VALUES (%s, %s)', (par['login'], self.md5(par['password']),))
 		self.db.commit()
 		return jsonify(result='ok', message='Successful signup')
 		
 	def signin(self, par):
-		return par['login']
+		cur = self.db.cursor()
+		cur.execute('SELECT login FROM user WHERE login = %s AND password = %s', (par['login'], self.md5(par['password']),))
+		login = cur.fetchone()
+		if not login:
+			return jsonify(result='incorrect', message='Incorrect login/password')
+		
+		session['sid'] = self.md5(os.urandom(32))
+		session['login'] = login
+		return jsonify(result='ok', sid=session['sid'], message='Successful signin')
 		
 	def signout(self, par):
 		return par['login']

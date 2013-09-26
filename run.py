@@ -1,8 +1,9 @@
 from flask import Flask, request, render_template
 from process import Process
-import re
+import os
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
 @app.route('/', methods = ['POST'])
 def index():
