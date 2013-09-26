@@ -22,6 +22,9 @@ class Process:
 			'joinGame':		self.joinGame(params),
 			'loadMap':		self.loadMap(params),
 		}
+		if not proc.has_key(req['action']):
+			return self.unknownAction()
+		
 		return proc.get(req['action'])
 
 	def signup(self, par):
@@ -73,4 +76,4 @@ class Process:
 		return par['login']
 
 	def unknownAction(self):
-		return jsonify(result=unknownAction, message='Unknown action')
+		return jsonify(result='unknownAction', message='Unknown action')
