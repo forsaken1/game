@@ -71,10 +71,19 @@ class Process:
 			return jsonify(result='badSid', message='Wrong session id')
 		
 	def sendMessage(self, par):
-		return par['login']
+		if par['sid'] != session['sid']:
+			return jsonify(result='badSid', message='Wrong session id')
+			
+		cur = self.db.cursor()
+		cur.execute('INSERT INTO message (login, text, time, game_id) VALUES (%s, %s, TIME(), %s)', (session['login'], par['text'], par['game'],))
+		return jsonify(result='ok', message='Your message added')
 		
 	def getMessages(self, par):
-		return par['login']
+		if par['sid'] != session['sid']:
+			return jsonify(result='badSid', message='Wrong session id')
+			
+		
+		return jsonify(result='ok', message='All messages')
 		
 	def createGame(self, par):
 		return par['login']
