@@ -4,6 +4,9 @@
 
 flask/
 virtualenv
+.pyc
+
+static/jquery.js
 
 #cfg.php
 
