@@ -1,18 +1,20 @@
 <!DOCTYPE HTML>
-<input type = button value = "Press" onclick = "send()">
+<input type = button value = "Test signup" onclick = "send()">
+<br>
+<input style = 'width: 600px;' id = 'json' value = '{"action":"signup", "params":{"login":"admin", "password":"123"}}'>
 <script src = "static/jquery.js"></script>
 <script>
 function send()
 {
 	$.ajax({
 		type: 'POST',
-		data: '{"action":"signup", "params":{"login":"admin", "password":"qwerty"}}',
-		contentType: "application/json; charset=utf-8",
+		data: $('#json').val(),
+		contentType: 'application/json; charset=utf-8',
 		url: 'http://localhost:5000',
-		dataType: "json",
+		dataType: 'json',
 		success: function(data)
 		{
-			alert(data);
+			alert(data.message);
 		},
 	});
 }
