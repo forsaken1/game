@@ -65,7 +65,10 @@ class Process:
 		return jsonify(result='ok', sid=session['sid'], message='Successful signin')
 		
 	def signout(self, par):
-		return par['login']
+		if par['sid'] == session['sid']:
+			return jsonify(result='ok', message='Successful signout')
+		else:
+			return jsonify(result='badSid', message='Wrong session id')
 		
 	def sendMessage(self, par):
 		return par['login']
