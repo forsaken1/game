@@ -14,23 +14,26 @@ class Process:
 		return m.hexdigest()
 	
 	def process(self, req):
+		if not req['params']:
+			return self.unknownAction()
+		
 		params = req['params']
 		proc = 	{
-			'signup':		self.signup(params),
-			'signin':		self.signin(params),
-			'signout':		self.signout(params),
-			'sendMessage':	self.sendMessage(params),
-			'getMessages':	self.getMessages(params),
-			'createGame':	self.createGame(params),
-			'leaveGame':	self.leaveGame(params),
-			'getGames':		self.getGames(params),
-			'joinGame':		self.joinGame(params),
-			'loadMap':		self.loadMap(params),
+			'signup':		self.signup,
+			'signin':		self.signin,
+			'signout':		self.signout,
+			'sendMessage':	self.sendMessage,
+			'getMessages':	self.getMessages,
+			'createGame':	self.createGame,
+			'leaveGame':	self.leaveGame,
+			'getGames':		self.getGames,
+			'joinGame':		self.joinGame,
+			'loadMap':		self.loadMap,
 		}
 		if not proc.has_key(req['action']):
 			return self.unknownAction()
 		
-		return proc.get(req['action'])
+		return proc.get(req['action'])(params)
 
 	def signup(self, par):
 		reg_exp_login = re.compile('\w{4,40}', re.IGNORECASE)
