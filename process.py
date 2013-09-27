@@ -3,7 +3,7 @@ import MySQLdb, re, os, hashlib
 
 class Process:
 	def __init__(self):
-		self.db = MySQLdb.connect(host='localhost', port=3306, user='root', passwd='', db='game')
+		self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654', db='game')
 		
 	def __del__(self):
 		self.db.close()
@@ -14,7 +14,7 @@ class Process:
 		return m.hexdigest()
 	
 	def process(self, req):
-		if not req['params']:
+		if not req['params'] or not req.has_key('action'):
 			return self.unknownAction()
 		
 		params = req['params']
@@ -30,13 +30,13 @@ class Process:
 			'joinGame':		self.joinGame,
 			'loadMap':		self.loadMap,
 		}
-		if not proc.has_key(req['action']):
+		if  not proc.has_key(req['action']):
 			return self.unknownAction()
 		
 		return proc.get(req['action'])(params)
 
 	def signup(self, par):
-		reg_exp_login = re.compile('\w{4,40}', re.IGNORECASE)
+		reg_exp_login = re.compile('\w{4,40}$', re.IGNORECASE)
 		result = reg_exp_login.match(par['login'])
 		if not result:
 			return jsonify(result='badLogin', message='Bad login')
