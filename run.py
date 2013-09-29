@@ -6,9 +6,15 @@ import json
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+@app.route('/', methods = ['GET'])
+def asd():
+	if (app.config["TESTING"]):
+		return 'asd'
+	else: return 'asdss'
+
 @app.route('/', methods = ['POST'])
 def index():
-	p = Process()
+	p = Process(app) 	
 	try:
 		req = json.loads(request.data)
 	except ValueError:

@@ -1,5 +1,55 @@
-..........
+FFFF...F..
+======================================================================
+FAIL: test_signin_bad_combi (__main__.AuthTestCase)
 ----------------------------------------------------------------------
-Ran 10 tests in 0.146s
+Traceback (most recent call last):
+  File "tester.py", line 136, in test_signin_bad_combi
+    signup_user(self,'user6')
+  File "tester.py", line 22, in signup_user
+    assert resp == {"result": "ok"}, resp
+AssertionError: {u'result': u'userExists'}
 
-OK
+======================================================================
+FAIL: test_signin_ok (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 132, in test_signin_ok
+    signup_user(self,'user5')
+  File "tester.py", line 22, in signup_user
+    assert resp == {"result": "ok"}, resp
+AssertionError: {u'result': u'userExists'}
+
+======================================================================
+FAIL: test_signout_ok (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 149, in test_signout_ok
+    signup_user(self,'user7')
+  File "tester.py", line 22, in signup_user
+    assert resp == {"result": "ok"}, resp
+AssertionError: {u'result': u'userExists'}
+
+======================================================================
+FAIL: test_signup_already_exists (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 119, in test_signup_already_exists
+    signup_user(self,'user4', 'pass4')
+  File "tester.py", line 22, in signup_user
+    assert resp == {"result": "ok"}, resp
+AssertionError: {u'result': u'userExists'}
+
+======================================================================
+FAIL: test_signup_ok (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 80, in test_signup_ok
+    signup_user(self, 'user1')
+  File "tester.py", line 22, in signup_user
+    assert resp == {"result": "ok"}, resp
+AssertionError: {u'result': u'userExists'}
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.129s
+
+FAILED (failures=5)

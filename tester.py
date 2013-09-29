@@ -1,7 +1,5 @@
 from run import app 
-import unittest
-import json
-import re
+import json, unittest, re, MySQLdb
 
 def send(test, query):
     query = json.dumps(query)
@@ -38,6 +36,17 @@ def signin_user(test, login, passwd = "pass"):
     assert resp == {"result": "ok", "sid": sid}, resp
     return sid
     
+def create_db(test):
+	app = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654',)
+	cursor = con.cursor()
+	cursor.execute('CREATE DATABASE test')
+	sql = '''CREATE TABLE user (
+		   login VARCHAR(255)
+		   password VARCHAR(40)
+		   )
+		   '''
+	cursor.execute(sql)	
+		   
 def setup(test):
     app.config["TESTING"] = True
     test.app = app.test_client()    

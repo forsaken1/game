@@ -2,8 +2,12 @@ from flask import jsonify, session
 import MySQLdb, re, os, hashlib
 
 class Process:
-	def __init__(self):
-		self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654', db='game')
+	def __init__(self, app): 
+		if (app.config["TESTING"]):
+			db = 'test'
+		else:
+			db = 'game'
+		self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654', db=db)
 		
 	def __del__(self):
 		self.db.close()
