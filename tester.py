@@ -37,24 +37,41 @@ def signin_user(test, login, passwd = "pass"):
     return sid
     
 def create_db():
-    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654',)
+    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='',)
     cursor = con.cursor()
-    cursor.execute('CREATE DATABASE test')
+    cursor.execute('CREATE DATABASE IF NOT EXISTS test')
     con.close()
-    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654', db='test')
+    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db='test')
     cursor = con.cursor()    
-    sql = '''CREATE TABLE user (
-           login VARCHAR(255),
-           password VARCHAR(40)
-           )
+    sql = '''CREATE TABLE IF NOT EXISTS `users` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`online` bit(1) NOT NULL DEFAULT b'0',
+			`sid` varchar(64) CHARACTER SET latin1,
+			`login` varchar(255) CHARACTER SET latin1 NOT NULL,
+			`password` varchar(255) CHARACTER SET latin1 NOT NULL,
+			`game_id` int(11),
+			`last_connection` date,
+			PRIMARY KEY (`id`),
+			KEY `id` (`id`)
+			) DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+			
+			CREATE TABLE IF NOT EXISTS `messages` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`login_id` int(11) NOT NULL,
+			`text` varchar(1024) CHARACTER SET latin1 NOT NULL,
+			`time` date NOT NULL,
+			`game_id` int(11) NOT NULL,
+			PRIMARY KEY (`id`)
+			) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;			
            '''
     cursor.execute(sql)    
     con.close()
     
 def drop_db():
-    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654',)    
+    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='',)    
     cursor = con.cursor()
-    cursor.execute('DROP DATABASE test')
+    cursor.execute('DROP DATABASE IF EXISTS test')
+    con.close()	
            
 def setup(test):
     app.config["TESTING"] = True
@@ -71,8 +88,6 @@ class AuthTestCase(unittest.TestCase):
     setUp = setup    
     def tearDown(test):
         drop_db()
-        #os.close(test.db_fd)
-        #os.unlink(app.config["DATABASE"])
     
     def test_unknown_action1(self):
         resp = send(self, 
@@ -176,18 +191,41 @@ class AuthTestCase(unittest.TestCase):
 		drop_db()
 		create_db()
 		signup_user(self,'user8')
-		sid = signin_user(self,'user8')   
+		sid1 = signin_user(self,'user8')   
+		signup_user(self,'user8')
+		sid2 = signin_user(self,'user8')   		
 		resp = send(self, 
 		{ 
 			"action": "signout",
 			"params": 
 			{    
-				"sid": sid + '1'
+				"sid": sid1 + sid2
 			} 
 		})        
 		assert resp == {"result": "badSid"}, resp           
     
+class ChatTestCase(unittest.TestCase):
     
+    setUp = setup    
+    def tearDown(test):
+        drop_db()   
+	
+	def test_sendMessage_bad_sid(self):
+		drop_db()
+		create_db()
+		signup_user(self,'user8')
+		sid1 = signin_user(self,'user8')   
+		signup_user(self,'user8')
+		sid2 = signin_user(self,'user8')   		
+		resp = send(self, 
+		{ 
+			"action": "signout",
+			"params": 
+			{    
+				"sid": sid1 + sid2
+			} 
+		})        
+		assert resp == {"result": "badSid"}, resp        	
     
 if __name__ == '__main__':
    log_file = 'log.txt'
