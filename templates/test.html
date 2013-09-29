@@ -2,6 +2,9 @@
 <input type = button value = "Test signup" onclick = "send()">
 <br>
 <input style = 'width: 600px;' id = 'json' value = '{"action":"signup", "params":{"login":"admin", "password":"123"}}'>
+<br><br>
+<input style = 'width: 600px;' id = 'result'>
+<script src = "static/jquery.js"></script>
 <script>
 function send()
 {
@@ -13,7 +16,7 @@ function send()
 		dataType: 'json',
 		success: function(data)
 		{
-			alert(data.message);
+			$('#result').val(data.result);
 		},
 	});
 }
