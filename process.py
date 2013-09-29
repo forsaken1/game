@@ -70,20 +70,24 @@ class Process:
 		return jsonify(result='ok', message='Successful signup')
 		
 	def signin(self, par):
+		if not par['login'] or not par['password']:
+			return jsonify(result='incorrect', message='Incorrect login/password')
+		
 		cur = self.db.cursor()
 		cur.execute('SELECT id FROM users WHERE login = %s AND password = %s', (par['login'], self.hash(par['password']),))
-		id = cur.fetchone()
-		if not id:
+		res = cur.fetchone()
+		if not res:
 			return jsonify(result='incorrect', message='Incorrect login/password')
 		
 		ssid = self.hash(os.urandom(32) + 'key' + self.hash(os.urandom(32)))
-		cur.execute("UPDATE users SET online = '1', sid = %s WHERE id = %s", (ssid,id,))
+		cur.execute("UPDATE users SET online = '1', sid = %s WHERE id = %s", (ssid,res[0],))
 		self.db.commit()
 		return jsonify(result='ok', sid=ssid, message='Successful signin')
 		
 	def signout(self, par):
 		if self.is_auth(par['sid']):
-			self.db.cursor().execute('UPDATE users SET online = "0", sid = "" WHERE id = %s', (id,))
+			sid = par['sid']
+			self.db.cursor().execute('UPDATE users SET online = 0, sid = "" WHERE sid = %s', (sid,))
 			self.db.commit()
 			return jsonify(result='ok', message='Successful signout')
 		else:
@@ -96,7 +100,13 @@ class Process:
 		if not par['game'] or (par['game'] != '' and not self.game_exists(par['game'])):
 			return jsonify(result='badGame', message='Wrong game id')
 		
-		cur.execute('INSERT INTO messages (login, text, time, game_id) VALUES (%s, %s, UNIX_TIMESTAMP(), %s)', (session['login'], par['text'], par['game'],))
+		sid = par['sid']
+		cur = self.db.cursor()
+		cur.execute('SELECT login FROM users WHERE sid = %s', (sid,))
+		login = cur.fetchone()
+		text = par['text']
+		game = par['game']
+		cur.execute('INSERT INTO messages (login, text, time, game_id) VALUES (%s, %s, UNIX_TIMESTAMP(), %s)', (login, text, game,))
 		self.db.commit()
 		return jsonify(result='ok', message='Your message added')
 		
@@ -108,10 +118,12 @@ class Process:
 			return jsonify(result='badGame', message='Wrong game id')
 		
 		if not par['since']:
-			par['since'] = 0
+			since = 0
+		else:
+			since = par['since']
 		
 		cur = self.db.cursor()
-		m = cur.execute('SELECT time, text, login FROM messages WHERE time > %s ORDER BY time', (par['since'],))
+		m = cur.execute('SELECT time, text, login FROM messages WHERE time > %s ORDER BY time', (since,))
 		return jsonify(result='ok', message='All messages', messages=m)
 		
 	def createGame(self, par):
