@@ -36,20 +36,30 @@ def signin_user(test, login, passwd = "pass"):
     assert resp == {"result": "ok", "sid": sid}, resp
     return sid
     
-def create_db(test):
-	app = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654',)
-	cursor = con.cursor()
-	cursor.execute('CREATE DATABASE test')
-	sql = '''CREATE TABLE user (
-		   login VARCHAR(255)
-		   password VARCHAR(40)
-		   )
-		   '''
-	cursor.execute(sql)	
-		   
+def create_db():
+    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654',)
+    cursor = con.cursor()
+    cursor.execute('CREATE DATABASE test')
+    con.close()
+    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654', db='test')
+    cursor = con.cursor()    
+    sql = '''CREATE TABLE user (
+           login VARCHAR(255),
+           password VARCHAR(40)
+           )
+           '''
+    cursor.execute(sql)    
+    con.close()
+    
+def drop_db():
+    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='p.077654',)    
+    cursor = con.cursor()
+    cursor.execute('DROP DATABASE test')
+           
 def setup(test):
     app.config["TESTING"] = True
     test.app = app.test_client()    
+    create_db()
 
 #def tearDown(test):
     #os.close(test.db_fd)
@@ -59,7 +69,11 @@ def setup(test):
 class AuthTestCase(unittest.TestCase):
     
     setUp = setup    
-
+    def tearDown(test):
+        drop_db()
+        #os.close(test.db_fd)
+        #os.unlink(app.config["DATABASE"])
+    
     def test_unknown_action1(self):
         resp = send(self, 
         {
@@ -158,8 +172,23 @@ class AuthTestCase(unittest.TestCase):
         })        
         assert resp == {"result": "ok"}, resp       
 
-   # def test_signout_bad_sid(self):
-
+	def test_signout_bad_sid(self):
+		drop_db()
+		create_db()
+		signup_user(self,'user8')
+		sid = signin_user(self,'user8')   
+		resp = send(self, 
+		{ 
+			"action": "signout",
+			"params": 
+			{    
+				"sid": sid + '1'
+			} 
+		})        
+		assert resp == {"result": "badSid"}, resp           
+    
+    
+    
 if __name__ == '__main__':
    log_file = 'log.txt'
    f = open(log_file, "w")
