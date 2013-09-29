@@ -30,9 +30,12 @@ class Process:
 		cur = self.db.cursor()
 		cur.execute('SELECT id FROM games WHERE id = %s', (gid,))
 		return cur.fetchone()
+		
+	def valid_name(self, name):
+		return re.compile('^\w{1,64}$', re.IGNORECASE).match(name)
 	
 	def process(self, req):
-		if not req['action'] or not req['params']:
+		if not req.has_key('action') or not req.has_key('params'):
 			return self.unknownAction()
 		
 		params = req['params']
@@ -54,10 +57,10 @@ class Process:
 		return proc.get(req['action'])(params)
 
 	def signup(self, par):
-		if not re.compile('\w{4,40}', re.IGNORECASE).match(par['login']):
+		if not re.compile('^\w{4,40}$', re.IGNORECASE).match(par['login']):
 			return jsonify(result='badLogin', message='Bad login')
 		
-		if not re.compile('\w{4,}', re.IGNORECASE).match(par['password']):
+		if not re.compile('^\w{4,256}$', re.IGNORECASE).match(par['password']):
 			return jsonify(result='badPassword', message='Bad password')
 		
 		cur = self.db.cursor()
@@ -70,7 +73,7 @@ class Process:
 		return jsonify(result='ok', message='Successful signup')
 		
 	def signin(self, par):
-		if not par['login'] or not par['password']:
+		if not par.has_key('login') or not par.has_key('password'):
 			return jsonify(result='incorrect', message='Incorrect login/password')
 		
 		cur = self.db.cursor()
@@ -97,7 +100,7 @@ class Process:
 		if not self.is_auth(par['sid']):
 			return jsonify(result='badSid', message='Wrong session id')
 		
-		if not par['game'] or (par['game'] != '' and not self.game_exists(par['game'])):
+		if not par.has_key('game') or (par['game'] != '' and not self.game_exists(par['game'])):
 			return jsonify(result='badGame', message='Wrong game id')
 		
 		sid = par['sid']
@@ -114,10 +117,10 @@ class Process:
 		if not self.is_auth(par['sid']):
 			return jsonify(result='badSid', message='Wrong session id')
 			
-		if not par['game'] or (par['game'] != '' and not self.game_exists(par['game'])):
+		if not par.has_key('game') or (par['game'] != '' and not self.game_exists(par['game'])):
 			return jsonify(result='badGame', message='Wrong game id')
 		
-		if not par['since']:
+		if not par.has_key('since'):
 			since = 0
 		else:
 			since = par['since']
@@ -130,7 +133,7 @@ class Process:
 		if not self.is_auth(par['sid']):
 			return jsonify(result='badSid', message='Wrong session id')
 		
-		if not self.valid_name(par['sid']):
+		if not self.valid_name(par['name']):
 			return jsonify(result='badName', message='Incorrect game name')
 		
 		if self.game_exists(par['game']):
