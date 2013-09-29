@@ -32,7 +32,7 @@ def signin_user(test, login, passwd = "pass"):
         }
     })
     sid = resp['sid']
-    assert re.match('\w+$', sid), sid
+    assert re.match('^\w+$', sid), sid
     assert resp == {"result": "ok", "sid": sid}, resp
     return sid
     

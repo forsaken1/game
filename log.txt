@@ -1,13 +1,453 @@
-........F.
+EEEEEEEEEE
 ======================================================================
-FAIL: test_unknown_action1 (__main__.AuthTestCase)
+ERROR: test_signin_bad_combi (__main__.AuthTestCase)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "tester.py", line 85, in test_unknown_action1
-    assert resp == { "result": "unknowwwnAction" }, resp
-AssertionError: {u'result': u'unknownAction'}
+  File "tester.py", line 150, in test_signin_bad_combi
+    signup_user(self,'user6')
+  File "tester.py", line 19, in signup_user
+    "password": passwd
+  File "tester.py", line 6, in send
+    resp = test.app.post('/', data=query)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 771, in post
+    return self.open(*args, **kw)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\testing.py", line 108, in open
+    follow_redirects=follow_redirects)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 735, in open
+    response = self.run_wsgi_app(environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 658, in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 854, in run_wsgi_app
+    app_iter = app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1403, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\web\game\run.py", line 8, in index
+    p = Process(app)
+  File "C:\web\game\process.py", line 10, in __init__
+    self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+  File "C:\Python27\lib\site-packages\MySQLdb\__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "C:\Python27\lib\site-packages\MySQLdb\connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+
+======================================================================
+ERROR: test_signin_ok (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 146, in test_signin_ok
+    signup_user(self,'user5')
+  File "tester.py", line 19, in signup_user
+    "password": passwd
+  File "tester.py", line 6, in send
+    resp = test.app.post('/', data=query)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 771, in post
+    return self.open(*args, **kw)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\testing.py", line 108, in open
+    follow_redirects=follow_redirects)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 735, in open
+    response = self.run_wsgi_app(environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 658, in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 854, in run_wsgi_app
+    app_iter = app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1403, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\web\game\run.py", line 8, in index
+    p = Process(app)
+  File "C:\web\game\process.py", line 10, in __init__
+    self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+  File "C:\Python27\lib\site-packages\MySQLdb\__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "C:\Python27\lib\site-packages\MySQLdb\connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+
+======================================================================
+ERROR: test_signout_ok (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 163, in test_signout_ok
+    signup_user(self,'user7')
+  File "tester.py", line 19, in signup_user
+    "password": passwd
+  File "tester.py", line 6, in send
+    resp = test.app.post('/', data=query)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 771, in post
+    return self.open(*args, **kw)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\testing.py", line 108, in open
+    follow_redirects=follow_redirects)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 735, in open
+    response = self.run_wsgi_app(environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 658, in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 854, in run_wsgi_app
+    app_iter = app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1403, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\web\game\run.py", line 8, in index
+    p = Process(app)
+  File "C:\web\game\process.py", line 10, in __init__
+    self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+  File "C:\Python27\lib\site-packages\MySQLdb\__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "C:\Python27\lib\site-packages\MySQLdb\connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+
+======================================================================
+ERROR: test_signup_already_exists (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 133, in test_signup_already_exists
+    signup_user(self,'user4', 'pass4')
+  File "tester.py", line 19, in signup_user
+    "password": passwd
+  File "tester.py", line 6, in send
+    resp = test.app.post('/', data=query)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 771, in post
+    return self.open(*args, **kw)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\testing.py", line 108, in open
+    follow_redirects=follow_redirects)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 735, in open
+    response = self.run_wsgi_app(environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 658, in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 854, in run_wsgi_app
+    app_iter = app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1403, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\web\game\run.py", line 8, in index
+    p = Process(app)
+  File "C:\web\game\process.py", line 10, in __init__
+    self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+  File "C:\Python27\lib\site-packages\MySQLdb\__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "C:\Python27\lib\site-packages\MySQLdb\connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+
+======================================================================
+ERROR: test_signup_bad_login1 (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 115, in test_signup_bad_login1
+    "password": "pass3"
+  File "tester.py", line 6, in send
+    resp = test.app.post('/', data=query)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 771, in post
+    return self.open(*args, **kw)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\testing.py", line 108, in open
+    follow_redirects=follow_redirects)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 735, in open
+    response = self.run_wsgi_app(environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 658, in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 854, in run_wsgi_app
+    app_iter = app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1403, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\web\game\run.py", line 8, in index
+    p = Process(app)
+  File "C:\web\game\process.py", line 10, in __init__
+    self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+  File "C:\Python27\lib\site-packages\MySQLdb\__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "C:\Python27\lib\site-packages\MySQLdb\connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+
+======================================================================
+ERROR: test_signup_bad_login2 (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 127, in test_signup_bad_login2
+    "password": "pass3"
+  File "tester.py", line 6, in send
+    resp = test.app.post('/', data=query)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 771, in post
+    return self.open(*args, **kw)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\testing.py", line 108, in open
+    follow_redirects=follow_redirects)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 735, in open
+    response = self.run_wsgi_app(environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 658, in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 854, in run_wsgi_app
+    app_iter = app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1403, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\web\game\run.py", line 8, in index
+    p = Process(app)
+  File "C:\web\game\process.py", line 10, in __init__
+    self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+  File "C:\Python27\lib\site-packages\MySQLdb\__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "C:\Python27\lib\site-packages\MySQLdb\connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+
+======================================================================
+ERROR: test_signup_bad_pass (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 103, in test_signup_bad_pass
+    "password": "p"
+  File "tester.py", line 6, in send
+    resp = test.app.post('/', data=query)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 771, in post
+    return self.open(*args, **kw)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\testing.py", line 108, in open
+    follow_redirects=follow_redirects)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 735, in open
+    response = self.run_wsgi_app(environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 658, in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 854, in run_wsgi_app
+    app_iter = app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1403, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\web\game\run.py", line 8, in index
+    p = Process(app)
+  File "C:\web\game\process.py", line 10, in __init__
+    self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+  File "C:\Python27\lib\site-packages\MySQLdb\__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "C:\Python27\lib\site-packages\MySQLdb\connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+
+======================================================================
+ERROR: test_signup_ok (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 94, in test_signup_ok
+    signup_user(self, 'user1')
+  File "tester.py", line 19, in signup_user
+    "password": passwd
+  File "tester.py", line 6, in send
+    resp = test.app.post('/', data=query)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 771, in post
+    return self.open(*args, **kw)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\testing.py", line 108, in open
+    follow_redirects=follow_redirects)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 735, in open
+    response = self.run_wsgi_app(environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 658, in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 854, in run_wsgi_app
+    app_iter = app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1403, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\web\game\run.py", line 8, in index
+    p = Process(app)
+  File "C:\web\game\process.py", line 10, in __init__
+    self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+  File "C:\Python27\lib\site-packages\MySQLdb\__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "C:\Python27\lib\site-packages\MySQLdb\connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+
+======================================================================
+ERROR: test_unknown_action1 (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 82, in test_unknown_action1
+    "password": "pass"
+  File "tester.py", line 6, in send
+    resp = test.app.post('/', data=query)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 771, in post
+    return self.open(*args, **kw)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\testing.py", line 108, in open
+    follow_redirects=follow_redirects)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 735, in open
+    response = self.run_wsgi_app(environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 658, in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 854, in run_wsgi_app
+    app_iter = app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1403, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\web\game\run.py", line 8, in index
+    p = Process(app)
+  File "C:\web\game\process.py", line 10, in __init__
+    self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+  File "C:\Python27\lib\site-packages\MySQLdb\__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "C:\Python27\lib\site-packages\MySQLdb\connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
+
+======================================================================
+ERROR: test_unknown_action2 (__main__.AuthTestCase)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "tester.py", line 88, in test_unknown_action2
+    resp = json.loads(self.app.post('/', data="fooooooo").data)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 771, in post
+    return self.open(*args, **kw)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\testing.py", line 108, in open
+    follow_redirects=follow_redirects)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 735, in open
+    response = self.run_wsgi_app(environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 658, in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+  File "C:\Python27\lib\site-packages\werkzeug-0.9.4-py2.7.egg\werkzeug\test.py", line 854, in run_wsgi_app
+    app_iter = app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1403, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1381, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Python27\lib\site-packages\flask-0.10.1-py2.7.egg\flask\app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "C:\web\game\run.py", line 8, in index
+    p = Process(app)
+  File "C:\web\game\process.py", line 10, in __init__
+    self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+  File "C:\Python27\lib\site-packages\MySQLdb\__init__.py", line 81, in Connect
+    return Connection(*args, **kwargs)
+  File "C:\Python27\lib\site-packages\MySQLdb\connections.py", line 187, in __init__
+    super(Connection, self).__init__(*args, **kwargs2)
+OperationalError: (1045, "Access denied for user 'root'@'localhost' (using password: NO)")
 
 ----------------------------------------------------------------------
-Ran 10 tests in 1.219s
+Ran 10 tests in 1.131s
 
-FAILED (failures=1)
+FAILED (errors=10)
