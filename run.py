@@ -14,6 +14,10 @@ def index():
 	except ValueError:
 		return p.unknownAction()
 	return p.process(req)
+
+@app.route('/', methods = ['OPTIONS'])
+def index1():
+	pass
 	
 @app.after_request
 def after_request(response):

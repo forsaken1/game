@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `messages` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `login_id` int(11) NOT NULL,
   `text` varchar(1024) CHARACTER SET latin1 NOT NULL,
-  `time` date NOT NULL,
+  `time` int(11) NOT NULL,
   `game_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

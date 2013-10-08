@@ -1,12 +1,67 @@
 from flask import jsonify
-import MySQLdb, re, os, hashlib
+import MySQLdb, re, os, hashlib, time
 
+def truncate_db():
+    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db='game')
+    cursor = con.cursor()
+    cursor.execute('show tables')
+    tables = cursor.fetchall()
+    for table in tables:
+        counter[table[0]] = 0
+        cursor.execute('truncate %s' %table)
+    con.close()
+
+def create_db(name):
+	con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='',)
+	cursor = con.cursor()
+	cursor.execute('CREATE DATABASE IF NOT EXISTS %s' %name)
+	con.close()
+	con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=name)
+	cursor = con.cursor()    
+	sql = '''CREATE TABLE IF NOT EXISTS `users` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`online` bit(1) DEFAULT b'0' NOT NULL,
+			`sid` varchar(64) CHARACTER SET latin1,
+			`login` varchar(255) CHARACTER SET latin1 NOT NULL,
+			`password` varchar(255) CHARACTER SET latin1 NOT NULL,
+			`game_id` int(11),
+			`last_connection` date,
+			PRIMARY KEY (`id`),
+			KEY `id` (`id`)
+			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=2;        
+		   '''
+	cursor.execute(sql)    
+	sql = '''CREATE TABLE IF NOT EXISTS `messages` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`login` varchar(255) CHARACTER SET latin1 NOT NULL,
+			`text` varchar(1024) CHARACTER SET latin1 NOT NULL,
+			`time` int(11) NOT NULL,
+			`game_id` varchar(255) NOT NULL,
+			PRIMARY KEY (`id`)
+			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;    
+		   '''
+	cursor.execute(sql)             
+	sql = '''CREATE TABLE IF NOT EXISTS `games` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+			`name` varchar(256) CHARACTER SET latin1 NOT NULL,
+			`map` varchar(256) CHARACTER SET latin1 NOT NULL,
+			`maxPlayers` int(11) NOT NULL,
+			`status` varchar(64) DEFAULT 'running' NOT NULL,
+			`sid` varchar(64) NOT NULL,
+			`playersCount` int(11) NOT NULL DEFAULT '0',
+			PRIMARY KEY (`id`)
+			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;   
+		   '''
+	cursor.execute(sql)        
+	con.close()
+		
 class Process:
 	def __init__(self, app):
 		if app.config["TESTING"]:
 			db = 'test'
 		else:
-			db = 'game'
+			db = 'game'	
+		create_db(db)			
 		self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
 		
 	def __del__(self):
@@ -40,6 +95,7 @@ class Process:
 		
 		params = req['params']
 		proc = 	{
+			'startTesting': self.startTesting,
 			'signup': self.signup,
 			'signin': self.signin,
 			'signout': self.signout,
@@ -49,13 +105,17 @@ class Process:
 			'leaveGame': self.leaveGame,
 			'getGames': self.getGames,
 			'joinGame': self.joinGame,
-			'loadMap': self.loadMap,
+			'loadMap': self.loadMap
 		}
 		if  not proc.has_key(req['action']):
 			return self.unknownAction()
 		
 		return proc.get(req['action'])(params)
-
+	
+	def startTesting(self, par):
+		truncate_db()
+		return jsonify(result='ok')		
+	
 	def signup(self, par):
 		if not re.compile('^\w{4,40}$', re.IGNORECASE).match(par['login']):
 			return jsonify(result='badLogin', message='Bad login')
@@ -71,7 +131,7 @@ class Process:
 		cur.execute('INSERT INTO users (login, password) VALUES (%s, %s)', (par['login'], self.hash(par['password']),))
 		self.db.commit()
 		return jsonify(result='ok', message='Successful signup')
-		
+	
 	def signin(self, par):
 		if not par.has_key('login') or not par.has_key('password'):
 			return jsonify(result='incorrect', message='Incorrect login/password')
@@ -83,7 +143,7 @@ class Process:
 			return jsonify(result='incorrect', message='Incorrect login/password')
 		
 		ssid = self.hash(os.urandom(32) + 'key' + self.hash(os.urandom(32)))
-		cur.execute("UPDATE users SET online = '1', sid = %s WHERE id = %s", (ssid,res[0],))
+		cur.execute("UPDATE users SET online = b'1', sid = %s WHERE id = %s", (ssid,res[0],))
 		self.db.commit()
 		return jsonify(result='ok', sid=ssid, message='Successful signin')
 		
@@ -109,7 +169,7 @@ class Process:
 		login = cur.fetchone()
 		text = par['text']
 		game = par['game']
-		cur.execute('INSERT INTO messages (login, text, time, game_id) VALUES (%s, %s, UNIX_TIMESTAMP(), %s)', (login, text, game,))
+		cur.execute('INSERT INTO messages (login, text, time, game_id) VALUES ("%s", "%s", UNIX_TIMESTAMP(), "%s")', (login, text, game,))
 		self.db.commit()
 		return jsonify(result='ok', message='Your message added')
 		
@@ -124,9 +184,10 @@ class Process:
 			since = 0
 		else:
 			since = par['since']
-		
-		cur = self.db.cursor()
-		m = cur.execute('SELECT time, text, login FROM messages WHERE time > %s ORDER BY time', (since,))
+			if not isinstance(since, int) or since > int(time.time()):
+				return jsonify(result='badSince', message='Incorrect since time')
+		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
+		cur.execute('SELECT time, text, login FROM messages WHERE time >= %s ORDER BY time', (since,))
 		return jsonify(result='ok', message='All messages', messages=m)
 		
 	def createGame(self, par):
@@ -136,34 +197,33 @@ class Process:
 		if not self.valid_name(par['name']):
 			return jsonify(result='badName', message='Incorrect game name')
 		
-		if self.game_exists(par['game']):
-			return jsonify(result='gameExists', message='Game already exists')
+		#if self.game_exists(par['game']):
+		#	return jsonify(result='gameExists', message='Game already exists')
 			
 		if not self.valid_name(par['map']):
 			return jsonify(result='badMap', message='Incorrect map name')
 			
-		if not par['maxPlayers']:
+		if not par['maxPlayers'] or not isinstance(par['maxPlayers'], int):
 			return jsonify(result='badMaxPlayers', message='Incorrect max players')
 		
 		cur = self.db.cursor()
-		cur.execute('INSERT INTO games (name, map, maxPlayers, status, creator_sid) VALUES(%s, %s, %s, 1, %s)', (par['name'], par['map'], par['maxPlayers'], par['sid']))
-		game_id = cursor.lastrowid
+		cur.execute("INSERT INTO games (name, map, maxPlayers, status, sid) VALUES(%s, %s, %s, 'running', %s)", (par['name'], par['map'], par['maxPlayers'], par['sid']))
+		game_id = cur.lastrowid
 		cur.execute('UPDATE users SET game_id = %s WHERE sid = %s', (game_id, par['sid']))
 		self.db.commit()
 		return jsonify(result='ok', message='Game successfully created')
 	
-	def getGames(self, par):
+	def getGames(self, par):	
 		if not self.is_auth(par['sid']):
 			return jsonify(result='badSid', message='Wrong session id')
 			
-		cur = self.db.cursor()
-		cur.execute('SELECT id, sid, name, map, maxPlayers, status FROM games')
+		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
+		cur.execute('SELECT id, sid, name, map, maxPlayers, status FROM games')	
 		res = cur.fetchall()
 		for item in res:
-			cur.execute('SELECT login FROM users WHERE game_id = %s', (item['id'],))
-			item['players'] = cur.fechall()
-		
-		return jsonify(result='ok', games=res, message='All games')
+			cur.execute('SELECT login FROM users WHERE game_id = %i' %item['id'])
+			item['players'] = cur.fetchall()
+		return jsonify(result='ok', games=res, message='All games')			# change bool status to str
 		
 	def joinGame(self, par):
 		if not self.is_auth(par['sid']):
