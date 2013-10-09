@@ -1,60 +1,6 @@
 from flask import jsonify
 import MySQLdb, re, os, hashlib, time
 
-def truncate_db():
-    con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db='game')
-    cursor = con.cursor()
-    cursor.execute('show tables')
-    tables = cursor.fetchall()
-    for table in tables:
-        counter[table[0]] = 0
-        cursor.execute('truncate %s' %table)
-    con.close()
-
-def create_db(name):
-	con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='',)
-	cursor = con.cursor()
-	cursor.execute('CREATE DATABASE IF NOT EXISTS %s' %name)
-	con.close()
-	con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=name)
-	cursor = con.cursor()    
-	sql = '''CREATE TABLE IF NOT EXISTS `users` (
-			`id` int(11) NOT NULL AUTO_INCREMENT,
-			`online` bit(1) DEFAULT b'0' NOT NULL,
-			`sid` varchar(64) CHARACTER SET latin1,
-			`login` varchar(255) CHARACTER SET latin1 NOT NULL,
-			`password` varchar(255) CHARACTER SET latin1 NOT NULL,
-			`game_id` int(11),
-			`last_connection` date,
-			PRIMARY KEY (`id`),
-			KEY `id` (`id`)
-			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=2;        
-		   '''
-	cursor.execute(sql)    
-	sql = '''CREATE TABLE IF NOT EXISTS `messages` (
-			`id` int(11) NOT NULL AUTO_INCREMENT,
-			`login` varchar(255) CHARACTER SET latin1 NOT NULL,
-			`text` varchar(1024) CHARACTER SET latin1 NOT NULL,
-			`time` int(11) NOT NULL,
-			`game_id` varchar(255) NOT NULL,
-			PRIMARY KEY (`id`)
-			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;    
-		   '''
-	cursor.execute(sql)             
-	sql = '''CREATE TABLE IF NOT EXISTS `games` (
-			`id` int(11) NOT NULL AUTO_INCREMENT,
-			`name` varchar(256) CHARACTER SET latin1 NOT NULL,
-			`map` varchar(256) CHARACTER SET latin1 NOT NULL,
-			`maxPlayers` int(11) NOT NULL,
-			`status` varchar(64) DEFAULT 'running' NOT NULL,
-			`sid` varchar(64) NOT NULL,
-			`playersCount` int(11) NOT NULL DEFAULT '0',
-			PRIMARY KEY (`id`)
-			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;   
-		   '''
-	cursor.execute(sql)        
-	con.close()
-		
 class Process:
 	def __init__(self, app):
 		if app.config["TESTING"]:
@@ -66,7 +12,59 @@ class Process:
 		
 	def __del__(self):
 		self.db.close()
-		
+	
+	def truncate_db():
+		cursor = self.db.cursor()
+		cursor.execute('show tables')
+		tables = cursor.fetchall()
+		for table in tables:
+			counter[table[0]] = 0
+			cursor.execute('truncate %s' %table)
+		con.close()
+
+	def create_db(name):
+		cursor = self.db.cursor()
+		cursor.execute('CREATE DATABASE IF NOT EXISTS %s' %name)
+		con.close()
+		con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=name)
+		cursor = con.cursor()    
+		sql = '''CREATE TABLE IF NOT EXISTS `users` (
+				`id` int(11) NOT NULL AUTO_INCREMENT,
+				`online` bit(1) DEFAULT b'0' NOT NULL,
+				`sid` varchar(64) CHARACTER SET latin1,
+				`login` varchar(255) CHARACTER SET latin1 NOT NULL,
+				`password` varchar(255) CHARACTER SET latin1 NOT NULL,
+				`game_id` int(11),
+				`last_connection` date,
+				PRIMARY KEY (`id`),
+				KEY `id` (`id`)
+				)DEFAULT CHARSET=utf8 AUTO_INCREMENT=2;        
+			   '''
+		cursor.execute(sql)    
+		sql = '''CREATE TABLE IF NOT EXISTS `messages` (
+				`id` int(11) NOT NULL AUTO_INCREMENT,
+				`login` varchar(255) CHARACTER SET latin1 NOT NULL,
+				`text` varchar(1024) CHARACTER SET latin1 NOT NULL,
+				`time` int(11) NOT NULL,
+				`game_id` varchar(255) NOT NULL,
+				PRIMARY KEY (`id`)
+				)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;    
+			   '''
+		cursor.execute(sql)             
+		sql = '''CREATE TABLE IF NOT EXISTS `games` (
+				`id` int(11) NOT NULL AUTO_INCREMENT,
+				`name` varchar(256) CHARACTER SET latin1 NOT NULL,
+				`map` varchar(256) CHARACTER SET latin1 NOT NULL,
+				`maxPlayers` int(11) NOT NULL,
+				`status` varchar(64) DEFAULT 'running' NOT NULL,
+				`sid` varchar(64) NOT NULL,
+				`playersCount` int(11) NOT NULL DEFAULT '0',
+				PRIMARY KEY (`id`)
+				)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;   
+			   '''
+		cursor.execute(sql)        
+		con.close()
+	
 	def hash(self, body):
 		m = hashlib.sha256()
 		m.update(body)

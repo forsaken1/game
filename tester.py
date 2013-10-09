@@ -2,7 +2,7 @@
 
 from run import app
 import json, unittest, re, MySQLdb, time, process, requests
-from websocket import create_connection
+#from websocket import create_connection
 
 host, port = 'localhost', '5000'
 
