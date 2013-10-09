@@ -23,9 +23,10 @@ Framework: Flask 0.9
 * Устанавливаем Flask с расширениями командой `flask/Scripts/pip install flask==0.9`
 * Копируем файлы из этого репозитория в папку проекта
 * Установить gevent, gevent-websocket(например 'easy_install-2.7.exe gevent', 'easy_install-2.7.exe gevent-websocket')
+
 #### Запуск сервера
 
-Заходим в директорию проекта и используем команду `flask/Scripts/python run.py`, где `run.py` - файл запуска сервера. 
+Заходим в директорию проекта и используем команду `C:/../flask/Scripts/python run.py`, где `run.py` - файл запуска сервера. 
 
 ### Тестирование
 
