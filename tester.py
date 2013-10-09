@@ -2,6 +2,9 @@
 
 from run import app
 import json, unittest, re, MySQLdb, time, process, requests
+from websocket import create_connection
+
+host, port = 'localhost', '5000'
 
 def send(test, action, params):
     query = json.dumps(
@@ -10,7 +13,7 @@ def send(test, action, params):
         "params": params
     })
     #resp = test.app.post('/', data=query)
-    resp = requests.post("http:/172.20.10.9:5000", data=query)
+    resp = requests.post("http:/" + host + ":" + port, data=query)
     #resp = json.loads(resp.data)
     resp = json.loads(resp.text)
     if resp.has_key('message'):
@@ -33,7 +36,7 @@ def count(item):
 
 def truncate_db():
     query = json.dumps({"action": "startTesting"})
-    resp = requests.post("http://172.20.10.7:5000", data=query)
+    resp = requests.post("http://" + host + ":" + port, data=query)
     assert resp == {"result": "ok"}, resp
 
 def setup(test):
@@ -409,6 +412,15 @@ class GamePreparingTestCase(unittest.TestCase):
         resp = send(self, "leaveGame", {"sid": sid})
         assert resp == {"result": "notInGame"}, resp
 
+class test_ws(unittest.TestCase):
+	def setUp(self):
+		self.ws = create_connection('ws://' + host + ':' + port)
+
+	def test_ws(self):
+		self.ws.send('100')
+		resp = self.ws.recv()
+		assert  resp == '100', resp
+		
 if __name__ == '__main__':
    log_file = 'log.txt'
    f = open(log_file, "w")

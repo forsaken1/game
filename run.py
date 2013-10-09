@@ -1,5 +1,7 @@
 from flask import Flask, request, render_template, make_response
 from process import Process
+from geventwebsocket.handler import WebSocketHandler
+from gevent.pywsgi import WSGIServer
 import os
 import json
 
@@ -25,9 +27,16 @@ def after_request(response):
 	response.headers.add('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 	return response
 
-@app.route('/test', methods = ['GET'])
-def test():
-    return render_template('test.html')
+@app.route('/', methods = ['GET'])
+def ws():
+	if request.environ.get('wsgi.websocket'):
+		ws = request.environ['wsgi.websocket']
+		while True:
+			message = ws.receive()
+			ws.send(message)
+	return
 
 if __name__ == '__main__':
-    app.run(debug = True, host='0.0.0.0')
+    server = WSGIServer(("", 5000), app, handler_class=WebSocketHandler)
+    server.serve_forever()
+    #app.run(debug = True, host='0.0.0.0')
