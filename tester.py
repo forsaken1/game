@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 from run import app
 import json, unittest, re, MySQLdb, time, process, requests

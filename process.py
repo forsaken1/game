@@ -4,11 +4,11 @@ import MySQLdb, re, os, hashlib, time
 class Process:
 	def __init__(self, app):
 		if app.config["TESTING"]:
-			db = 'test'
+			db_name = 'test'
 		else:
-			db = 'game'	
+			db_name = 'game'	
 		create_db(db)			
-		self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db)
+		self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db_name)
 		
 	def __del__(self):
 		self.db.close()
@@ -110,7 +110,7 @@ class Process:
 		
 		return proc.get(req['action'])(params)
 	
-	def startTesting(self, par):
+	def start_testing(self, par):
 		truncate_db()
 		return jsonify(result='ok')		
 	
@@ -154,7 +154,7 @@ class Process:
 		else:
 			return jsonify(result='badSid', message='Wrong session id')
 		
-	def sendMessage(self, par):
+	def send_message(self, par):
 		if not self.is_auth(par['sid']):
 			return jsonify(result='badSid', message='Wrong session id')
 		
@@ -171,7 +171,7 @@ class Process:
 		self.db.commit()
 		return jsonify(result='ok', message='Your message added')
 		
-	def getMessages(self, par):
+	def get_messages(self, par):
 		if not self.is_auth(par['sid']):
 			return jsonify(result='badSid', message='Wrong session id')
 			
@@ -188,7 +188,7 @@ class Process:
 		cur.execute('SELECT time, text, login FROM messages WHERE time >= %s ORDER BY time', (since,))
 		return jsonify(result='ok', message='All messages', messages=m)
 		
-	def createGame(self, par):
+	def create_game(self, par):
 		if not self.is_auth(par['sid']):
 			return jsonify(result='badSid', message='Wrong session id')
 		
@@ -211,7 +211,7 @@ class Process:
 		self.db.commit()
 		return jsonify(result='ok', message='Game successfully created')
 	
-	def getGames(self, par):	
+	def get_games(self, par):	
 		if not self.is_auth(par['sid']):
 			return jsonify(result='badSid', message='Wrong session id')
 			
@@ -223,7 +223,7 @@ class Process:
 			item['players'] = cur.fetchall()
 		return jsonify(result='ok', games=res, message='All games')			# change bool status to str
 		
-	def joinGame(self, par):
+	def join_game(self, par):
 		if not self.is_auth(par['sid']):
 			return jsonify(result='badSid', message='Wrong session id')
 		
@@ -241,7 +241,7 @@ class Process:
 		self.db.commit()
 		return jsonify(result='ok', message='You joined')
 		
-	def leaveGame(self, par):
+	def leave_game(self, par):
 		if not self.is_auth(par['sid']):
 			return jsonify(result='badSid', message='Wrong session id')
 		
@@ -258,8 +258,8 @@ class Process:
 		self.db.commit()
 		return jsonify(result='ok', message='Success leave from game')
 	
-	def loadMap(self, par):
+	def load_map(self, par):
 		return jsonify(result='ok', message='OK')
 
-	def unknownAction(self):
+	def unknown_action(self):
 		return jsonify(result='unknownAction', message='Unknown action')

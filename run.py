@@ -1,8 +1,7 @@
-from flask import Flask, request, render_template, make_response
+from flask import Flask, request, render_template
 from process import Process
 #from geventwebsocket.handler import WebSocketHandler
 #from gevent.pywsgi import WSGIServer
-import os
 import json
 
 app = Flask(__name__)
