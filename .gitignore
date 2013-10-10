@@ -3,8 +3,11 @@
 #################
 
 flask/
+nbproject/
 virtualenv
 .pyc
+.rar
+log.txt
 
 static/jquery.js
 
@@ -107,7 +110,6 @@ publish
 # Others
 [Bb]in
 [Oo]bj
-sql
 TestResults
 *.Cache
 ClientBin
