@@ -13,7 +13,7 @@ class Process:
 	def __del__(self):
 		self.db.close()
 	
-	def truncate_db():
+	def truncate_db(self):
 		cursor = self.db.cursor()
 		cursor.execute('show tables')
 		tables = cursor.fetchall()
@@ -22,7 +22,7 @@ class Process:
 			cursor.execute('truncate %s' %table)
 		con.close()
 
-	def create_db(name):
+	def create_db(self, name):
 		cursor = self.db.cursor()
 		cursor.execute('CREATE DATABASE IF NOT EXISTS %s' %name)
 		con.close()
@@ -56,9 +56,8 @@ class Process:
 				`name` varchar(256) CHARACTER SET latin1 NOT NULL,
 				`map` varchar(256) CHARACTER SET latin1 NOT NULL,
 				`maxPlayers` int(11) NOT NULL,
-				`status` varchar(64) DEFAULT 'running' NOT NULL,
+				`status` tinyint(1) DEFAULT 0 NOT NULL,
 				`sid` varchar(64) NOT NULL,
-				`playersCount` int(11) NOT NULL DEFAULT '0',
 				PRIMARY KEY (`id`)
 				)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;   
 			   '''
@@ -93,17 +92,17 @@ class Process:
 		
 		params = req['params']
 		proc = 	{
-			'startTesting': self.startTesting,
+			'startTesting': self.start_testing,
 			'signup': self.signup,
 			'signin': self.signin,
 			'signout': self.signout,
-			'sendMessage': self.sendMessage,
-			'getMessages': self.getMessages,
-			'createGame': self.createGame,
-			'leaveGame': self.leaveGame,
-			'getGames': self.getGames,
-			'joinGame': self.joinGame,
-			'loadMap': self.loadMap
+			'sendMessage': self.send_message,
+			'getMessages': self.get_messages,
+			'createGame': self.create_mame,
+			'leaveGame': self.leave_game,
+			'getGames': self.get_games,
+			'joinGame': self.join_game,
+			'loadMap': self.load_map
 		}
 		if  not proc.has_key(req['action']):
 			return self.unknownAction()
@@ -186,7 +185,8 @@ class Process:
 				return jsonify(result='badSince', message='Incorrect since time')
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
 		cur.execute('SELECT time, text, login FROM messages WHERE time >= %s ORDER BY time', (since,))
-		return jsonify(result='ok', message='All messages', messages=m)
+		mess = cur.fetchall()
+		return jsonify(result='ok', message='All messages', messages=mess)
 		
 	def create_game(self, par):
 		if not self.is_auth(par['sid']):
@@ -205,9 +205,10 @@ class Process:
 			return jsonify(result='badMaxPlayers', message='Incorrect max players')
 		
 		cur = self.db.cursor()
-		cur.execute("INSERT INTO games (name, map, maxPlayers, status, sid) VALUES(%s, %s, %s, 'running', %s)", (par['name'], par['map'], par['maxPlayers'], par['sid']))
+		cur.execute("INSERT INTO games (name, map, maxPlayers, status, sid) VALUES(%s, %s, %s, '1', %s)", (par['name'], par['map'], par['maxPlayers'], par['sid']))
 		game_id = cur.lastrowid
-		cur.execute('UPDATE users SET game_id = %s WHERE sid = %s', (game_id, par['sid']))
+		sid = par['sid']
+		cur.execute('UPDATE users SET game_id = %s WHERE sid = %s', (game_id, sid))
 		self.db.commit()
 		return jsonify(result='ok', message='Game successfully created')
 	
@@ -231,12 +232,13 @@ class Process:
 			return jsonify(result='badGame', message='Incorrect game id')
 		
 		cur = self.db.cursor()
-		cur.execute('SELECT id, playersCount, maxPlayers FROM games WHERE name = %s', (par['game'],))
-		res = cut.fetchone()
-		if res['playersCount'] >= res['maxPlayers']:
+		cur.execute('SELECT id, maxPlayers FROM games WHERE name = %s', (par['game'],))
+		res = cur.fetchone()
+		cur.execute('SELECT id FROM games')
+		_res = cur.fetchall()
+		playersCount = len(_res)
+		if playersCount >= res['maxPlayers']:
 			return jsonify(result='gameFull', message='Game full')
-			
-		cur.execute('UPDATE games SET playersCount = %s WHERE name = %s', (res['playersCount'] + 1, par['game']))
 		cur.execute('UPDATE users SET game_id = %s WHERE sid = %s', (res['id'], par['sid']))
 		self.db.commit()
 		return jsonify(result='ok', message='You joined')
@@ -251,9 +253,8 @@ class Process:
 		if not cur.fetchone():
 			return jsonify(result='notInGame', message='Player not in game')
 		
-		cur.execute('SELECT id, playersCount, maxPlayers FROM games WHERE name = %s', (par['game'],))
+		cur.execute('SELECT id, maxPlayers FROM games WHERE name = %s', (par['game'],))
 		res = cut.fetchone()
-		cur.execute('UPDATE games SET playersCount = %s WHERE name = %s', (res['playersCount'] - 1, par['game']))
 		cur.execute('UPDATE users SET game_id = %s WHERE sid = %s', (0, par['sid']))
 		self.db.commit()
 		return jsonify(result='ok', message='Success leave from game')
