@@ -1,27 +1,20 @@
 from flask import jsonify
-import MySQLdb, re, os, hashlib, time
+import MySQLdb, re, os, hashlib, time, json
 
 class Process:
 	def __init__(self, app):
-		if app.config["TESTING"]:
-			db_name = 'test'
-		else:
-			db_name = 'game'	
-		create_db(db)			
+		db_name = 'game'
 		self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db_name)
 		
 	def __del__(self):
 		self.db.close()
 	
-	def truncate_db(self):
-		cursor = self.db.cursor()
-		cursor.execute('show tables')
-		tables = cursor.fetchall()
-		for table in tables:
-			counter[table[0]] = 0
-			cursor.execute('truncate %s' %table)
-		con.close()
-
+	def conf(self):
+		conf = open("conf", "r").read()
+		conf = '{"' + conf.replace('\n', '","').replace(': ', '": "') + '"}'
+		return json.loads(conf)	
+	
+	
 	def create_db(self, name):
 		cursor = self.db.cursor()
 		cursor.execute('CREATE DATABASE IF NOT EXISTS %s' %name)
@@ -56,7 +49,7 @@ class Process:
 				`name` varchar(256) CHARACTER SET latin1 NOT NULL,
 				`map` varchar(256) CHARACTER SET latin1 NOT NULL,
 				`maxPlayers` int(11) NOT NULL,
-				`status` tinyint(1) DEFAULT 0 NOT NULL,
+				`status` bit(1) DEFAULT b'0' NOT NULL,
 				`sid` varchar(64) NOT NULL,
 				PRIMARY KEY (`id`)
 				)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;   
@@ -77,41 +70,48 @@ class Process:
 		return cur.fetchone()
 		
 	def game_exists(self, gid):
-		if not gid or gid != '':
+		if not gid:
 			return False
 		cur = self.db.cursor()
 		cur.execute('SELECT id FROM games WHERE id = %s', (gid,))
 		return cur.fetchone()
 		
 	def valid_name(self, name):
-		return re.compile('^\w{1,64}$', re.IGNORECASE).match(name)
-	
-	def process(self, req):
-		if not req.has_key('action') or not req.has_key('params'):
-			return self.unknownAction()
+		if name: return re.compile('^\w{1,64}$', re.IGNORECASE).match(name)
+		else: return False
 		
-		params = req['params']
+	def process(self, req):
+		if not req.has_key('action'):
+			return self.unknown_action()
+		if req['action'] == 'startTesting':
+			return self.start_testing()
 		proc = 	{
-			'startTesting': self.start_testing,
 			'signup': self.signup,
 			'signin': self.signin,
 			'signout': self.signout,
 			'sendMessage': self.send_message,
 			'getMessages': self.get_messages,
-			'createGame': self.create_mame,
+			'createGame': self.create_game,
 			'leaveGame': self.leave_game,
 			'getGames': self.get_games,
 			'joinGame': self.join_game,
 			'loadMap': self.load_map
 		}
-		if  not proc.has_key(req['action']):
-			return self.unknownAction()
-		
+		if  not proc.has_key(req['action']) or not req.has_key('params'):
+			return self.unknown_action()
+		params = req['params']		
 		return proc.get(req['action'])(params)
 	
-	def start_testing(self, par):
-		truncate_db()
-		return jsonify(result='ok')		
+	def start_testing(self):
+		data = open("conf", "r").read()
+		if (self.conf()['testing'] != 'yes'):
+			return jsonify(result='notInTestMode')
+		cursor = self.db.cursor()
+		cursor.execute('show tables')
+		tables = cursor.fetchall()
+		for table in tables:
+			cursor.execute('truncate %s' %table)
+		return jsonify(result='ok')
 	
 	def signup(self, par):
 		if not re.compile('^\w{4,40}$', re.IGNORECASE).match(par['login']):
@@ -163,10 +163,10 @@ class Process:
 		sid = par['sid']
 		cur = self.db.cursor()
 		cur.execute('SELECT login FROM users WHERE sid = %s', (sid,))
-		login = cur.fetchone()
+		login = cur.fetchone()[0]
 		text = par['text']
 		game = par['game']
-		cur.execute('INSERT INTO messages (login, text, time, game_id) VALUES ("%s", "%s", UNIX_TIMESTAMP(), "%s")', (login, text, game,))
+		cur.execute('INSERT INTO messages (login, text, time, game_id) VALUES (%s, %s, UNIX_TIMESTAMP(), "%s")', (login, text, game,))
 		self.db.commit()
 		return jsonify(result='ok', message='Your message added')
 		
@@ -181,7 +181,7 @@ class Process:
 			since = 0
 		else:
 			since = par['since']
-			if not isinstance(since, int) or since > int(time.time()):
+			if not isinstance(since, int):
 				return jsonify(result='badSince', message='Incorrect since time')
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
 		cur.execute('SELECT time, text, login FROM messages WHERE time >= %s ORDER BY time', (since,))
@@ -198,14 +198,19 @@ class Process:
 		#if self.game_exists(par['game']):
 		#	return jsonify(result='gameExists', message='Game already exists')
 			
-		if not self.valid_name(par['map']):
+		if not self.valid_name(par['map']): #map id
 			return jsonify(result='badMap', message='Incorrect map name')
 			
 		if not par['maxPlayers'] or not isinstance(par['maxPlayers'], int):
 			return jsonify(result='badMaxPlayers', message='Incorrect max players')
+
+		cur = self.db.cursor()			
+		cur.execute('SELECT name FROM games WHERE name = %s', (par['name'],))
+		if cur.fetchone():
+			return jsonify(result='gameExists', message='Game exists')		
 		
 		cur = self.db.cursor()
-		cur.execute("INSERT INTO games (name, map, maxPlayers, status, sid) VALUES(%s, %s, %s, '1', %s)", (par['name'], par['map'], par['maxPlayers'], par['sid']))
+		cur.execute("INSERT INTO games (name, map, maxPlayers, status, sid) VALUES(%s, %s, %s, b'1', %s)", (par['name'], par['map'], par['maxPlayers'], par['sid']))
 		game_id = cur.lastrowid
 		sid = par['sid']
 		cur.execute('UPDATE users SET game_id = %s WHERE sid = %s', (game_id, sid))
@@ -217,11 +222,15 @@ class Process:
 			return jsonify(result='badSid', message='Wrong session id')
 			
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
-		cur.execute('SELECT id, sid, name, map, maxPlayers, status FROM games')	
-		res = cur.fetchall()
+		cur.execute('SELECT id, name, map, maxPlayers, status FROM games')	
+		res = cur.fetchall()	
 		for item in res:
+			item['status'] = 'running' if item['status'] else 'finished' 
+			item['players'] = []			
 			cur.execute('SELECT login FROM users WHERE game_id = %i' %item['id'])
-			item['players'] = cur.fetchall()
+			players = cur.fetchall()
+			for i in range(len(players)):
+				item['players'].append(players[i]['login'])
 		return jsonify(result='ok', games=res, message='All games')			# change bool status to str
 		
 	def join_game(self, par):
@@ -232,14 +241,14 @@ class Process:
 			return jsonify(result='badGame', message='Incorrect game id')
 		
 		cur = self.db.cursor()
-		cur.execute('SELECT id, maxPlayers FROM games WHERE name = %s', (par['game'],))
+		cur.execute('SELECT maxPlayers FROM games WHERE id = %s', (par['game'],))
 		res = cur.fetchone()
-		cur.execute('SELECT id FROM games')
+		cur.execute('SELECT id FROM users WHERE game_id = %s', (par['game'],))
 		_res = cur.fetchall()
 		playersCount = len(_res)
-		if playersCount >= res['maxPlayers']:
+		if playersCount >= res[0]:
 			return jsonify(result='gameFull', message='Game full')
-		cur.execute('UPDATE users SET game_id = %s WHERE sid = %s', (res['id'], par['sid']))
+		cur.execute('UPDATE users SET game_id = %s WHERE sid = %s', (par['game'], par['sid']))
 		self.db.commit()
 		return jsonify(result='ok', message='You joined')
 		
@@ -249,12 +258,9 @@ class Process:
 		
 		cur = self.db.cursor()
 		cur.execute('SELECT game_id FROM users WHERE sid = %s', (par['sid'],))
-		cur.execute('SELECT id FROM games WHERE id = %s AND status = "2"')
-		if not cur.fetchone():
-			return jsonify(result='notInGame', message='Player not in game')
-		
-		cur.execute('SELECT id, maxPlayers FROM games WHERE name = %s', (par['game'],))
-		res = cut.fetchone()
+		gid = cur.fetchone()[0]
+		if not gid:
+			return jsonify(result='notInGame', message='Player not in game')					
 		cur.execute('UPDATE users SET game_id = %s WHERE sid = %s', (0, par['sid']))
 		self.db.commit()
 		return jsonify(result='ok', message='Success leave from game')

@@ -1,23 +1,24 @@
 <!DOCTYPE HTML>
-<input type = button value = "Test signup" onclick = "send()">
-<br>
-<input style = 'width: 600px;' id = 'json' value = '{"action":"signup", "params":{"login":"admin", "password":"123"}}'>
-<br><br>
-<input style = 'width: 600px;' id = 'result'>
-<script src = "static/jquery.js"></script>
-<script>
-function send()
-{
-	$.ajax({
-		type: 'POST',
-		data: $('#json').val(),
-		contentType: 'application/json; charset=utf-8',
-		url: 'http://localhost:5000',
-		dataType: 'json',
-		success: function(data)
-		{
-			$('#result').val(data.result);
-		},
-	});
-}
-</script>
+<html>
+    <head>
+        <script>
+            var webSocket = new WebSocket('ws://localhost:5000/webSocket');
+ 
+            webSocket.onopen = function(event) {
+                alert('onopen');
+                webSocket.send("Hello Web Socket!");
+            };
+ 
+            webSocket.onmessage = function(event) {
+                alert('onmessage, ' + event.data);
+                webSocket.close();
+            };
+ 
+            webSocket.onclose = function(event) {
+                alert('onclose');
+            };
+        </script>
+    </head>
+    <body>
+    </body>
+</html>
