@@ -1,5 +1,5 @@
 var canvas = document.getElementById('canvas');
-var player = new Player(100, 100);
+var player = new Player(400, 300);
 var map = 
 [
 	[],

@@ -5,10 +5,14 @@ function Player(startX, startY)
 	this.dx = 0;
 	this.dy = 0;
 	this.speed = 6;
+	this.jumpSpeed = 10;
+	this.jumpHeigth = 15;
+	this.gravitation = 8;
 	this.moving = false;
 	this.animationPicCount = 4;
 	this.animationFrameNumber = 0;
 	this.direction = 0; // to left == 0, right == 1
+	this.jumpIterator = 0;
 	
 	this.animation = [];
 	this.animation[0] = [];
@@ -45,6 +49,14 @@ function Player(startX, startY)
 	
 	this.getY = function()
 	{
+		if(this.jumpIterator > 0)
+		{
+			--this.jumpIterator;
+		}
+		else
+		{
+			this.dy = 0;
+		}
 		return this.y = this.y + this.dy;
 	}
 	
@@ -79,5 +91,14 @@ function Player(startX, startY)
 		if(this.dx > 0)
 			this.dx = 0;
 		this.moving = false;
+	}
+	
+	this.jump = function()
+	{
+		if(this.jumpIterator <= 0)
+		{
+			this.jumpIterator = this.jumpHeigth;
+			this.dy = - this.jumpSpeed;
+		}
 	}
 }
