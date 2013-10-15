@@ -27,8 +27,9 @@ function Player(startX, startY)
 		if(!this.moving)
 			return 0;
 			
-		if(this.animationFrameNumber >= this.animationPicCount)
+		if(this.animationFrameNumber >= this.animationPicCount - 1)
 			return this.animationFrameNumber = 0;
+		
 		return ++this.animationFrameNumber;
 	}
 	
