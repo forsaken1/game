@@ -4,11 +4,38 @@ function Player(startX, startY)
 	this.y = startY;
 	this.dx = 0;
 	this.dy = 0;
-	this.sprite = new Image();
-	this.sprite.src = 'graphics/pl1.png';
 	this.speed = 6;
-	this.movingLeft = false;
-	this.movingRight = false;
+	this.moving = false;
+	this.animationPicCount = 4;
+	this.animationFrameNumber = 0;
+	this.direction = 0; // to left == 0, right == 1
+	
+	this.animation = [];
+	this.animation[0] = [];
+	this.animation[1] = [];
+	
+	for(var i = 0; i < this.animationPicCount; ++i)
+	{
+		this.animation[0][i] = new Image();
+		this.animation[0][i].src = 'graphics/pl' + (i + 1) + '.png';
+		this.animation[1][i] = new Image();
+		this.animation[1][i].src = 'graphics/pr' + (i + 1) + '.png';
+	}
+	
+	this.getAnimationNumber = function()
+	{
+		if(!this.moving)
+			return 0;
+			
+		if(this.animationFrameNumber >= this.animationPicCount)
+			return this.animationFrameNumber = 0;
+		return ++this.animationFrameNumber;
+	}
+	
+	this.getAnimationDirection = function()
+	{
+		return this.direction;
+	}
 	
 	this.getX = function()
 	{
@@ -22,32 +49,34 @@ function Player(startX, startY)
 	
 	this.getSprite = function()
 	{
-		return this.sprite;
+		return this.animation[this.direction][this.getAnimationNumber()];
 	}
 	
 	this.moveLeft = function()
 	{
+		this.direction = 0;
 		this.dx = - this.speed;
-		this.movingLeft = true;
+		this.moving = true;
 	}
 	
 	this.moveRight = function()
 	{
+		this.direction = 1;
 		this.dx = this.speed;
-		this.movingRight = true;
+		this.moving = true;
 	}
 	
 	this.stopLeft = function()
 	{
-		if(!this.movingRight)
+		if(this.dx < 0)
 			this.dx = 0;
-		this.movingLeft = false;
+		this.moving = false;
 	}
 	
 	this.stopRight = function()
 	{
-		if(!this.movingLeft)
+		if(this.dx > 0)
 			this.dx = 0;
-		this.movingRight = false;
+		this.moving = false;
 	}
 }
