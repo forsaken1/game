@@ -1,10 +1,13 @@
 from flask import Flask, request, render_template
 from process import Process
-#from geventwebsocket.handler import WebSocketHandler
-#from gevent.pywsgi import WSGIServer
+from geventwebsocket.handler import WebSocketHandler
+from gevent.pywsgi import WSGIServer
 import json
 
 app = Flask(__name__)
+
+def log(mess):
+	open("log_serv", "w").write(mess)
 
 ### standart 
 @app.route('/', methods = ['POST'])
@@ -12,8 +15,9 @@ def index():
 	p = Process(app) 	
 	try:
 		req = json.loads(request.data)
+		json.loads(request.data)
 	except ValueError:
-		return p.unknownAction()
+		return p.unknown_action()
 	return p.process(req)
 	
 ### for sending tests in browser
@@ -29,16 +33,16 @@ def after_request(response):
 	return response
 
 ### sockets
-#@app.route('/', methods = ['GET'])
-#def ws():
-	#if request.environ.get('wsgi.websocket'):
-		#ws = request.environ['wsgi.websocket']
-		#while True:
-			#message = ws.receive()
-			#ws.send(message)
-	#return
+@app.route('/webSocket', methods = ['GET'])
+def ws():
+	if request.environ.get('wsgi.websocket'):
+		ws = request.environ['wsgi.websocket']
+		while True:
+			message = ws.receive()
+			ws.send('server string:' + message)
+	return
 
 if __name__ == '__main__':
-    #server = WSGIServer(("", 5000), app, handler_class=WebSocketHandler)
-    #server.serve_forever()
-    app.run(debug = True, host='0.0.0.0')
+	server = WSGIServer(("", 5000), app, handler_class=WebSocketHandler)
+	server.serve_forever()
+	#app.run(debug = True, host='0.0.0.0')

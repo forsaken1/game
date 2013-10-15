@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 --
 
 INSERT INTO `users` (`id`, `online`, `sid`, `login`, `password`, `game_id`, `last_connection`) VALUES
-(1, b'1', 'a2969f73cddb5d0323b80c5873eb9c6c72e86329feaf377263e7f03f26359ec4', 'admin', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 0, '0000-00-00');
+(100, b'1', 'a2969f73cddb5d0323b80c5873eb9c6c72e86329feaf377263e7f03f26359ec4', 'admin', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 0, '0000-00-00');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
