@@ -1,7 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 
 from run import app
-import json, unittest, re, MySQLdb, time, process, requests
+import json, unittest, re, MySQLdb, time, process, requests, sys
 from websocket import create_connection
 
 host, port = 'localhost', '5000'
@@ -464,7 +464,7 @@ class GamePreparingTestCase(MyTestCase):
 		resp = self.send("leaveGame", {"sid": sid})
 		assert resp == {"result": "notInGame"}, resp
 
-class WSTestCase(unittest.TestCase):
+class WebSocketTestCase(unittest.TestCase):
 	def setUp(self):
 		self.ws = create_connection('ws://' + host + ':' + port + '/webSocket')
 
@@ -474,8 +474,16 @@ class WSTestCase(unittest.TestCase):
 		assert resp == '1011', resp
 		
 if __name__ == '__main__':
-   log_file = 'log.txt'
-   f = open(log_file, "w")
-   runner = unittest.TextTestRunner(f)
-   unittest.main(testRunner=runner)
-   f.close()
+	f = open('log.txt', "w")
+	if len(sys.argv) == 2:
+		cases = {
+		'A': AuthTestCase,
+		'C': ChatTestCase,
+		'GP': GamePreparingTestCase,
+		'WS': WebSocketTestCase}
+		suite = unittest.TestLoader().loadTestsFromTestCase(cases[sys.argv[1]])
+		unittest.TextTestRunner(f).run(suite)
+	else:
+		runner = unittest.TextTestRunner(f)
+		unittest.main(testRunner=runner)
+	f.close()

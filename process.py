@@ -177,7 +177,7 @@ class Process:
 		if not par.has_key('game') or (par['game'] != '' and not self.game_exists(par['game'])):
 			return jsonify(result='badGame', message='Wrong game id')
 		gid = par['game']
-		if not par.has_key('since'):		#sure needed!
+		if not par.has_key('since'):		#sure needed?!
 			since = 0
 		else:
 			since = par['since']
