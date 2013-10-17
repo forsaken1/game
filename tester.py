@@ -5,7 +5,7 @@ import json, unittest, re, MySQLdb, time, process, requests, sys
 from websocket import create_connection
 
 host, port = 'localhost', '5000'
-counter = {'user':0, 'game':0}	
+counter = {'user':0, 'game':0, 'map': 0}	
 test = True
 
 def default(item, offset = 0):  
@@ -16,17 +16,18 @@ def default(item, offset = 0):
 		if not offset: counter[item] += 1
 		return ret
 		
-class MyTestCase(unittest.TestCase):
+class MyTestCase(unittest.TestCase):	
 	def truncate_db(self):
-		counter = {'user':0, 'game':0}	
 		query = json.dumps({"action": "startTesting"})
 		if test:
 			resp = self.app.post('/', data=query)
 			resp = json.loads(resp.data)		
 		else:
 			resp = requests.post("http:/" + host + ":" + port, data=query)
-			resp = json.loads(resp.text)	
+			resp = json.loads(resp.text)
+		
 		assert resp == {"result": "ok"}, resp
+		self.defMap = self.get_map()				# there's always default map in DB	
 		
 	def setUp(self):
 		app.config["TESTING"] = True
@@ -50,13 +51,13 @@ class MyTestCase(unittest.TestCase):
 			del resp['message']
 		return resp
 
-	def signup_user(self, login = 0, passwd = "pass"):
-		if not login: login = default('user')
+	def signup_user(self, login = None, passwd = "pass"):
+		if login is None: login = default('user')
 		resp = self.send("signup", {"login": login, "password": passwd })
 		assert resp == {"result": "ok"}, resp
 
-	def signin_user(self, login = 0, passwd = "pass"):
-		if not login: login = default('user')
+	def signin_user(self, login = None, passwd = "pass"):
+		if login is None: login = default('user')
 		self.signup_user(login, passwd)
 		resp = self.send("signin", {"login": login,"password": passwd})
 		sid = resp['sid']
@@ -70,37 +71,38 @@ class MyTestCase(unittest.TestCase):
 		assert resp == {"result": "ok"}, resp
 		return sid
 		
-	def create_game(self, is_ret = False, sid = 0, name = 0, map = "map", maxPlayers = 8):	#add map id
-		if not name: name = default('game')	
-		if not sid: sid = self.signin_user()
+	def create_game(self, is_ret = False, sid = None, name = None, map = None, maxPlayers = 8):	#add map id
+		if name is None: name = default('game')	
+		if sid is None: sid = self.signin_user()
+		if map is None: map = self.defMap		
 	
 		resp = self.send("createGame",
-			{
-				"sid": sid,
-				"name": name,
-				"map": map,
-				"maxPlayers": maxPlayers
-			})
+		{
+			"sid": sid,
+			"name": name,
+			"map": map,
+			"maxPlayers": maxPlayers
+		})
 		if is_ret:
 			return resp
 		else:		
 			assert resp == {"result": "ok"}, resp	
 			return sid
-		
-		
-	def join_game(self, game = 0, sid = 0):
-		if not game: game = self.get_game()	
-		if not sid: sid = self.signin_user()
+
+	def join_game(self, game = None, sid = None):
+		if game is None: game = self.get_game()	
+		if sid is None: sid = self.signin_user()
 		resp = self.send("joinGame",
-			{
-				"sid": sid,
-				"game": game,
-			})
+		{
+			"sid": sid,
+			"game": game,
+		})
 		assert resp == {"result": "ok"}, resp
 		return sid
 
-	def get_game(self, is_ret = False, name = 0, map = "map", maxPlayers = 8):
-		if not name: name = default('game')
+	def get_game(self, is_ret = False, maxPlayers = 8):
+		name = default('game')
+		map = self.defMap
 		sid = self.create_game(name = name, map = map, maxPlayers = maxPlayers)
 		resp = self.send("getGames", {"sid": sid})
 		if is_ret: return resp
@@ -119,9 +121,45 @@ class MyTestCase(unittest.TestCase):
 			"maxPlayers": maxPlayers,
 			"players": [default('user', 1)],
 			"status": "running"
-		}]}, [resp, name, default('user', 1)]
+		}]}, [resp, map, name, default('user', 1)]
 		return id
-			
+
+	def upload_map(self, map = ['..', '..'], is_ret = False, name = None, maxPlayers = 8, sid = None):
+		if name is None: name = default('map')
+		if sid is None: sid = self.signin_user()
+		resp = self.send("uploadMap",
+		{
+			'sid': sid,
+			'name': name,
+			'map': map,
+			'maxPlayers': maxPlayers
+		})
+		if is_ret: return resp
+		assert resp == {"result": "ok"}, resp
+		return sid
+
+	def get_map(self, is_ret = False, sid = None, maxPlayers = 8):
+		if sid is None: sid = self.signin_user()	
+		self.upload_map(maxPlayers = maxPlayers)
+		
+		resp = self.send("getMaps",{'sid': sid})
+		if is_ret: return resp
+		assert resp.has_key('maps'), resp
+		maps = resp['maps']
+		for i in range(len(maps)-1):
+			del maps[i]
+		map = maps[0]
+		assert map.has_key('id') and type(map['id']) is int, map
+		id = map["id"]
+		del map["id"]
+		assert resp == {"result": "ok", "maps": [
+		{
+			"name": default('map', 1),
+			"map": ['..', '..'],
+			"maxPlayers": maxPlayers,
+		}]}, resp
+		return id		
+		
 class AuthTestCase(MyTestCase):
 	
 	def test_startTesting(self):
@@ -321,7 +359,7 @@ class GamePreparingTestCase(MyTestCase):
 			{
 				"sid": sid1 + sid2,
 				"name": "RakiSyuda",
-				"map": "bestMap",
+				"map": self.defMap,
 				"maxPlayers": 8
 			})
 		assert resp == {"result": "badSid"}, resp
@@ -335,30 +373,35 @@ class GamePreparingTestCase(MyTestCase):
 			{
 				"sid": sid,
 				"name": "RakiSyuda1",
-				"map": "bestMap",
+				"map": self.defMap,
 				"maxPlayers": 8
 			})
 		assert resp == {"result": "badSid"}, resp
 
 	def test_createGame_badName(self):
-		resp = self.create_game( is_ret = True, name = "***")
+		resp = self.create_game( is_ret = True, name = 123)
 		assert resp == {"result": "badName"}, resp
 
 	def test_createGame_badMap(self):
+		self.truncate_db()
 		sid = self.signin_user()
 		resp = self.send("createGame",
 			{
 				"sid": sid,
 				"name": "game3",
-				"map": "notInBase",                # there isn't such map in DB
+				"map": self.defMap + 100,
 				"maxPlayers": 8
 			})
-		assert resp == {"result": "ok"}, resp      #   "result": "badMap"
+		assert resp == {"result": "badMap"}, resp
 
-	def test_createGame_badMaxPlayers(self):
+	def test_createGame_badMaxPlayers_str(self):
 		resp = self.create_game( is_ret = True, maxPlayers = "badMaxPl")
 		assert resp == {"result": "badMaxPlayers"}, resp
 
+	def test_createGame_badMaxPlayers_moreThenMapMaxPlyaers(self):
+		resp = self.create_game( is_ret = True, maxPlayers = 12)
+		assert resp == {"result": "badMaxPlayers"}, resp
+		
 	def test_createGame_gameExists(self):
 		self.create_game()
 		resp = self.create_game( is_ret = True, name = default('game', 1))
@@ -378,19 +421,20 @@ class GamePreparingTestCase(MyTestCase):
 		games = [
 			{
 				"name": default('game', 2),
-				"map": "map",
+				"map": self.defMap,
 				"maxPlayers": 8,
 				"players": [default('user', 3), default('user', 2)],
 				"status": "running"
 			},
 			{
 				"name": default('game', 1),
-				"map": "map",
+				"map": self.defMap,
 				"maxPlayers": 8,
 				"players": [default('user', 1)],
 				"status": "running"
 			}
 		]
+		assert len(resp["games"]) == 2, resp		
 		for game in resp["games"]:
 			assert game.has_key('id') and type(game['id']) is int, game
 			del game['id']
@@ -464,6 +508,73 @@ class GamePreparingTestCase(MyTestCase):
 		resp = self.send("leaveGame", {"sid": sid})
 		assert resp == {"result": "notInGame"}, resp
 
+class MapTestCase(MyTestCase):
+	def test_uploadMap_ok(self):
+		self.upload_map()
+		
+	def test_uploadMap_badMap(self):
+		resp = self.upload_map(map = ['...'], is_ret = True)
+		assert resp == {"result": "badMap"}, resp
+	
+	def test_uploadMap_badMap_singleStr(self):
+		resp = self.upload_map(map = '...', is_ret = True)
+		assert resp == {"result": "badMap"}, resp
+	
+	def test_uploadMap_badSid(self):
+		self.truncate_db()
+		resp = self.upload_map(is_ret = True, sid = "badSid")
+		assert resp == {"result": "badSid"}, resp
+
+	def test_uploadMap_badName(self):
+		resp = self.upload_map(is_ret = True, name = "КартаКароч")
+		assert resp == {"result": "badName"}, resp
+		
+	def test_uploadMap_badMaxPlayers(self):
+		resp = self.upload_map(is_ret = True, maxPlayers = -10)
+		assert resp == {"result": "badMaxPlayers"}, resp
+
+	def test_uploadMap_mapExists(self):
+		self.upload_map(name = "MapMap")		
+		resp = self.upload_map(is_ret = True, name = "MapMap")
+		assert resp == {"result": "mapExists"}, resp		
+		
+	def test_getMaps_ok(self):	
+		self.truncate_db()	
+		self.upload_map()
+		resp = self.get_map(is_ret = True)
+		assert resp.has_key('maps'), resp
+		maps = [
+			{
+				"name": default('map', 3),
+				"map": ['..', '..'],
+				"maxPlayers": 8,
+			},		
+			{
+				"name": default('map', 2),
+				"map": ['..', '..'],
+				"maxPlayers": 8,
+			},
+			{
+				"name": default('map', 1),
+				"map": ['..', '..'],
+				"maxPlayers": 8,
+			}
+		]
+		assert len(resp["maps"]) == 3, resp
+		for map in resp["maps"]:
+			assert map.has_key('id') and type(map['id']) is int, map
+			del map['id']
+		for map in maps:		
+			assert resp["maps"].count(map) == 1, [map, resp]
+		del resp["maps"]
+		assert resp == {"result":"ok"}, resp	
+
+	def test_getMaps_badSid(self):
+		self.truncate_db()
+		sid = self.upload_map()
+		resp = self.send("getMaps",{"sid": sid+"1"})
+		assert resp == {"result": "badSid"}, resp			
+		
 class WebSocketTestCase(unittest.TestCase):
 	def setUp(self):
 		self.ws = create_connection('ws://' + host + ':' + port + '/webSocket')
@@ -480,6 +591,7 @@ if __name__ == '__main__':
 		'A': AuthTestCase,
 		'C': ChatTestCase,
 		'GP': GamePreparingTestCase,
+		'M': MapTestCase,
 		'WS': WebSocketTestCase}
 		suite = unittest.TestLoader().loadTestsFromTestCase(cases[sys.argv[1]])
 		unittest.TextTestRunner(f).run(suite)
