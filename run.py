@@ -2,6 +2,7 @@ from flask import Flask, request, render_template
 from process import Process
 from geventwebsocket.handler import WebSocketHandler
 from gevent.pywsgi import WSGIServer
+from db import create_db
 import json
 
 app = Flask(__name__)
@@ -12,13 +13,8 @@ def log(mess):
 ### standart 
 @app.route('/', methods = ['POST'])
 def index():
-	p = Process(app) 	
-	try:
-		req = json.loads(request.data)
-		json.loads(request.data)
-	except ValueError:
-		return p.unknown_action()
-	return p.process(req)
+	p = Process(app) 
+	return p.process(request.data)
 	
 ### for sending tests in browser
 @app.route('/test', methods = ['GET'])
@@ -43,6 +39,7 @@ def ws():
 	return
 
 if __name__ == '__main__':
+	create_db()
 	server = WSGIServer(("", 5000), app, handler_class=WebSocketHandler)
 	server.serve_forever()
 	#app.run(debug = True, host='0.0.0.0')

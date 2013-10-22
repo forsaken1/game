@@ -24,6 +24,7 @@ Framework: Flask 0.9
 * Копируем файлы из этого репозитория в папку проекта
 * Установить gevent, gevent-websocket(например 'easy_install-2.7.exe gevent', 'easy_install-2.7.exe gevent-websocket')
 
+* Так же вам понадобиться MySQL server с поддержкой транзакций
 #### Запуск сервера
 
 Заходим в директорию проекта и используем команду `C:/../flask/Scripts/python run.py`, где `run.py` - файл запуска сервера. 

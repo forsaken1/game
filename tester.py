@@ -4,9 +4,10 @@ from run import app
 import json, unittest, re, MySQLdb, time, process, requests, sys
 from websocket import create_connection
 
-host, port = 'localhost', '5000'
+#host, port = '10.9.61.161', '3000' #161 186
+host, port = '10.9.61.186', '5000' #161 186
 counter = {'user':0, 'game':0, 'map': 0}	
-test = True
+appTesting = True
 
 def default(item, offset = 0):  
 	if not counter.has_key(item):
@@ -18,14 +19,7 @@ def default(item, offset = 0):
 		
 class MyTestCase(unittest.TestCase):	
 	def truncate_db(self):
-		query = json.dumps({"action": "startTesting"})
-		if test:
-			resp = self.app.post('/', data=query)
-			resp = json.loads(resp.data)		
-		else:
-			resp = requests.post("http:/" + host + ":" + port, data=query)
-			resp = json.loads(resp.text)
-		
+		resp = self.send('startTesting')
 		assert resp == {"result": "ok"}, resp
 		self.defMap = self.get_map()				# there's always default map in DB	
 		
@@ -34,18 +28,14 @@ class MyTestCase(unittest.TestCase):
 		self.app = app.test_client()
 		self.truncate_db()
 
-	def send(self, action, params):
-		query = json.dumps(
-		{
-			"action": action,
-			"params": params
-		})
-	
-		if test:
+	def send(self, action, params = False):
+		if params is False: query = json.dumps({"action": action,})			
+		else: query = json.dumps({"action": action, "params": params})
+		if appTesting:
 			resp = self.app.post('/', data=query)
 			resp = json.loads(resp.data)		
 		else:
-			resp = requests.post("http:/" + host + ":" + port, data=query)
+			resp = requests.post("http://" + host + ":" + port, data=query, headers = {"Content-Type": "application/json"})		
 			resp = json.loads(resp.text)
 		if resp.has_key('message'):
 			del resp['message']
@@ -146,8 +136,7 @@ class MyTestCase(unittest.TestCase):
 		if is_ret: return resp
 		assert resp.has_key('maps'), resp
 		maps = resp['maps']
-		for i in range(len(maps)-1):
-			del maps[i]
+		maps[:-1] = []
 		map = maps[0]
 		assert map.has_key('id') and type(map['id']) is int, map
 		id = map["id"]
@@ -184,7 +173,7 @@ class AuthTestCase(MyTestCase):
 		resp = json.loads(self.app.post('/', data="fooooooo").data)
 		if resp.has_key('message'):
 			del resp['message']
-		assert resp == { "result": "unknownAction" }, resp
+		assert resp == { "result": "badJSON" }, resp
 
 	def test_unknown_action(self):
 		resp = self.send("unknown_action", {"login": "userr","password": "pass" })
@@ -259,7 +248,7 @@ class ChatTestCase(MyTestCase):
 		self.truncate_db()
 		sid = self.signin_user()		
 		resp = self.send("sendMessage", {"sid": sid,"game": 1111,"text": "hello"})	
-		assert resp == {"result": "badGame"}
+		assert resp == {"result": "badGame"}, resp
 
 	def test_getMessages_ok(self):
 		self.send_message(text = "0th")
