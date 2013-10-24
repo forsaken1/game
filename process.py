@@ -257,7 +257,8 @@ class Process:
 	def join_game(self, par):
 		sid = par['sid']		
 		cur = self.db.cursor()
-		
+		if par['game'] == "":
+			return jsonify(result='badGame', message='Game is ""')			
 		cur.execute('SELECT id FROM user_game WHERE sid = %s', (sid,))
 		if cur.fetchone():
 			return jsonify(result='alreadyInGame', message='User already in game')					
@@ -271,7 +272,6 @@ class Process:
 			
 		cur.execute('SELECT login FROM users WHERE sid = %s', (sid,))	
 		login = cur.fetchone()[0]
-		print login
 		cur.execute('INSERT INTO user_game (sid, login, game_id) VALUES(%s, %s, %s)', (sid, login, par['game']))
 		self.db.commit()
 		return jsonify(result='ok', message='You joined to game')
@@ -290,6 +290,7 @@ class Process:
 		cur.execute('SELECT count(*) FROM user_game WHERE game_id = %s', (game,))
 		if not cur.fetchone()[0]:
 			cur.execute('DELETE from games WHERE id = %s', (game,))			
+		self.db.commit()
 		return jsonify(result='ok', message='You left game') 
 	
 	def upload_map(self, par):			

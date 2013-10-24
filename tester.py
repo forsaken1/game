@@ -65,7 +65,6 @@ class MyTestCase(unittest.TestCase):
 		if name is None: name = default('game')	
 		if sid is None: sid = self.signin_user()
 		if map is None: map = self.defMap		
-		print "asdasd"
 		resp = self.send("createGame",
 		{
 			"sid": sid,
@@ -91,10 +90,10 @@ class MyTestCase(unittest.TestCase):
 		assert resp == {"result": "ok"}, resp
 		return sid
 
-	def get_game(self, is_ret = False, maxPlayers = 8):				#fix bag with unsorted massive
+	def get_game(self, is_ret = False, maxPlayers = 8, host = None):				# unsorted massive bug
 		name = default('game')
 		map = self.defMap
-		sid = self.create_game(name = name, map = map, maxPlayers = maxPlayers)
+		sid = self.create_game(name = name, sid = host, map = map, maxPlayers = maxPlayers)
 		resp = self.send("getGames", {"sid": sid})
 		if is_ret: return resp
 		assert resp.has_key('games'), resp
@@ -129,7 +128,7 @@ class MyTestCase(unittest.TestCase):
 		assert resp == {"result": "ok"}, resp
 		return sid
 
-	def get_map(self, is_ret = False, sid = None, maxPlayers = 8):#fix bag with unsorted massive
+	def get_map(self, is_ret = False, sid = None, maxPlayers = 8):# unsorted massive bug
 		if sid is None: sid = self.signin_user()	
 		self.upload_map(maxPlayers = maxPlayers)
 		
@@ -251,7 +250,7 @@ class ChatTestCase(MyTestCase):
 		resp = self.send("sendMessage", {"sid": sid,"game": 1111,"text": "hello"})	
 		assert resp == {"result": "badGame"}, resp
 
-	def test_getMessages_ok(self):					# uncorrect since bag
+	def test_getMessages_ok(self):					# incorrect since bug
 		self.send_message(text = "0th")
 		time.sleep(5)
 		timestamp1 = int(time.time())
@@ -469,7 +468,7 @@ class GamePreparingTestCase(MyTestCase):
 		
 	def test_joinGame_alreadyInGame(self):
 		sid = self.signin_user()
-		game = self.create_game()
+		game = self.get_game()
 		self.join_game(sid = sid)
 		resp = self.send("joinGame",
 			{
@@ -495,10 +494,39 @@ class GamePreparingTestCase(MyTestCase):
 
 	def test_leaveGame_notInGame(self):
 		game = self.get_game()
-		self.join_game( game = game)
+		self.join_game(game = game)
 		sid = self.signin_user()
 		resp = self.send("leaveGame", {"sid": sid})
 		assert resp == {"result": "notInGame"}, resp
+	
+	def test_last_players_leave_game(self):
+		self.truncate_db()
+		sid = self.signin_user()
+		game = self.get_game(host = sid)
+		sids = [sid]
+		for i in range(2):
+			sid = self.signin_user()
+			self.join_game(sid = sid, game = game)
+			sids.append(sid)
+		for sid in sids:
+			resp = self.send("leaveGame", {"sid": sid})
+			assert resp == {"result": "ok"}, resp
+		resp = self.send("getGames", {"sid": sid})		
+		assert resp == {"result": "ok", "games": []}, resp
+		
+	def test_signout_from_game(self):
+		self.truncate_db()	
+		game_resp = self.get_game(is_ret = True)
+		game = game_resp['games'][0]['id']
+		sid = self.signin_user()
+		self.join_game(sid = sid, game = game)
+		resp = self.send("signout", {"sid": sid})	
+		assert resp == {"result": "ok"}, resp
+		sid = self.signin_user()			
+		resp = self.send("getGames", {"sid": sid})
+		assert resp == game_resp, [resp, game_resp]
+		
+		
 
 class MapTestCase(MyTestCase):
 	def test_uploadMap_ok(self):
