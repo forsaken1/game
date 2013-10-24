@@ -2,10 +2,104 @@ from flask import jsonify
 from exceptions import Exception
 import MySQLdb, re, os, hashlib, time, json
 
+MAXLOGIN = 40
+MINLOGIN = 4
+LONGBLOB = 65535
+
+class param_validator:
+	
+	def valid_str(self, str, min = 1, max = 255):
+		if type(str) == unicode and min <= len(str) <= max and all(ord(c) < 128 for c in str):
+			return True
+		else: return False	
+		
+	def badLogin(self, login):
+		return self.valid_str(login, MINLOGIN, MAXLOGIN)
+		
+	def badPassword(self, password):
+		return self.valid_str(password, MINLOGIN, LONGBLOB)
+		
+	def badSid(self, sid):
+		if not self.valid_str(sid): return False
+		cur = self.db.cursor()
+		cur.execute('SELECT id FROM users WHERE sid = %s', (sid,))
+		return cur.fetchone()		
+
+	def badName(self, name):
+		return self.valid_str(name)
+		
+	def badGame(self, game):											### '' is valid game too
+		cur = self.db.cursor()
+		if game == '':
+			return True			
+		cur.execute('SELECT id FROM games WHERE id = %s', (game,))
+		if type(game) != int or not cur.fetchone():
+			return False
+		else: return True
+		
+	def badText(self, text):
+		if type(text) != unicode or len(text) > LONGBLOB:		
+			return False
+		return True
+	
+	def badSince(self, since):
+		if type(since) != int or since < 0:
+			return False
+		else: return True
+	
+	def badMapId(self, map):
+		cur = self.db.cursor()	
+		cur.execute('SELECT id FROM maps WHERE id = %s', (map,))
+		if type(map) != int or not cur.fetchone():
+			return False
+		else: return True		
+			
+	def badMaxPlayers(self, maxPlayers):
+		if type(maxPlayers) != int or maxPlayers < 0:
+			return False
+		else: return True		
+
+	def valid_dot(self, c):
+		return 'A'<=c<='z' or '0'<=c<='9' or c=='.' or c=='$' or c=='#' 
+	
+	def badMap(self, map):
+		if type(map) != list or len(map) < 1: return False
+		size = len(map[0])
+		for row in map:
+			if type(row) != unicode or len(row) != size or not all(self.valid_dot(d) for d in row):
+				return False
+		return True
+		
+	def __init__(self, db):
+		self.db = db
+		self.param_error = {
+			'login': 		'badLogin',
+			'password': 	'badPassword',
+			'sid': 			'badSid',
+			'name': 		'badName',
+			'game': 		'badGame',
+			'text': 		'badText',
+			'since': 		'badSince',
+			'map': 			'badMap',
+			'maxPlayers': 	'badMaxPlayers'
+		}
+	
+	def find_error(self, formal, actual):
+		for param in formal:
+			if param == 'mapId':	
+				if not self.badMapId(actual['map']):
+					return "badMap"
+				else: continue
+			if not getattr(self, self.param_error[param])(actual[param]):
+				return self.param_error[param]
+		return None		
+
 class Process:		
+
 	def __init__(self, app):
 		db_name = 'game'
 		self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db_name)
+		self.valid = param_validator(self.db)
 		
 	def __del__(self):
 		self.db.close()
@@ -25,18 +119,6 @@ class Process:
 		cur.execute('SELECT login FROM users WHERE sid = %s', (sid,))
 		return cur.fetchone()
 		
-	def game_exists(self, gid):
-		if not gid:
-			return False
-		cur = self.db.cursor()
-		cur.execute('SELECT id FROM games WHERE id = %s', (gid,))
-		return cur.fetchone()
-		
-	def valid_name(self, name, min = 1, max = 255):
-		if type(name) == unicode and min <= len(name) <= max and all(ord(c) < 128 for c in name):
-			return True
-		else: return False
-		
 	def process(self, req):
 		try:
 			req = json.loads(req)
@@ -46,27 +128,34 @@ class Process:
 			if req['action'] == 'startTesting':
 				return self.start_testing()
 			proc = {
-				'signup': self.signup,
-				'signin': self.signin,
-				'signout': self.signout,
-				'sendMessage': self.send_message,
-				'getMessages': self.get_messages,
-				'createGame': self.create_game,
-				'leaveGame': self.leave_game,
-				'getGames': self.get_games,
-				'joinGame': self.join_game,
-				'uploadMap': self.upload_map,
-				'getMaps': self.get_maps
+				'signup': 		[self.signup, 			['login', 'password']],
+				'signin': 		[self.signin, 			['login', 'password']],
+				'signout': 		[self.signout, 			['sid']],
+				'sendMessage': 	[self.send_message, 	['sid', 'game', 'text']],
+				'getMessages': 	[self.get_messages, 	['sid', 'game', 'since']],
+				'createGame': 	[self.create_game, 		['sid', 'name', 'mapId', 'maxPlayers']],
+				'getGames': 	[self.get_games, 		['sid']],
+				'joinGame': 	[self.join_game, 		['sid', 'game']],
+				'leaveGame': 	[self.leave_game, 		['sid']],
+				'uploadMap': 	[self.upload_map, 		['sid', 'name', 'map', 'maxPlayers']],
+				'getMaps': 		[self.get_maps, 		['sid']],
 			}
-			action = proc[req['action']]
+			action = proc[req['action']]		
 		except KeyError:
 			return jsonify(result='unknownAction', message='Unknown action')
 			
-		try:
-			params = req['params']
-			return action(params)
-		except KeyError:
-			return jsonify(result='paramMissed', message='Not enough parametrs') 
+
+		params = req['params']
+		
+		try: error = self.valid.find_error(action[1], params)
+		except KeyError: return jsonify(result='paramMissed ', message='Not enough params')		
+		if error:
+			if action[0] == self.signin:
+				return jsonify(result= 'incorrect', message='param error') 
+			else:
+				return jsonify(result= error, message='param error') 
+		return action[0](params)
+
 	
 	def start_testing(self):
 		data = open("conf", "r").read()
@@ -80,12 +169,6 @@ class Process:
 		return jsonify(result='ok')
 	
 	def signup(self, par):															# add consist proofer
-		if not self.valid_name(par['login'], 4, 40):
-			return jsonify(result='badLogin', message='Bad login')
-		
-		if not self.valid_name(par['password'], 4):
-			return jsonify(result='badPassword', message='Bad password')
-		
 		cur = self.db.cursor()
 		cur.execute('SELECT login FROM users WHERE login = %s', (par['login'],))
 		if cur.fetchone():
@@ -108,10 +191,7 @@ class Process:
 		return jsonify(result='ok', sid=ssid, message='Successful signin')
 		
 	def signout(self, par):
-		if not self.user_info(par['sid']):
-			return jsonify(result='badSid', message='Wrong session id')		
 		sid = par['sid']
-		
 		self.leave_game({'sid': sid})
 		
 		self.db.cursor().execute('UPDATE users SET sid = NULL WHERE sid = %s', (sid,))
@@ -119,32 +199,17 @@ class Process:
 		return jsonify(result='ok', message='Successful signout')
 		
 	def send_message(self, par):
-		if not self.user_info(par['sid']):
-			return jsonify(result='badSid', message='Wrong session id')
-		
-		if par['game'] != '' and not self.game_exists(par['game']):
-			return jsonify(result='badGame', message='Wrong game id')
-		
-		sid , gid = par['sid'], par['game']
+		sid , gid, text = par['sid'], par['game'], par['text']
 		cur = self.db.cursor()
 		cur.execute('SELECT login FROM users WHERE sid = %s', (sid,))
 		login = cur.fetchone()[0]
-		text = par['text']
 		query = 'INSERT INTO messages (login, text, time, game_id) VALUES (%s, %s, UNIX_TIMESTAMP(),'+(str(gid) if gid else "NULL")+')'
 		cur.execute(query, (login, text,))
 		self.db.commit()
 		return jsonify(result='ok', message='Your message added')
 		
 	def get_messages(self, par):
-		if not self.user_info(par['sid']):
-			return jsonify(result='badSid', message='Wrong session id')
-			
-		if par['game'] != '' and not self.game_exists(par['game']):
-			return jsonify(result='badGame', message='Wrong game id')
 		gid, since = par['game'], par['since']
-
-		if not isinstance(since, int)  or since < 0:
-			return jsonify(result='badSince', message='Incorrect since time')
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
 		query = 'SELECT time, text, login FROM messages WHERE time >= %s AND game_id '+('='+str(gid) if gid else "IS NULL")+' ORDER BY time'
 		cur.execute(query, (since, ))
@@ -153,10 +218,6 @@ class Process:
 		
 	def create_game(self, par):
 		sid = par['sid']
-		user = self.user_info(sid)
-			
-		if not self.valid_name(par['name']):
-			return jsonify(result='badName', message='Incorrect game name')
 			
 		cur = self.db.cursor()			
 		cur.execute('SELECT id FROM games WHERE name = %s', (par['name'],))
@@ -164,13 +225,10 @@ class Process:
 			return jsonify(result='gameExists', message='Game exists')		
 
 		cur.execute('SELECT maxPlayers FROM maps WHERE id = %s', (par['map'],))
-		mapMax = cur.fetchone()
-		if not mapMax:
-			return jsonify(result='badMap', message='Wrong map id')				
-		mapMax = mapMax[0]			
+		mapMax = cur.fetchone()[0]
 			
-		if not isinstance(par['maxPlayers'], int) or par['maxPlayers'] < 1 or mapMax < par['maxPlayers']:
-			return jsonify(result='badMaxPlayers', message='Incorrect max players')
+		if mapMax < par['maxPlayers']:
+			return jsonify(result='badMaxPlayers', message='Max players more than map avaible')
 		
 		cur = self.db.cursor()
 		cur.execute("INSERT INTO games (name, map, maxPlayers) VALUES(%s, %s, %s)", (par['name'], par['map'], par['maxPlayers']))
@@ -178,12 +236,12 @@ class Process:
 		ret = self.join_game({'sid': sid, 'game': cur.lastrowid})
 		if json.loads(ret.data)['result'] == 'ok':
 			return jsonify(result='ok', message='Game created')				
-		else: return ret
+		else: 
+			cur.execute("DELETE FROM games WHERE name = %s", (par['name'],))
+			self.db.commit()		
+			return ret
 		
-	def get_games(self, par):	
-		if not self.user_info(par['sid']):
-			return jsonify(result='badSid', message='Wrong session id')
-
+	def get_games(self, par):
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
 		cur.execute('SELECT id, name, map, maxPlayers, status FROM games')	
 		res = cur.fetchall()	
@@ -197,17 +255,12 @@ class Process:
 		return jsonify(result='ok', games=res, message='All games')
 		
 	def join_game(self, par):
-		sid = par['sid']
-		user = self.user_info(sid)
-		if not user:
-			return jsonify(result='badSid', message='Wrong session id')
-		if not self.game_exists(par['game']):
-			return jsonify(result='badGame', message='Incorrect game id')
-		
+		sid = par['sid']		
 		cur = self.db.cursor()
+		
 		cur.execute('SELECT id FROM user_game WHERE sid = %s', (sid,))
 		if cur.fetchone():
-			return jsonify(result='alreadyInGame', message='User already in game')		
+			return jsonify(result='alreadyInGame', message='User already in game')					
 			
 		cur.execute('SELECT maxPlayers FROM games WHERE id = %s', (par['game'],))
 		maxPlayers = cur.fetchone()[0]
@@ -216,14 +269,14 @@ class Process:
 		if playersCount >= maxPlayers:
 			return jsonify(result='gameFull', message='Game full')
 			
-		cur.execute('INSERT INTO user_game (sid, login, game_id) VALUES(%s, %s, %s)', (sid, user['login'], par['game']))
+		cur.execute('SELECT login FROM users WHERE sid = %s', (sid,))	
+		login = cur.fetchone()[0]
+		print login
+		cur.execute('INSERT INTO user_game (sid, login, game_id) VALUES(%s, %s, %s)', (sid, login, par['game']))
 		self.db.commit()
 		return jsonify(result='ok', message='You joined to game')
 		
-	def leave_game(self, par):							# remove game when last player leave it?
-		if not self.user_info(par['sid']):
-			return jsonify(result='badSid', message='Wrong session id')
-		
+	def leave_game(self, par):		
 		cur = self.db.cursor()
 		cur.execute('SELECT game_id FROM user_game WHERE sid = %s', (par['sid'],))
 		game = cur.fetchone()
@@ -236,55 +289,26 @@ class Process:
 		
 		cur.execute('SELECT count(*) FROM user_game WHERE game_id = %s', (game,))
 		if not cur.fetchone()[0]:
-			cur.execute('DELETE from games WHERE id = %s', (game ))			
+			cur.execute('DELETE from games WHERE id = %s', (game,))			
 		return jsonify(result='ok', message='You left game') 
 	
-	def valid_char(self, c):
-		return 'A'<=c<='z' or '0'<=c<='9' or c=='.' or c=='$' or c=='#' 
-	
-	def create_strmap(self, map):
-		size = len(map[0])
-		str = ""
-		for row in map:
-			if not all(self.valid_char(c) for c in row):
-				raise Exception('incorrect consist')		
-			if len(row) != size:
-				raise Exception('incorrect row length: ', len(row))
-			str += row + '\n'
-		str = str[:-1]
-		return str
-	
-	def upload_map(self, par):
-		if not self.user_info(par['sid']):
-			return jsonify(result='badSid', message='Wrong session id')	
-		
-		if not self.valid_name(par['name']):
-			return jsonify(result='badName', message='Incorrect map name')
-			
-		if not isinstance(par['maxPlayers'], int) or par['maxPlayers'] < 1:
-			return jsonify(result='badMaxPlayers', message='Incorrect max players')
-			
-		try:
-			strmap = self.create_strmap(par['map'])
-		except Exception as a:
-			return jsonify(result="badMap", message='Incorrect map')				
+	def upload_map(self, par):			
 		cur = self.db.cursor()
 		cur.execute('SELECT id FROM maps WHERE name = %s', (par['name'],))
 		if cur.fetchone():
 			return jsonify(result='mapExists', message='Map already exists')
-
+		strmap = ''
+		for row in par['map']:
+			strmap += row + '\n'
+		strmap = strmap[:-1]
 		cur.execute("INSERT INTO maps (name, map, maxPlayers) VALUES(%s, %s, %s)", (par['name'], strmap, par['maxPlayers']))
 		self.db.commit()
 		return jsonify(result='ok', message='Your map added')
 
-	def get_maps(self, par):
-		if not self.user_info(par['sid']):
-			return jsonify(result='badSid', message='Wrong session id')
-			
+	def get_maps(self, par):			
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
 		cur.execute('SELECT id, name, map, maxPlayers FROM maps')	
 		res = cur.fetchall()
-		
 		for map in res:
 			map['map'] = map['map'].split('\n')
 			

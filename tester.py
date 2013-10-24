@@ -5,7 +5,7 @@ import json, unittest, re, MySQLdb, time, process, requests, sys
 from websocket import create_connection
 
 #host, port = '10.9.61.161', '3000' #161 186
-host, port = '10.9.61.186', '5000' #161 186
+host, port = '95.154.98.218', '3000' #161 186
 counter = {'user':0, 'game':0, 'map': 0}	
 appTesting = True
 
@@ -65,7 +65,7 @@ class MyTestCase(unittest.TestCase):
 		if name is None: name = default('game')	
 		if sid is None: sid = self.signin_user()
 		if map is None: map = self.defMap		
-	
+		print "asdasd"
 		resp = self.send("createGame",
 		{
 			"sid": sid,
@@ -73,6 +73,7 @@ class MyTestCase(unittest.TestCase):
 			"map": map,
 			"maxPlayers": maxPlayers
 		})
+		print resp
 		if is_ret:
 			return resp
 		else:		
@@ -90,7 +91,7 @@ class MyTestCase(unittest.TestCase):
 		assert resp == {"result": "ok"}, resp
 		return sid
 
-	def get_game(self, is_ret = False, maxPlayers = 8):
+	def get_game(self, is_ret = False, maxPlayers = 8):				#fix bag with unsorted massive
 		name = default('game')
 		map = self.defMap
 		sid = self.create_game(name = name, map = map, maxPlayers = maxPlayers)
@@ -128,7 +129,7 @@ class MyTestCase(unittest.TestCase):
 		assert resp == {"result": "ok"}, resp
 		return sid
 
-	def get_map(self, is_ret = False, sid = None, maxPlayers = 8):
+	def get_map(self, is_ret = False, sid = None, maxPlayers = 8):#fix bag with unsorted massive
 		if sid is None: sid = self.signin_user()	
 		self.upload_map(maxPlayers = maxPlayers)
 		
@@ -250,7 +251,7 @@ class ChatTestCase(MyTestCase):
 		resp = self.send("sendMessage", {"sid": sid,"game": 1111,"text": "hello"})	
 		assert resp == {"result": "badGame"}, resp
 
-	def test_getMessages_ok(self):
+	def test_getMessages_ok(self):					# uncorrect since bag
 		self.send_message(text = "0th")
 		time.sleep(5)
 		timestamp1 = int(time.time())
@@ -282,6 +283,7 @@ class ChatTestCase(MyTestCase):
 	def test_getMessages_from_game_ok(self):
 		id1 = self.get_game()
 		id2 = self.get_game()
+		print id1
 		self.send_message(text = "0th", game = id1)
 		time.sleep(5)
 		timestamp1 = int(time.time())
@@ -290,6 +292,7 @@ class ChatTestCase(MyTestCase):
 		sid2 =self.send_message(text = "2nd", game = id2)
 		time.sleep(5)
 		sid3 =self.send_message(text = "3rd", game = id1)	
+		print self.get_game(is_ret = True)
 		resp = self.send("getMessages",
 			{
 				"sid": sid1,
@@ -298,7 +301,7 @@ class ChatTestCase(MyTestCase):
 			})
 		assert resp.has_key('messages'), resp			
 		mess = resp['messages']
-		assert mess[0]['time'] < mess[1]['time']		
+		assert mess[0]['time'] < mess[1]['time'], resp		
 		del resp['messages'][0]['time']
 		del resp['messages'][1]['time']
 		assert resp == {"result": "ok", "messages": [
@@ -405,7 +408,7 @@ class GamePreparingTestCase(MyTestCase):
 	def test_getGames_ok(self):
 		self.truncate_db()
 		self.join_game()
-		resp = self.get_game( is_ret = True)
+		resp = self.get_game(is_ret = True)
 		assert resp.has_key('games'), resp
 		games = [
 			{
@@ -502,7 +505,7 @@ class MapTestCase(MyTestCase):
 		self.upload_map()
 		
 	def test_uploadMap_badMap(self):
-		resp = self.upload_map(map = ['...'], is_ret = True)
+		resp = self.upload_map(map = ['.**..'], is_ret = True)
 		assert resp == {"result": "badMap"}, resp
 	
 	def test_uploadMap_badMap_singleStr(self):
@@ -566,7 +569,7 @@ class MapTestCase(MyTestCase):
 		
 class WebSocketTestCase(unittest.TestCase):
 	def setUp(self):
-		self.ws = create_connection('ws://' + host + ':' + port + '/webSocket')
+		self.ws = create_connection('ws://' + host + ':' + port + '/websocket')
 
 	def test_ws(self):
 		self.ws.send('1001')

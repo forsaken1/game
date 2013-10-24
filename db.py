@@ -1,4 +1,7 @@
+import MySQLdb
+
 DB_NAME = "game"
+
 def create_db():
 	con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='')	
 	cursor = con.cursor()
@@ -8,7 +11,7 @@ def create_db():
 			`id` int(11) NOT NULL AUTO_INCREMENT,
 			`sid` varchar(64) CHARACTER SET latin1,
 			`login` varchar(255) CHARACTER SET latin1 NOT NULL,
-			`password` varchar(255) CHARACTER SET latin1 NOT NULL,
+			`password` LONGBLOB,
 			PRIMARY KEY (`id`),
 			KEY `id` (`id`)
 			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=2  
@@ -18,7 +21,7 @@ def create_db():
 	sql = '''CREATE TABLE IF NOT EXISTS `messages` (
 			`id` int(11) NOT NULL AUTO_INCREMENT,
 			`login` varchar(255) CHARACTER SET latin1 NOT NULL,
-			`text` text CHARACTER SET utf8 NOT NULL,
+			`text` LONGTEXT CHARACTER SET utf8 NOT NULL,
 			`time` int(11) NOT NULL,
 			`game_id` int(11),
 			PRIMARY KEY (`id`)
