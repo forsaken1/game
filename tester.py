@@ -1,11 +1,11 @@
 ﻿# -*- coding: utf-8 -*-
 
-from run import app
-import json, unittest, re, MySQLdb, time, process, requests, sys
+from app import app
+import json, unittest, re, MySQLdb, time, requests, sys
 from websocket import create_connection
 
 #host, port = '10.9.61.161', '3000' #161 186
-host, port = '95.154.98.218', '3000' #161 186
+host, port = 'localhost', '5000' #161 186
 counter = {'user':0, 'game':0, 'map': 0}	
 appTesting = True
 
@@ -602,7 +602,7 @@ class WebSocketTestCase(unittest.TestCase):
 	def test_ws(self):
 		self.ws.send('1001')
 		resp = self.ws.recv()
-		assert resp == '1011', resp
+		assert resp == 'server string:1001', resp
 		
 if __name__ == '__main__':
 	f = open('log.txt', "w")
