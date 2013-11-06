@@ -1,6 +1,7 @@
 from flask import request, render_template
 from app import app
 from process import Process
+from websocket import WebSocket
 
 def log(mess):
 	open("log_serv", "w").write(mess)
@@ -21,13 +22,14 @@ def index():
 ### for sending tests in browser
 @app.route('/', methods = ['GET'])
 def test():
-	return render_template('test.html')	
+	return render_template('game.html')	
 
 ### sockets
 @app.route('/websocket', methods = ['GET'])
 def ws():
 	if request.environ.get('wsgi.websocket'):
 		ws = request.environ['wsgi.websocket']
+		ws_proc = WebSocket()
 		while True:
 			message = ws.receive()
-			ws.send('server string:' + message)
+			ws.send(ws_proc.get(message))
