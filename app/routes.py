@@ -13,17 +13,6 @@ def after_request(response):
 	response.headers.add('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 	return response
 
-### standart 
-@app.route('/', methods = ['POST'])
-def index():
-	p = Process(app) 
-	return p.process(request.data)
-	
-### for sending tests in browser
-@app.route('/', methods = ['GET'])
-def test():
-	return render_template('game.html')	
-
 ### sockets
 @app.route('/websocket', methods = ['GET'])
 def ws():
@@ -33,3 +22,25 @@ def ws():
 		while True:
 			message = ws.receive()
 			ws.send(ws_proc.get(message))
+
+### client routes
+@app.route('/', methods = ['POST'])
+def post():
+	p = Process(app)
+	return p.process(request.data)
+
+@app.route('/', methods = ['GET'])
+def index():
+	return render_template('index.html')
+
+@app.route('/signin', methods = ['GET'])
+def signin():
+	return render_template('signin.html')
+
+@app.route('/signup', methods = ['GET'])
+def signup():
+	return render_template('signup.html')
+
+@app.route('/signout', methods = ['GET'])
+def signout():
+	return ''

@@ -2,6 +2,7 @@
 ## Eclipse
 #################
 
+app/static/js/jquery.js
 flask/
 nbproject/
 virtualenv
