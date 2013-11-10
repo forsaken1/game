@@ -5,6 +5,7 @@ DB_NAME = "game"
 def create_db():
 	con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='')	
 	cursor = con.cursor()
+	cursor.execute('DROP DATABASE IF EXISTS %s'% DB_NAME)	
 	cursor.execute('CREATE DATABASE IF NOT EXISTS %s'% DB_NAME)
 	cursor.execute('use ' + DB_NAME)   
 	sql = '''CREATE TABLE IF NOT EXISTS `users` (
