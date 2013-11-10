@@ -74,6 +74,7 @@ local.properties
 .builds
 *.dotCover
 *.pyproj
+*.sln
 
 ## TODO: If you have NuGet Package Restore enabled, uncomment this
 #packages/
