@@ -18,9 +18,6 @@ class MapTestCase(BaseTestCase):
 		resp = self.upload_map(is_ret = True, sid = "badSid")
 		assert resp["result"] == "badSid", resp
 
-	def test_uploadMap_badName(self):
-		resp = self.upload_map(is_ret = True, name = "КартаКароч")
-		assert resp["result"] == "badName", resp
 		
 	def test_uploadMap_badMaxPlayers(self):
 		resp = self.upload_map(is_ret = True, maxPlayers = -10)

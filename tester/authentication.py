@@ -20,9 +20,7 @@ class AuthTestCase(BaseTestCase):
 		resp = self.send("signup",{"login": "ThisStringConsistMoreThen40LattersNeedSomeMore", "password": "pass3"})
 		assert resp["result"] == "badLogin", resp
 		
-	def test_signup_bad_unicode(self):
-		resp = self.send("signup",{"login": u"паруски", "password": "pass3"})
-		assert resp["result"] == "badLogin", resp
+
 		
 	def test_signup_already_exists(self):
 		self.signup_user()

@@ -8,8 +8,7 @@ class ChatTestCase(BaseTestCase):
 	def test_sendMessage_ok(self):
 		self.send_message()
 
-	def test_sendMessage_ok_cyr(self):
-		self.send_message( text = (u"привет == hello".encode('utf-8')))
+
 
 	def test_sendMessage_ok_from_game(self):
 		gid = self.get_game()
