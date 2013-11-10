@@ -10,7 +10,7 @@ from autobahn.resource import WebSocketResource
 from db import create_db
 from process import Process
 from game import *
-from ws_conection import *
+from ws_connection import *
 
 class post(Resource):
 	
