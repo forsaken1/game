@@ -29,7 +29,7 @@ def after_request(response):
 	return response
 
 ### sockets
-@app.route('/webSocket', methods = ['GET'])
+@app.route('/websocket', methods = ['GET'])
 def ws():
 	if request.environ.get('wsgi.websocket'):
 		ws = request.environ['wsgi.websocket']
