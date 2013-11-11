@@ -6,6 +6,7 @@ class Server:
 	def __init__(self):
 		self.games = {}
 		self.players = {}
+		self.map = {}
 
 	def add_game(self, map, id):
 		self.games[id] = game(map)
@@ -19,6 +20,9 @@ class Server:
 		#	print login
 		#for g in self.games.keys():
 		#	print g
+
+	def add_map(self, id, scheme):
+		self.map[id] = map(scheme)
 
 	def erase_player(self, sid, gid):
 		self.games[gid].leave(sid)

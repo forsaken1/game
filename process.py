@@ -337,6 +337,8 @@ class Process:
 					(par['name'], strmap, par['maxPlayers']))
 
 		self.db.commit()
+		mid = cur.lastrowid
+		self.server.add_map(mid, par['map'])
 		return self.result()
 
 	def getMaps(self, par):			
