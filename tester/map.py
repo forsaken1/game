@@ -13,6 +13,10 @@ class MapTestCase(BaseTestCase):
 		resp = self.upload_map(map = '...', is_ret = True)
 		assert resp["result"] == "badMap", resp
 	
+	def test_uploadMap_badMap_unpair_tps(self):
+		resp = self.upload_map(map =  ['2.', '.1'], is_ret = True)
+		assert resp["result"] == "badMap", resp
+
 	def test_uploadMap_badSid(self):
 		self.truncate_db()
 		resp = self.upload_map(is_ret = True, sid = "badSid")
