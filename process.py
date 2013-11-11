@@ -61,8 +61,14 @@ class param_validator:
 	def badMap(self, map):
 		if type(map) != list or len(map) < 1: return False
 		size = len(map[0])
+		tp = [0]*10
 		for row in map:
 			if type(row) != unicode or len(row) != size or not all(self.valid_dot(d) for d in row):
+				for dot in row:
+					if '0' <= dot <= '9': tp[int(dot)] +=1
+				return False
+		for t in tp:
+			if t != 2 and t != 0:
 				return False
 		return True
 		
