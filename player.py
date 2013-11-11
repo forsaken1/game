@@ -39,8 +39,7 @@ class player:
 	#def fire(self, params):
 
 	def resp(self):
-		self.pos = self.game.spawns.pop(0) + Point(0.5, 0.5)
-		self.game.spawns.append(self.pos)
+		self.pos = self.game.get_spawn()
 		self.speed = ZERO
 		self.status = 1
 		self.heals = MAX_HEALTH
@@ -60,7 +59,7 @@ class player:
 		if not self.is_start:
 			return
 
-		if self.status == 0:
+		elif self.status == 0:
 			self.respawn -= TICK
 			if self.respawn <= 0:
 				self.resp()

@@ -7,8 +7,10 @@ from datetime import datetime
 class game:
 
 	def __init__(self, map):
-
-
+		self.map = map
+		self.cur_spawn = 0
+		self.c_spawns, c_items = map.get_attr()
+		self.items = [0]*c_items
 		self.mess = ''
 		self.pl_mess = []
 		self.pr_mess = []
@@ -33,6 +35,11 @@ class game:
 			'items': self.items
 		})
 
+	def get_spawn(self):
+		ret = self.map.spawns[self.cur_spawn]
+		self.cur_spawn +=1
+		self.cur_spawn %= self.c_spawns
+		return ret	
 
 
 	def tick(self):

@@ -21,7 +21,7 @@ class map:
 				if dot == '$': 
 					self.spawns[num_spawn] = (i,j)
 					num_spawn +=1
-				if 'A' <= dot <= 'Z': 
+				if 'a' <= dot <= 'Z': 
 					self.items[(i, j)] = (num_item, dot)
 					num_item +=1
 				if '0' <= dot <= '9': 
@@ -31,6 +31,9 @@ class map:
 						tps[Point(j, i)] = num_tps[dot]
 						pts[num_tps[dot]] = Point(j, i)
 		self.map.append('#'*self.width)
+
+	def get_attr(self):
+		return [len(self.spawns), len(self.items)]
 
 	def collis_detect(self, start, end):
 		""" ret type == {dist:(rect, coll_point)} sorted by dist"""

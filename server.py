@@ -8,8 +8,8 @@ class Server:
 		self.players = {}
 		self.map = {}
 
-	def add_game(self, map, id):
-		self.games[id] = game(map)
+	def add_game(self, map_id, id):
+		self.games[id] = game(self.map[map_id])
 
 	def add_player(self, sid, login, gid):
 		game = self.games[gid]

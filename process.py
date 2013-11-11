@@ -243,9 +243,8 @@ class Process:
 		if cur.fetchone():
 			return self.result('gameExists')		
 
-		cur.execute('SELECT maxPlayers, map FROM maps WHERE id = %s', (par['map'],))
+		cur.execute('SELECT maxPlayers, id FROM maps WHERE id = %s', (par['map'],))
 		mapMax, map = cur.fetchone()
-		map = map.split('\n')
 			
 		if mapMax < par['maxPlayers']:
 			return self.result('badMaxPlayers')

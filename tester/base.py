@@ -1,6 +1,7 @@
 import json, unittest, re, MySQLdb, time, requests, sys
 
-
+def_map_scheme = [	"#$........#",
+					"###########"]
 
 
 class BaseTestCase(unittest.TestCase):
@@ -112,7 +113,7 @@ class BaseTestCase(unittest.TestCase):
 		if sid_returned: return [id, sid]
 		return id
 
-	def upload_map(self, map = ["#$........#","###########"], is_ret = False, name = None, maxPlayers = 8, sid = None):
+	def upload_map(self, map = [def_map_scheme], is_ret = False, name = None, maxPlayers = 8, sid = None):
 		if name is None: name = self.default('map')
 		if sid is None: sid = self.signin_user()
 		resp = self.send("uploadMap",
