@@ -98,8 +98,8 @@ class param_validator:
 
 class Process:		
 
-	def __init__(self, games):
-		self.games = games
+	def __init__(self, server):
+		self.server = server
 		db_name = 'game'
 		self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db_name)
 		self.valid = param_validator(self.db)
@@ -151,7 +151,7 @@ class Process:
 		for table in tables:
 			cursor.execute('truncate %s' %table)
 
-		self.games.clear()
+		self.server.clear()
 
 		return self.result()
 		
@@ -255,7 +255,7 @@ class Process:
 		self.db.commit()
 
 		gid = cur.lastrowid
-		self.games.add_game(map, gid)
+		self.server.add_game(map, gid)
 
 		ret = self.joinGame({'sid': sid, 'game': gid})
 		if json.loads(ret)['result'] == 'ok':
@@ -300,7 +300,7 @@ class Process:
 		cur.execute('INSERT INTO user_game (sid, login, game_id) VALUES(%s, %s, %s)', (sid, login, gid))
 		self.db.commit()
 
-		self.games.add_player(sid, login, gid)
+		self.server.add_player(sid, login, gid)
 
 		return self.result()
 		
@@ -316,7 +316,7 @@ class Process:
 		cur.execute('DELETE from user_game WHERE sid = %s', (sid, ))
 		self.db.commit()
 		
-		self.games.erase_player(sid, game)
+		self.server.erase_player(sid, game)
 
 		cur.execute('SELECT count(*) FROM user_game WHERE game_id = %s', (game,))
 		if not cur.fetchone()[0]:
@@ -333,7 +333,9 @@ class Process:
 		for row in par['map']:
 			strmap += row + '\n'
 		strmap = strmap[:-1]
-		cur.execute("INSERT INTO maps (name, map, maxPlayers) VALUES(%s, %s, %s)", (par['name'], strmap, par['maxPlayers']))
+		cur.execute("INSERT INTO maps (name, map, maxPlayers) VALUES(%s, %s, %s)",
+					(par['name'], strmap, par['maxPlayers']))
+
 		self.db.commit()
 		return self.result()
 

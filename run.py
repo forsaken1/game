@@ -9,13 +9,13 @@ from autobahn.resource import WebSocketResource
 
 from db import create_db
 from process import Process
-from game import *
+from server import *
 from ws_connection import *
 
 class post(Resource):
 	
-	def __init__(self, games):
-		self.p = Process(games) 
+	def __init__(self, server):
+		self.p = Process(server) 
 		Resource.__init__(self)
 
 	def render_GET(self, request):
@@ -31,7 +31,7 @@ class post(Resource):
 
 
 if __name__ == '__main__':
-	games = all_games()
+	server = Server()
 
 	if len(sys.argv) > 1 and sys.argv[1] == 'debug':
 		log.startLogging(sys.stdout)
@@ -39,18 +39,18 @@ if __name__ == '__main__':
 	else:
 		debug = False
 
-	factory = ws_factory(games, "ws://localhost:5000", debug = debug, debugCodePaths = debug)
+	factory = ws_factory(server, "ws://localhost:5000", debug = debug, debugCodePaths = debug)
 	resource = WebSocketResource(factory)
 
 	root = File(".")
 	root.putChild("websocket", resource)
 	root.putChild("conf", File("conf"))
-	root.putChild("", post(games))
+	root.putChild("", post(server))
 	site = Site(root)
 
 	from twisted.internet import reactor
 	reactor.callWhenRunning(create_db)
 	reactor.listenTCP(5000, site)
-	lc = LoopingCall(games.tick)
+	lc = LoopingCall(server.tick)
 	lc.start(0.03)
 	reactor.run()
