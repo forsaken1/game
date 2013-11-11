@@ -2,7 +2,7 @@ import os
 
 from flask import Flask
 
-app = Flask(__name__, template_folder='client')
+app = Flask(__name__, template_folder='static')
 app.debug = True
 
 def start(environ, start_response):

@@ -1,0 +1,29 @@
+<div ng-controller = 'SigninController' style = 'width: 300px'>
+
+	<div class = 'form-group'>
+		<label for = 'login'>Login</label>
+
+		<input 
+			placeholder="Enter login" 
+			class = 'form-control' 
+			ng-model="login" 
+			id = 'login'
+			required 
+		>
+	</div>
+
+	<div class = 'form-group'>
+		<label for = 'password'>Password</label>
+
+		<input 
+			placeholder="Enter password" 
+			class = 'form-control' 
+			ng-model="password" 
+			id = 'password' 
+			type = password
+			required 
+		>
+	</div>
+
+	<input class = 'btn btn-primary' type = button value = 'Submit' ng-click = 'signin()'>
+</div>

@@ -3,12 +3,15 @@
 #################
 
 app/static/js/jquery.js
+app/static/js/angular/
+app/static/js/angular.min.js
 flask/
 nbproject/
 virtualenv
 .pyc
 .rar
 log.txt
+*.txt
 
 static/jquery.js
 

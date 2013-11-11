@@ -1,0 +1,36 @@
+<!doctype html>
+<html ng-app = 'game'>
+    <head>
+        <title>Game</title>
+        <link rel = 'stylesheet' href = '{{ url_for("static", filename="css/bootstrap.css") }}'>
+        <link rel = 'stylesheet' href = '{{ url_for("static", filename="css/bootstrap-theme.css") }}'>
+        <script src = '{{ url_for("static", filename="js/angular.js") }}'></script>
+        <script src = '{{ url_for("static", filename="js/jquery.js") }}'></script>
+        <script src = '{{ url_for("static", filename="js/script.js") }}'></script>
+    </head>
+
+    <body>
+    	<div align = center style = 'width: 100%'>
+            <div class = 'header'>
+                <div class="navbar navbar-default">
+                <div class="container">
+                  <div class="navbar-header">
+                    <a class="navbar-brand" href="#home">Game</a>
+                  </div>
+                  <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                      <li><a href="#home">Home</a></li>
+                      <li><a href="#lobby">Lobby</a></li>
+                      <li><a href="#signin">Signin</a></li>
+                      <li><a href="#signup">Signup</a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id = 'message'></div>
+            <div id = 'error'></div>
+            <div ng-view></div>
+    	</div>
+    </body>
+</html>
