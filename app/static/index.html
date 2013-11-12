@@ -6,6 +6,8 @@
         <link rel = 'stylesheet' href = '{{ url_for("static", filename="css/bootstrap-theme.css") }}'>
         <script src = '{{ url_for("static", filename="js/angular.js") }}'></script>
         <script src = '{{ url_for("static", filename="js/jquery.js") }}'></script>
+        <script src = '{{ url_for("static", filename="js/alert.js") }}'></script>
+        <script src = '{{ url_for("static", filename="js/controllers.js") }}'></script>
         <script src = '{{ url_for("static", filename="js/script.js") }}'></script>
     </head>
 
@@ -20,9 +22,13 @@
                   <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
                       <li><a href="#home">Home</a></li>
+                      <li><a href="#create_game">Create game</a></li>
+                      <li><a href="#find_game">Find game</a></li>
                       <li><a href="#lobby">Lobby</a></li>
+                      <li><a href="#lobby">Create Map</a></li>
                       <li><a href="#signin">Signin</a></li>
                       <li><a href="#signup">Signup</a></li>
+                      <li><a href="#signout">Signout</a></li>
                     </ul>
                   </div>
                 </div>
