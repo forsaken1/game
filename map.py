@@ -1,10 +1,10 @@
+from sympy.geometry import *
+
 class map:
 
 	def __init__(self, map):
-
 		self.height = len(map)
-		self.width = len(map[0])
-		
+		self.width = len(map[0])			
 		self.spawns = []
 		self.items = {}
 		self.tps = {}
@@ -13,23 +13,22 @@ class map:
 		self.map.append('#'*self.width)
 		num_tps = {}
 		num_item = 0
-		num_spawn = 0
-		for i in range(self.height):
+		for i in range(self.height):				# coordinates w/o border
 			self.map.append("#" + map[i] + "#")
 			for j in range(self.width):
-				dot = self.map[i][j]
+				dot = map[i][j]
+				x, y = j+1, i+1
 				if dot == '$': 
-					self.spawns[num_spawn] = (i,j)
-					num_spawn +=1
+					self.spawns.append(Point(x,y))
 				if 'a' <= dot <= 'Z': 
-					self.items[(i, j)] = (num_item, dot)
+					self.items[Point(x,y)] = (num_item, dot)
 					num_item +=1
 				if '0' <= dot <= '9': 
 					if not num_tps[dot]:
-					   num_tps[dot] = Point(j, i)
+					   num_tps[dot] = Point(x,y)
 					else:
-						tps[Point(j, i)] = num_tps[dot]
-						pts[num_tps[dot]] = Point(j, i)
+						tps[Point(x,y)] = num_tps[dot]
+						pts[num_tps[dot]] = Point(x,y)
 		self.map.append('#'*self.width)
 
 	def get_attr(self):
@@ -52,3 +51,5 @@ class map:
 							if dist < min_dist:
 								min_dist, min_point = dist, point
 						coll[min_dist] = (Point(j,i), min_point)
+
+		return coll

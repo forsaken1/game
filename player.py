@@ -46,8 +46,8 @@ class player:
 
 	def cur_consist(self):
 		self.game.pl_mess.append({
-			'x': float(self.pos.x),
-			'y': float(self.pos.y),
+			'x': float(self.pos.x)-1,
+			'y': float(self.pos.y)-1,
 			'vx': float(self.speed.x),
 			'vy': float(self.speed.y),
 			'health': self.health,
