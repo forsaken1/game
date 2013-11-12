@@ -18,8 +18,9 @@ class BaseTestCase(unittest.TestCase):
 			if not offset: counter[item] += 1
 			return ret
 
-	def truncate_db(self):
-		resp = self.send('startTesting')
+	def startTesting(self, sync = False):
+		param = {'websocketMode': 'sync' if sync else 'async'}
+		resp = self.send('startTesting', param)
 		assert resp["result"] == "ok", resp
 		BaseTestCase.defMap = self.get_map()				# there's always default map in DB
 

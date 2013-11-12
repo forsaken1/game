@@ -31,6 +31,7 @@ class post(Resource):
 
 
 if __name__ == '__main__':
+	create_db()
 	server = Server()
 
 	if len(sys.argv) > 1 and sys.argv[1] == 'debug':
@@ -49,7 +50,6 @@ if __name__ == '__main__':
 	site = Site(root)
 
 	from twisted.internet import reactor
-	reactor.callWhenRunning(create_db)
 	reactor.listenTCP(5000, site)
 	lc = LoopingCall(server.tick)
 	lc.start(0.03)

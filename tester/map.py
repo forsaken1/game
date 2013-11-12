@@ -18,7 +18,7 @@ class MapTestCase(BaseTestCase):
 		assert resp["result"] == "badMap", resp
 
 	def test_uploadMap_badSid(self):
-		self.truncate_db()
+		self.startTesting()
 		resp = self.upload_map(is_ret = True, sid = "badSid")
 		assert resp["result"] == "badSid", resp
 
@@ -33,7 +33,7 @@ class MapTestCase(BaseTestCase):
 		assert resp["result"] == "mapExists", resp		
 		
 	def test_getMaps_ok(self):	
-		self.truncate_db()	
+		self.startTesting()	
 		self.upload_map()
 		resp = self.get_map(is_ret = True)
 		assert resp.has_key('maps'), resp
@@ -64,7 +64,7 @@ class MapTestCase(BaseTestCase):
 		assert resp["result"] == "ok", resp	
 
 	def test_getMaps_badSid(self):
-		self.truncate_db()
+		self.startTesting()
 		sid = self.upload_map()
 		resp = self.send("getMaps",{"sid": sid+"1"})
 		assert resp["result"] == "badSid", resp			

@@ -125,9 +125,9 @@ class Process:
 			req = json.loads(req)
 			action = req['action']	
 			print action
-			if action == 'startTesting':
-				return self.start_testing()
 			params = req['params']
+			if action == 'startTesting':
+				return self.start_testing(params)
 			act = getattr(self, action)
 			formal_param = self.proc_param[action]
 			action = act
@@ -141,7 +141,7 @@ class Process:
 		if error: return self.result(error) 
 		else: return action(params)
 	
-	def start_testing(self):
+	def start_testing(self, params):
 		data = open("conf", "r").read()
 		if (self.config()['testing'] != 'yes'):
 			return self.result('notInTestMode')
@@ -150,9 +150,7 @@ class Process:
 		tables = cursor.fetchall()
 		for table in tables:
 			cursor.execute('truncate %s' %table)
-
-		self.server.clear()
-
+		self.server.clear(params['websocketMode'])
 		return self.result()
 		
 	def result(self, error = None, param = None):

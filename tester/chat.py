@@ -17,20 +17,20 @@ class ChatTestCase(BaseTestCase):
 		self.send_message(sid, game = gid, text = "***")		
 	
 	def test_sendMessage_badSid(self):
-		self.truncate_db()
+		self.startTesting()
 		sid1 = self.signin_user()
 		sid2 = self.signin_user()
 		resp = self.send("sendMessage", {"sid": sid1 + sid2,"game": "","text": "hello"})
 		assert resp["result"] == "badSid", resp
 
 	def test_sendMessage_badGame(self):
-		self.truncate_db()
+		self.startTesting()
 		sid = self.signin_user()		
 		resp = self.send("sendMessage", {"sid": sid,"game": 1111,"text": "hello"})	
 		assert resp["result"] == "badGame", resp
 
 	def test_sendMessage_badGame_another_game(self):
-		self.truncate_db()
+		self.startTesting()
 		sid = self.signin_user()
 		gid = self.get_game()
 		self.join_game(gid, sid)
@@ -101,7 +101,7 @@ class ChatTestCase(BaseTestCase):
 			assert mess['login'] in {self.default('user', 3), self.default('user', 1)}, mess
 			
 	def test_getMessages_badSid(self):
-		self.truncate_db()    
+		self.startTesting()    
 		timestamp = int(time.time())
 		sid1 =self.send_message()
 		sid2 =self.send_message()

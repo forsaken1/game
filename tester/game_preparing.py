@@ -6,7 +6,7 @@ class GamePreparingTestCase(BaseTestCase):
 		self.create_game()
 
 	def test_createGame_badSid(self):
-		self.truncate_db()
+		self.startTesting()
 		sid1 = self.signin_user()
 		sid2 = self.signin_user()
 		resp = self.send("createGame",
@@ -19,7 +19,7 @@ class GamePreparingTestCase(BaseTestCase):
 		assert resp["result"] == "badSid", resp
 
 	def test_createGame_badSid_signInOut(self):
-		self.truncate_db()
+		self.startTesting()
 		sid = self.signin_user()
 		resp = self.send("signout",{"sid": sid})
 		assert resp["result"] == "ok", resp
@@ -37,7 +37,7 @@ class GamePreparingTestCase(BaseTestCase):
 		assert resp["result"] == "badName", resp
 
 	def test_createGame_badMap(self):
-		self.truncate_db()
+		self.startTesting()
 		sid = self.signin_user()
 		resp = self.send("createGame",
 			{
@@ -68,7 +68,7 @@ class GamePreparingTestCase(BaseTestCase):
 		assert resp["result"] == "alreadyInGame", resp
 		
 	def test_getGames_ok(self):
-		self.truncate_db()
+		self.startTesting()
 		self.join_game()
 		resp = self.get_game(is_ret = True)
 		assert resp.has_key('games'), resp
@@ -98,7 +98,7 @@ class GamePreparingTestCase(BaseTestCase):
 		assert resp["result"] == "ok", resp
 		
 	def test_getGames_badSid(self):
-		self.truncate_db()
+		self.startTesting()
 		sid = self.create_game()
 		resp = self.send("getGames",{"sid": sid+"1"})
 		assert resp["result"] == "badSid", resp
@@ -119,7 +119,7 @@ class GamePreparingTestCase(BaseTestCase):
 		assert resp["result"] == "gameFull", resp
 
 	def test_joinGame_badGame(self):
-		self.truncate_db()
+		self.startTesting()
 		game = self.get_game()
 		sid = self.signin_user()		
 		resp = self.send("joinGame",
@@ -163,7 +163,7 @@ class GamePreparingTestCase(BaseTestCase):
 		assert resp["result"] == "notInGame", resp
 	
 	def test_last_players_leave_game(self):
-		self.truncate_db()
+		self.startTesting()
 		[game, sid] = self.get_game(sid_returned = True)
 		sids = [sid]
 		for i in range(2):
@@ -177,7 +177,7 @@ class GamePreparingTestCase(BaseTestCase):
 		assert resp["result"] == "ok" and resp["games"] == [], resp
 		
 	def test_signout_from_game(self):
-		self.truncate_db()	
+		self.startTesting()	
 		game_resp = self.get_game(is_ret = True)
 		game = game_resp['games'][0]['id']
 		sid = self.signin_user()

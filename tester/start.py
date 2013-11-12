@@ -2,7 +2,7 @@
 from base import *
 class StartTestCase(BaseTestCase):
 	def test_startTesting(self):
-		self.truncate_db()
+		self.startTesting(True)
 
 	def test_badJson(self):
 		resp = self.send(dict = 'notJSON.string.blahblahblah', wo_dumps = True)

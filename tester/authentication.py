@@ -41,7 +41,7 @@ class AuthTestCase(BaseTestCase):
 		assert resp["result"] == "ok", resp
 
 	def test_signout_bad_sid(self):
-		self.truncate_db()
+		self.startTesting()
 		sid1 = self.signin_user()
 		sid2 = self.signin_user()
 		resp = self.send("signout", {"sid": sid1 + sid2})

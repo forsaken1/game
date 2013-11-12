@@ -6,7 +6,8 @@ from datetime import datetime
 
 class game:
 
-	def __init__(self, map):
+	def __init__(self, map, server):
+		self.server = server
 		self.map = map
 		self.cur_spawn = 0
 		self.c_spawns, c_items = map.get_attr()
@@ -41,7 +42,6 @@ class game:
 		self.cur_spawn %= self.c_spawns
 		return ret	
 
-
 	def tick(self):
 		self.ticks += 1
 
@@ -54,6 +54,13 @@ class game:
 		for i in self.items:
 			i -= TICK
 		self.set_mess()
-
+		print self.pl_mess
 		for p in self.players:
 			p.write_mess()
+
+	def sync_tick(self):
+		if self.server.sync_mode:
+			if all(p.was_action for p in self.players):
+				for p in self.players:
+					p.was_action = False
+				self.tick()

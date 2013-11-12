@@ -19,6 +19,13 @@ class player:
 		self.is_start = False
 
 		self.connects = []
+		self.was_action = False
+
+	def action(self, msg):
+		self.was_action = True
+		if msg['action'] != 'empty':
+			getattr(self, msg['action'])(msg['params'])
+		self.game.sync_tick()
 
 	def move(self, params):
 		# add tick handler
@@ -39,7 +46,7 @@ class player:
 	#def fire(self, params):
 
 	def resp(self):
-		self.pos = self.game.get_spawn()
+		self.pos = self.game.get_spawn() + Point(0.5, 0.5)
 		self.speed = ZERO
 		self.status = 1
 		self.heals = MAX_HEALTH
@@ -70,7 +77,7 @@ class player:
 			elif self.speed.x < -0.1:
 				self.speed += Point(0.1,0)
 			else :
-				self.speed = ZERO
+				self.speed = Point(0, self.speed.y)
 			self.pos += self.speed
 		self.cur_consist()
 		return

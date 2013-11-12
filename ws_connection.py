@@ -19,5 +19,4 @@ class ws_connection(WebSocketServerProtocol):
 		if self.player is None: 
 			self.player = self.factory.games.players[msg['params']['sid']]
 			self.player.connects.append(self)
-		act = getattr(self.player, msg['action'])
-		act(msg['params'])
+		self.player.action(msg)
