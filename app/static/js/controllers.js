@@ -1,3 +1,11 @@
+function FindGameController ($scope)
+{
+	$scope.join_game = function()
+	{
+
+	}
+}
+
 function CreateGameController ($scope)
 {
 	$scope.create_game = function()
@@ -18,13 +26,14 @@ function CreateGameController ($scope)
 			return;
 		}
 		send(
-			JSON.stringify({
+			JSON.stringify(
+			{
 				'action': 'createGame', 
 				'params': 
 				{
 					'sid': getCookie('sid'), 
 					'name': $scope.name, 
-					'map': parseInt('1'), 
+					'map': parseInt('1'), //will be remake
 					'maxPlayers': parseInt($scope.maxPlayers)
 				}
 			}),
@@ -46,29 +55,29 @@ function CreateGameController ($scope)
 	}
 }
 
-function LobbyController ($scope, $http)
+function LobbyController ($scope, $http, $interval)
 {
-	/*send(
-		JSON.stringify({'action': 'getMessages', 'params': {'sid': getCookie('sid'), 'game': g = getCookie('game') ? g : '', since: 0}}),
-		function(data)
+	setCookie('time', 0);
+	$interval(function()
+	{
+		$http.post('/', JSON.stringify(
 		{
-			if(!data)
+			'action': 'getMessages',
+			'params':
 			{
-				setError('Wrong request');
-				return;
+				sid: getCookie('sid'),
+				game: g = getCookie('game') ? g : '', 
+				since: parseInt(getCookie('time'))
 			}
-			if(data.result == 'ok')
-			{
-				$scope.messages = data.messages;
-			}
-			else
-				setError(data.message);
-		}
-	);*/
-	
-	$http.post('/').success(function() {
-		//alert('gdfg');
-	});
+		})).success(function(data) 
+		{
+			for(var i = 0; data.messages[i] != null; ++i)
+				data.messages[i].time = toUTCTime(data.messages[i].time);
+
+			setCookie('time', data.messages[0].time);
+			$scope.messages = data.messages;
+		});
+	}, 1000);
 
 	$scope.send_message = function()
 	{
@@ -77,7 +86,8 @@ function LobbyController ($scope, $http)
 			return;
 		}
 		send(
-			JSON.stringify({
+			JSON.stringify(
+			{
 				'action': 'sendMessage', 
 				'params': 
 				{
@@ -95,7 +105,7 @@ function LobbyController ($scope, $http)
 				}
 				if(data.result == 'ok')
 				{
-					//setMessage('Successful authorisation');
+					$('#text').val('');
 				}
 				else
 					setError(data.message);
@@ -115,7 +125,15 @@ function SigninController ($scope)
 	$scope.signin = function()
 	{
 		send(
-			JSON.stringify({'action': 'signin', 'params': {'login': $scope.login, 'password': $scope.password}}),
+			JSON.stringify(
+			{
+				'action': 'signin', 
+				'params': 
+				{
+					'login': $scope.login, 
+					'password': $scope.password
+				}
+			}),
 			function (data)
 			{
 				if(!data) 
@@ -157,7 +175,15 @@ function SignupController ($scope)
 			return;
 		}
 		send(
-			JSON.stringify({'action': 'signup', 'params': {'login': $scope.login, 'password': $scope.password}}),
+			JSON.stringify(
+			{
+				'action': 'signup', 
+				'params': 
+				{
+					'login': $scope.login, 
+					'password': $scope.password
+				}
+			}),
 			function (data)
 			{
 				if(!data)

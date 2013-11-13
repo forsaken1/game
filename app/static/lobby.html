@@ -1,10 +1,8 @@
-<div ng-controller = 'LobbyController' class = 'navbar-form' style = 'width: 300px'>
+<div ng-controller = 'LobbyController' class = 'navbar-form' style = 'width: 600px'>
 
-	<table id = 'chat'>
-		<tr ng-repeat = 'message in messages'><td>[[ message.time ]]</td><td>[[ message.login ]]</td><td>[[ message.text ]]</td></tr>
-	</table>
+	<div ng-repeat = 'message in messages' class="alert alert-info"><strong>[[ message.login ]]</strong> say at [[ message.time ]]: <strong>[[ message.text ]]</strong></div>
 
-	<div class = 'form-group'>
+	<div class = 'form-group' style = 'width: 88%'>
 		<input 
 			placeholder="Enter text" 
 			class = 'form-control' 

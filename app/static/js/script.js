@@ -1,4 +1,4 @@
-var app = angular.module('game', [])
+var app = angular.module('game', ['ngRoute'])
 
 app.
 	config(['$interpolateProvider', function ($interpolateProvider) 
@@ -33,3 +33,8 @@ function send(data_, success_callback)
 	});
 }
 
+function toUTCTime(timestamp)
+{
+	var d = new Date(timestamp);
+	return d.getYear() + '/' + (d.getMonth() + 1) + '/' + d.getDay() + ' ' + d.getHours() + ':' + d.getMinutes();
+}
