@@ -11,10 +11,12 @@ app.
 		$routeProvider.
 			when('/signin', {templateUrl: '/static/signin.html'}).
 			when('/signup', {templateUrl: '/static/signup.html'}).
-			when('/signout', {templateUrl: '/static/home.html', controller: 'SignoutController'}).
+			when('/signout', {templateUrl: '/static/empty.html', controller: SignoutController}).
 			when('/lobby', {templateUrl: '/static/lobby.html'}).
 			when('/home', {templateUrl: '/static/home.html'}).
+			when('/create_game', {templateUrl: '/static/create_game.html'}).
 			when('/find_game', {templateUrl: '/static/find_game.html'}).
+			when('/create_map', {templateUrl: '/static/create_map.html'}).
 			otherwise({redirectTo: '/home'});
 	}]);
 

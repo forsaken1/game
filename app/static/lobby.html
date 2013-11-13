@@ -1,0 +1,19 @@
+<div ng-controller = 'LobbyController' class = 'navbar-form' style = 'width: 300px'>
+
+	<table id = 'chat'>
+		<tr ng-repeat = 'message in messages'><td>[[ message.time ]]</td><td>[[ message.login ]]</td><td>[[ message.text ]]</td></tr>
+	</table>
+
+	<div class = 'form-group'>
+		<input 
+			placeholder="Enter text" 
+			class = 'form-control' 
+			ng-model="text" 
+			id = 'text'
+			required 
+		>
+	</div>
+
+	<input class = 'btn btn-primary' type = button value = 'Send' ng-click = 'send_message()'>
+
+</div>
