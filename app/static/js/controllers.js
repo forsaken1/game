@@ -1,3 +1,51 @@
+function CreateGameController ($scope)
+{
+	$scope.create_game = function()
+	{
+		if(!$scope.name)
+		{
+			setError('Game name is empty');
+			return;
+		}
+		if(!$scope.maxPlayers)
+		{
+			setError('Max players is empty');
+			return;
+		}
+		if(! /^\d+$/.test($scope.maxPlayers) || $scope.maxPlayers <= 0)
+		{
+			setError('Wrong number: max players');
+			return;
+		}
+		send(
+			JSON.stringify({
+				'action': 'createGame', 
+				'params': 
+				{
+					'sid': getCookie('sid'), 
+					'name': $scope.name, 
+					'map': parseInt('1'), 
+					'maxPlayers': parseInt($scope.maxPlayers)
+				}
+			}),
+			function (data)
+			{
+				if(!data)
+				{
+					setError('Wrong request');
+					return;
+				}
+				if(data.result == 'ok')
+				{
+					setMessage('Game successfully created');
+				}
+				else
+					setError(data.message);
+			}
+		);
+	}
+}
+
 function LobbyController ($scope, $http)
 {
 	/*send(
@@ -29,8 +77,16 @@ function LobbyController ($scope, $http)
 			return;
 		}
 		send(
-			JSON.stringify({'action': 'sendMessage', 'params': {'sid': getCookie('sid'), 'game': g = getCookie('game') ? g : '', 'text': $scope.text}}),
-			function(data)
+			JSON.stringify({
+				'action': 'sendMessage', 
+				'params': 
+				{
+					'sid': getCookie('sid'), 
+					'game': g = getCookie('game') ? g : '', 
+					'text': $scope.text
+				}
+			}),
+			function (data)
 			{
 				if(!data) 
 				{
@@ -60,7 +116,7 @@ function SigninController ($scope)
 	{
 		send(
 			JSON.stringify({'action': 'signin', 'params': {'login': $scope.login, 'password': $scope.password}}),
-			function(data)
+			function (data)
 			{
 				if(!data) 
 				{
@@ -102,7 +158,7 @@ function SignupController ($scope)
 		}
 		send(
 			JSON.stringify({'action': 'signup', 'params': {'login': $scope.login, 'password': $scope.password}}),
-			function(data)
+			function (data)
 			{
 				if(!data)
 				{

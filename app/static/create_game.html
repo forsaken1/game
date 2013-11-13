@@ -1,0 +1,36 @@
+<div ng-controller = 'CreateGameController' style = 'width: 300px'>
+
+	<div class = 'form-group'>
+		<label for = 'name'>Name</label>
+
+		<input 
+			placeholder="Enter game name" 
+			class = 'form-control' 
+			ng-model="name" 
+			id = 'name'
+			required 
+		>
+	</div>
+
+	<div class = 'form-group'>
+		<label for = 'maxPlayers'>Max players</label>
+
+		<input 
+			placeholder="Enter max players count" 
+			class = 'form-control' 
+			ng-model="maxPlayers" 
+			id = 'maxPlayers'
+			required 
+		>
+	</div>
+
+	<div class = 'form-group dropdown'>
+		<label for = 'map'>Map</label>
+
+		<select id = 'map'>
+			<option id = '1'>Map1</option>
+		</select>
+	</div>
+
+	<input class = 'btn btn-primary' type = button value = 'Create game' ng-click = 'create_game()'>
+</div>
