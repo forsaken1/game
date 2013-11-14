@@ -12,6 +12,8 @@ from process import Process
 from server import *
 from ws_connection import *
 
+TICK, EPS = 30, 1e-6
+
 class post(Resource):
 	
 	def __init__(self, server):

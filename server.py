@@ -3,11 +3,10 @@ from game import *
 from map import *
 
 class Server:
-	def __init__(self):
+	def __init__(self, tick, eps):
 		print 'start'
-		self.games = {}
-		self.players = {}
-		self.maps = {}
+		self.tick, self.eps = tick, eps
+		self.games = self.players = self.maps = {}
 		self.sync_mode = False
 
 	def add_game(self, map_id, id):
@@ -15,7 +14,7 @@ class Server:
 
 	def add_player(self, sid, login, gid):
 		game = self.games[gid]
-		pl = player(sid, login, game)
+		pl = player(sid, login, game, self)
 		game.join(pl)	
 		self.players[sid] = pl
 		#for pl in self.games[gid].players:

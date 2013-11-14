@@ -7,16 +7,14 @@ from datetime import datetime
 class game:
 
 	def __init__(self, map, server):
-		self.server = server
-		self.map = map
+		self.map, self.server = map, server
 		self.cur_spawn = 0
 		self.c_spawns, c_items = map.get_attr()
 		self.items = [0]*c_items
 		self.mess = ''
-		self.pl_mess = []
-		self.pr_mess = []
+		self.pl_mess = pr_mess = []
 
-		self.ticks = 0
+		self.c_ticks = 0
 		self.players = []
 		self.projects = []
 		
@@ -30,7 +28,7 @@ class game:
 
 	def set_mess(self):
 		self.mess = json.dumps({
-			'tick': self.ticks,
+			'tick': self.c_ticks,
 			'players': self.pl_mess,
 			'projectiles': self.pr_mess,
 			'items': self.items
@@ -43,7 +41,7 @@ class game:
 		return ret	
 
 	def tick(self):
-		self.ticks += 1
+		self.c_ticks += 1
 
 		self.pl_mess = []
 		self.pr_mess = []
