@@ -1,3 +1,13 @@
+function HomePageController()
+{
+
+}
+
+function CreateMapController()
+{
+	
+}
+
 function FindGameController ($scope, $http)
 {
 	$http.post('/', JSON.stringify(
@@ -137,7 +147,7 @@ function LobbyController ($scope, $http, $interval)
 
 function SignoutController ($scope)
 {
-	document.cookie = '';
+	deleteCookie('sid');
 	window.location = '#signin';
 }
 

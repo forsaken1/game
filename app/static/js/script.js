@@ -14,7 +14,7 @@ app.
 			when('/signup', {templateUrl: '/static/signup.html'}).
 			when('/signout', {templateUrl: '/static/empty.html', controller: SignoutController}).
 			when('/lobby', {templateUrl: '/static/lobby.html'}).
-			when('/home', {templateUrl: '/static/home.html'}).
+			when('/home', {templateUrl: '/static/home.html', controller: HomePageController}).
 			when('/create_game', {templateUrl: '/static/create_game.html'}).
 			when('/find_games', {templateUrl: '/static/find_games.html'}).
 			when('/create_map', {templateUrl: '/static/create_map.html'}).
@@ -38,4 +38,30 @@ function toUTCTime(timestamp)
 {
 	var d = new Date(timestamp);
 	return d.getYear() + '/' + (d.getMonth() + 1) + '/' + d.getDay() + ' ' + d.getHours() + ':' + d.getMinutes();
+}
+
+function checkAuth()
+{
+	send(
+		JSON.stringify(
+		{
+			'action': 'sidValidation',
+			'params':
+			{
+				'sid': g = getCookie('sid') ? g : ''
+			}
+		}),
+		function(data)
+		{
+			if(!data)
+			{
+				setError('Wrong request');
+				return;
+			}
+			if(data.result != 'ok')
+			{
+				window.location = '#signin';
+			}
+		}
+	);
 }
