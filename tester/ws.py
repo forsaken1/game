@@ -3,10 +3,9 @@ import json
 from base import *
 
 class WebSocketTestCase(BaseTestCase):
-	EPS = 1e-6
 
 	def equal(self, x, y):
-		return abs(x-y) < self.EPS
+		return abs(x-y) < BaseTestCase.accuracy
 
 	def send_ws(self, action = None, params = None, ws = None):
 		if ws is None: ws = create_connection("ws://" + self.HOST + ":" + self.PORT + "/websocket")

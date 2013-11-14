@@ -1,7 +1,7 @@
 from sympy.geometry import *
 
 MAX_HEALTH = 100
-MAX_SPEED = 1
+MAX_SPEED = 0.2
 ZERO = Point(0, 0)
 
 class player:
@@ -31,15 +31,6 @@ class player:
 			self.is_start = True
 			return
 		self.dv += Point(params['dx'],params['dy'])
-		if dv.y != 0:
-			#if self.on_floor
-			self.speed = Point(self.speed.x, -MAX_SPEED)
-		self.speed += Point(dv.x/dv.distance(ZERO), 0)			#zero div bug
-		if self.speed.x > MAX_SPEED:
-			self.speed = Point(MAX_SPEED, self.speed.y)
-		elif self.speed.x < -MAX_SPEED:
-			self.speed = Point(-MAX_SPEED, self.speed.y)
-
 	#def fire(self, params):
 
 	#----------------------------------function for using on tick---------------------------------#
@@ -63,12 +54,15 @@ class player:
 			})
 
 	def speed_calc(self):
-		if self.speed.x > 0.1:
-			self.speed -= Point(0.1,0)
-		elif self.speed.x < -0.1:
-			self.speed += Point(0.1,0)
-		else :
-			self.speed = Point(0, self.speed.y)
+		if dv.y != 0 and self.on_floor:		self.speed = Point(self.speed.x, -MAX_SPEED)
+		if not self.server.equal(dv.x, 0):	self.speed.translate(0.02*dv.x/abs(dv.x))
+		elif self.on_floor:
+			if self.speed.x > 0.02:			self.speed.translate(-0.02)
+			elif self.speed.x < -0.02:		self.speed.translate(0.02)
+			else:							self.speed = Point(0, self.speed.y)
+		if self.speed.x > MAX_SPEED:		self.speed = Point(MAX_SPEED, self.speed.y)
+		elif self.speed.x < -MAX_SPEED:		self.speed = Point(-MAX_SPEED, self.speed.y)
+
 
 	def take_weapon(self, dot):
 		pass
@@ -127,7 +121,6 @@ class player:
 			self.speed_calc()
 			self.go()
 
-			
 		self.cur_consist()
 		return
 
