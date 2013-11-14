@@ -50,7 +50,7 @@ class game:
 		for p in self.players:
 			p.tick()
 		for i in self.items:
-			i -= TICK
+			i -= self.server.tick_size
 		self.set_mess()
 		print self.pl_mess
 		for p in self.players:

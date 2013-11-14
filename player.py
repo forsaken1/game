@@ -43,7 +43,9 @@ class player:
 	#def fire(self, params):
 
 	def resp(self):
-		self.pos = self.game.get_spawn() + Point(0.5, 0.5)
+		spawn = self.game.get_spawn()
+		self.pos = spawn + Point(0.5, 0.5)
+		self.on_floor = self.game.map.above_floor(spawn)
 		self.speed = ZERO
 		self.status = 1
 		self.heals = MAX_HEALTH
@@ -73,7 +75,19 @@ class player:
 	def take_item(self, dot):
 		pass
 
-	def at_wall(self, dot):
+	def at_wall(self, dist, dot):
+		self.pos += self.speed/self.speed.distance(ZERO)*dist
+		if self.server.equal(dot['pt'].x, dot['sq'].x) or self.server.equal(dot['pt'].x, dot['sq'].x + 1):
+			self.speed = Point(0, self.speed.y)
+		
+		else:
+			self.speed = Point(self.speed.x, 0)
+			if self.server.equal(dot['pt'].y, dot['sq'].y):
+				self.on_floor = True
+			elif self.server.equal(dot['pt'].y, dot['sq'].y + 1):
+				pass
+			else: raise Exception('ERROR bad collision')	
+
 
 
 	def go(self):
@@ -89,7 +103,7 @@ class player:
 			if 'A' <= type <= 'Z': self.take_weapon(dot)
 			elif 'a' <= type <= 'z': self.take_item(dot)
 			elif type == '#': 
-				self.at_wall(dot); return
+				self.at_wall(dist, dot); return
 			elif '1' <= type <= '9': 
 				if self.teleport(dot): return
 
@@ -99,7 +113,7 @@ class player:
 			return
 
 		elif self.status == 0:
-			self.respawn -= TICK
+			self.respawn -= self.server.tick_size
 			if self.respawn <= 0:
 				self.resp()
 

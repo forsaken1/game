@@ -56,7 +56,7 @@ class param_validator:
 		else: return True		
 
 	def valid_dot(self, c):
-		return 'A'<=c<='z' or '0'<=c<='9' or c=='.' or c=='$' or c=='#' 
+		return 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or c=='.' or c=='$' or c=='#' 
 	
 	def badMap(self, map):
 		if type(map) != list or len(map) < 1: return False

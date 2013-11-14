@@ -5,9 +5,12 @@ from map import *
 class Server:
 	def __init__(self, tick, eps):
 		print 'start'
-		self.tick, self.eps = tick, eps
+		self.tick, self.eps = tick_size, eps
 		self.games = self.players = self.maps = {}
 		self.sync_mode = False
+
+	def equal(self, x, y):
+		return abs(x-y) < self.eps
 
 	def add_game(self, map_id, id):
 		self.games[id] = game(self.maps[map_id], self)
