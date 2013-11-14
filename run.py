@@ -34,7 +34,7 @@ class post(Resource):
 
 if __name__ == '__main__':
 	create_db()
-	server = Server()
+	server = Server(TICK, EPS)
 
 	if len(sys.argv) > 1 and sys.argv[1] == 'debug':
 		log.startLogging(sys.stdout)

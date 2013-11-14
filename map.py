@@ -1,5 +1,20 @@
 from sympy.geometry import *
 
+def all_types_wo_wall():
+	types = ''
+	i = ord('0')
+	while chr(i) < '9':
+		i+=1
+		types += chr(i)
+	i = ord('a')
+	while chr(i) < 'z':
+		i+=1
+		types += chr(i)
+	i = ord('A')
+	while chr(i) < 'Z':
+		i+=1
+		types += chr(i)
+
 class map:
 
 	def __init__(self, map, server):
@@ -35,22 +50,9 @@ class map:
 	def get_attr(self):
 		return [len(self.spawns), len(self.items)]
 
-	def all_types_wo_wall(self):
-		types = ''
-		i = ord('0')
-		while chr(i) < '9':
-			i+=1
-			types += chr(i)
-		i = ord('a')
-		while chr(i) < 'z':
-			i+=1
-			types += chr(i)
-		i = ord('A')
-		while chr(i) < 'Z':
-			i+=1
-			types += chr(i)
 
-	def collision_detect(self, start, end, types = self.all_types_wo_wall()):
+
+	def collision_detect(self, start, end, types = all_types_wo_wall()):
 		""" return {dist:{'sq':square, 'pt': coll_point, 'tp':dot_type}}"""
 
 		coll = {}
