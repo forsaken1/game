@@ -12,7 +12,7 @@ class player:
 		self.status = 0
 		self.respawn = -1
 
-		self.pos = self.speed = Point(0, 0)
+		self.pos = self.speed = self.dv = ZERO
 		self.is_start = self.was_action = False
 
 		self.connects = []
@@ -20,16 +20,17 @@ class player:
 	#----------------------------------function for using on client mess---------------------------------#
 	def action(self, msg):
 		self.was_action = True
-		if msg['action'] != 'empty':
-			getattr(self, msg['action'])(msg['params'])
-		self.game.sync_tick()
+		if self.game.c_ticks - 1 <= msg['params']['tick'] <= self.game.c_ticks: 
+			if msg['action'] != 'empty':
+				getattr(self, msg['action'])(msg['params'])
+			self.game.sync_tick()
 
 	def move(self, params):
 		print params, self.game.ticks
 		if not self.is_start:
 			self.is_start = True
 			return
-		dv = Point(params['dx'],params['dy'])
+		self.dv += Point(params['dx'],params['dy'])
 		if dv.y != 0:
 			#if self.on_floor
 			self.speed = Point(self.speed.x, -MAX_SPEED)

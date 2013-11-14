@@ -30,3 +30,9 @@ class StartTestCase(BaseTestCase):
 		if resp.has_key('message'):
 			del resp['message']
 		assert resp["result"] == "unknownAction", resp
+
+	def test_getGameParam_ok(self):
+		sid = self.join_game()
+		resp = self.send('getGameParam', {'sid': sid})
+		assert resp['result'] == 'ok' and resp.has_key('tickSize') and resp.has_key('accuracy'), resp
+		BaseTestCase.tickSize, BaseTestCase.accuracy = resp['tickSize'], resp['accuracy']

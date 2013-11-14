@@ -18,7 +18,7 @@ class BaseTestCase(unittest.TestCase):
 			if not offset: counter[item] += 1
 			return ret
 
-	def startTesting(self, sync = False):
+	def startTesting(self, sync = True):
 		param = {'websocketMode': 'sync' if sync else 'async'}
 		resp = self.send('startTesting', param)
 		assert resp["result"] == "ok", resp

@@ -115,6 +115,7 @@ class Process:
 			'leaveGame': 	['sid'],
 			'uploadMap': 	['sid', 'name', 'map', 'maxPlayers'],
 			'getMaps': 		['sid'],
+			'getGameParams': ['sid'],
 		}		
 		
 	def __del__(self):
@@ -347,3 +348,11 @@ class Process:
 			
 		return self.result(param = {'maps': res})
 
+	def getGameParams(self, par):
+		sid = par['sid']
+		cur = self.db.cursor()
+		cur.execute('SELECT game_id FROM user_game WHERE sid = %s', (sid,))
+		game = cur.fetchone()
+		if not game: 
+			return self.result('notInGame')
+		return self.result(param = {'tickSize': self.server.tick, 'accuracy': self.server.eps})

@@ -46,3 +46,15 @@ class AuthTestCase(BaseTestCase):
 		sid2 = self.signin_user()
 		resp = self.send("signout", {"sid": sid1 + sid2})
 		assert resp["result"] == "badSid", resp
+
+	def test_getGameParam_bad_sid(self):
+		self.startTesting()
+		sid1 = self.signin_user()
+		sid2 = self.signin_user()
+		resp = self.send("getGameParam", {"sid": sid1 + sid2})
+		assert resp["result"] == "badSid", resp
+
+	def test_getGameParam_not_in_game(self):
+		sid = self.signin_user()
+		resp = self.send("getGameParam", {"sid": sid})
+		assert resp["result"] == "notInGame", resp
