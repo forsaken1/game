@@ -26,7 +26,7 @@ class Server:
 		#	print g
 
 	def add_map(self, id, scheme):
-		self.maps[id] = map(scheme)
+		self.maps[id] = map(scheme, self)
 
 	def erase_player(self, sid, gid):
 		self.games[gid].leave(sid)

@@ -88,7 +88,10 @@ class player:
 				pass
 			else: raise Exception('ERROR bad collision')	
 
-
+	def teleport(self, dot):
+		if self.server.equal(dot['sq'].x, int(self.pos.x)) and self.server.equal(dot['sq'].y, int(self.pos.y)):
+			return False
+		self.pos = self.game.map.tps[dot['sq']]
 
 	def go(self):
 		end = self.pos + self.speed
