@@ -1,13 +1,35 @@
-function FindGameController ($scope)
+function FindGameController ($scope, $http)
 {
-	$scope.join_game = function()
+	$http.post('/', JSON.stringify(
+	{
+		'action': 'getGames',
+		'params':
+		{
+			sid: getCookie('sid')
+		}
+	})).success(function(data) 
+	{
+		$scope.games = data.games;
+	});
+	$scope.join_game = function($game_id)
 	{
 
 	}
 }
 
-function CreateGameController ($scope)
+function CreateGameController ($scope, $http)
 {
+	$http.post('/', JSON.stringify(
+	{
+		'action': 'getMaps',
+		'params':
+		{
+			sid: getCookie('sid')
+		}
+	})).success(function(data) 
+	{
+		$scope.maps = data.maps;
+	});
 	$scope.create_game = function()
 	{
 		if(!$scope.name)
@@ -33,7 +55,7 @@ function CreateGameController ($scope)
 				{
 					'sid': getCookie('sid'), 
 					'name': $scope.name, 
-					'map': parseInt('1'), //will be remake
+					'map': parseInt($scope.map_id),
 					'maxPlayers': parseInt($scope.maxPlayers)
 				}
 			}),
@@ -57,7 +79,6 @@ function CreateGameController ($scope)
 
 function LobbyController ($scope, $http, $interval)
 {
-	setCookie('time', 0);
 	$interval(function()
 	{
 		$http.post('/', JSON.stringify(

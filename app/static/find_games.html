@@ -7,7 +7,7 @@
       		<div class="navbar-collapse collapse">
 		        <ul class="nav navbar-nav">
 		          <li><a href="#create_game">Create game</a></li>
-		          <li><a href="#find_games">Find games</a></li>
+		          <li class = 'active'><a href="#find_games">Find games</a></li>
 		          <li><a href="#lobby">Lobby</a></li>
 		          <li><a href="#create_map">Create Map</a></li>
 		          <li><a href="#signout">Signout</a></li>
@@ -19,14 +19,14 @@
 <div id = 'message'></div>
 <div id = 'error'></div>
 
-<div style = 'width: 300px'>
-	<div class="panel panel-primary">  
-	  <div class="panel-heading">
-	    <h3 class="panel-title">Developers</h3>
-	  </div>
-	  <div class="panel-body">
-	    Anton Kim<br>
-	    Alexey Krylov
-	  </div>
-	</div>
+<div style = 'width: 500px' ng-controller = 'FindGameController'>
+	<table class = 'table'>
+		<thead>
+			<tr><th>Id</th><th>Name</th><th>Max players</th><th>Status</th></tr>
+		</thead>
+
+		<tbody>
+			<tr ng-repeat = 'game in games'><td>[[ game.id ]]</td><td>[[ game.name ]]</td><td>[[ game.maxPlayers ]]</td><td>[[ game.status ]]</td></tr>
+		</tbody>
+	</table>
 </div>

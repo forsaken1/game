@@ -1,4 +1,5 @@
 var app = angular.module('game', ['ngRoute'])
+setCookie('time', 0);
 
 app.
 	config(['$interpolateProvider', function ($interpolateProvider) 
@@ -15,7 +16,7 @@ app.
 			when('/lobby', {templateUrl: '/static/lobby.html'}).
 			when('/home', {templateUrl: '/static/home.html'}).
 			when('/create_game', {templateUrl: '/static/create_game.html'}).
-			when('/find_game', {templateUrl: '/static/find_game.html'}).
+			when('/find_games', {templateUrl: '/static/find_games.html'}).
 			when('/create_map', {templateUrl: '/static/create_map.html'}).
 			otherwise({redirectTo: '/home'});
 	}]);
