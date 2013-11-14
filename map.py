@@ -6,7 +6,7 @@ class map:
 		self.server = server
 		self.height, self.width = len(map), len(map[0])	
 		self.spawns = self.map = []
-		self.items = self.tps = {}
+		self.items = self.tps = {}					# tps - {tps: next_tps}, item - {coord: (number, type)}
 
 		self.map.append('#'*self.width)
 		num_tps = {}
