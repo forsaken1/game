@@ -13,11 +13,11 @@ class player:
 		self.respawn = -1
 
 		self.pos = self.speed = Point(0, 0)
-		self.is_start = False
+		self.is_start = self.was_action = False
 
 		self.connects = []
-		self.was_action = False
 
+	#----------------------------------function for using on client mess---------------------------------#
 	def action(self, msg):
 		self.was_action = True
 		if msg['action'] != 'empty':
@@ -25,7 +25,6 @@ class player:
 		self.game.sync_tick()
 
 	def move(self, params):
-		# add tick handler
 		print params, self.game.ticks
 		if not self.is_start:
 			self.is_start = True
@@ -42,6 +41,7 @@ class player:
 
 	#def fire(self, params):
 
+	#----------------------------------function for using on tick---------------------------------#
 	def resp(self):
 		spawn = self.game.get_spawn()
 		self.pos = spawn + Point(0.5, 0.5)
@@ -109,6 +109,8 @@ class player:
 				self.at_wall(dist, dot); return
 			elif '1' <= type <= '9': 
 				if self.teleport(dot): return
+
+		self.pos = end
 
 
 	def tick(self):

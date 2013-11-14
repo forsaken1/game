@@ -43,8 +43,7 @@ class game:
 	def tick(self):
 		self.c_ticks += 1
 
-		self.pl_mess = []
-		self.pr_mess = []
+		self.pl_mess = self.pr_mess = []
 		#for p in project
 		#
 		for p in self.players:
