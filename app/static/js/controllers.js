@@ -1,15 +1,16 @@
 function HomePageController()
 {
-
+	checkAuth();
 }
 
 function CreateMapController()
 {
-	
+	checkAuth();
 }
 
 function FindGameController ($scope, $http)
 {
+	checkAuth();
 	$http.post('/', JSON.stringify(
 	{
 		'action': 'getGames',
@@ -21,14 +22,39 @@ function FindGameController ($scope, $http)
 	{
 		$scope.games = data.games;
 	});
-	$scope.join_game = function($game_id)
+	$scope.join_game = function(game_id)
 	{
-
+		send(
+			JSON.stringify(
+			{
+				'action': 'joinGame',
+				'params': 
+				{
+					'sid': getCookie('sid'),
+					'game': game_id
+				}
+			}),
+			function(data)
+			{
+				if(!data)
+				{
+					setError('Wrong request');
+					return;
+				}
+				if(data.result == 'ok')
+				{
+					setMessage('You will be redirected to game...');
+				}
+				else
+					setError(data.message);
+			}
+		)
 	}
 }
 
 function CreateGameController ($scope, $http)
 {
+	checkAuth();
 	$http.post('/', JSON.stringify(
 	{
 		'action': 'getMaps',
@@ -89,6 +115,7 @@ function CreateGameController ($scope, $http)
 
 function LobbyController ($scope, $http, $interval)
 {
+	checkAuth();
 	$interval(function()
 	{
 		$http.post('/', JSON.stringify(

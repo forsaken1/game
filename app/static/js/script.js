@@ -18,6 +18,7 @@ app.
 			when('/create_game', {templateUrl: '/static/create_game.html'}).
 			when('/find_games', {templateUrl: '/static/find_games.html'}).
 			when('/create_map', {templateUrl: '/static/create_map.html'}).
+			when('/game', {templateUrl: '/static/game.html'}).
 			otherwise({redirectTo: '/home'});
 	}]);
 
@@ -42,13 +43,14 @@ function toUTCTime(timestamp)
 
 function checkAuth()
 {
+	var g = getCookie('sid');
 	send(
 		JSON.stringify(
 		{
 			'action': 'sidValidation',
 			'params':
 			{
-				'sid': g = getCookie('sid') ? g : ''
+				'sid': g ? g : ''
 			}
 		}),
 		function(data)

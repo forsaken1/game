@@ -19,14 +19,14 @@
 <div id = 'message'></div>
 <div id = 'error'></div>
 
-<div style = 'width: 500px' ng-controller = 'FindGameController'>
-	<table class = 'table'>
+<div style = 'width: 700px' ng-controller = 'FindGameController'>
+	<table class = 'table table-bordered'>
 		<thead>
-			<tr><th>Id</th><th>Name</th><th>Max players</th><th>Status</th></tr>
+			<tr><th>Id</th><th>Game name</th><th>Players count</th><th>Max players</th><th>Status</th><th></th></tr>
 		</thead>
 
 		<tbody>
-			<tr ng-repeat = 'game in games'><td>[[ game.id ]]</td><td>[[ game.name ]]</td><td>[[ game.maxPlayers ]]</td><td>[[ game.status ]]</td></tr>
+			<tr ng-repeat = 'game in games'><td>[[ game.id ]]</td><td>[[ game.name ]]</td><td>[[ game.players.length ]]</td><td>[[ game.maxPlayers ]]</td><td>[[ game.status ]]</td><td><input class = 'btn btn-primary' type = button value = 'Join' ng-click = 'join_game(game.id)'></td></tr>
 		</tbody>
 	</table>
 </div>

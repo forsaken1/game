@@ -139,6 +139,7 @@ class Process:
 				'leaveGame': 	[self.leave_game, 		['sid']],
 				'uploadMap': 	[self.upload_map, 		['sid', 'name', 'map', 'maxPlayers']],
 				'getMaps': 		[self.get_maps, 		['sid']],
+				'sidValidation': [self.sidValidation,   ['sid']],
 			}
 			action = proc[req['action']]		
 		except KeyError:
@@ -156,6 +157,14 @@ class Process:
 				return jsonify(result= error, message='param error') 
 		return action[0](params)
 
+
+	def sidValidation(self, par):
+		cur = self.db.cursor()
+		ceu.execute('SELECT sid FROM users WHERE sid = %s', (par['sid'],))
+		if not cur.fetchone():
+			return jsonify(result='ok')
+
+		return jsonify(result='invalidSid')
 	
 	def start_testing(self):
 		data = open("conf", "r").read()
