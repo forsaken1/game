@@ -160,7 +160,7 @@ class Process:
 
 	def sidValidation(self, par):
 		cur = self.db.cursor()
-		ceu.execute('SELECT sid FROM users WHERE sid = %s', (par['sid'],))
+		cur.execute('SELECT sid FROM users WHERE sid = %s', (par['sid'],))
 		if not cur.fetchone():
 			return jsonify(result='ok')
 

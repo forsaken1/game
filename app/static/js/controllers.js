@@ -1,17 +1,39 @@
-function HomePageController()
+function CreateMapController($scope)
 {
-	checkAuth();
-}
-
-function CreateMapController()
-{
-	checkAuth();
+	$scope.create_map = function()
+	{
+		send(
+			JSON.stringify({
+				'action': 'uploadMap',
+				'params':
+				{
+					'sid': getCookie('sid'),
+					'name': $scope.name,
+					'maxPlayers': $scope.maxPlayers,
+					'map': $('#map').val()
+				}
+			}),
+			function(data)
+			{
+				if(!data)
+				{
+					setError('Wrong request');
+					return;
+				}
+				if(data.result == 'ok')
+				{
+					setMessage('Game successfuly created');
+				}
+				else
+					setError(data.message);
+			}
+		)
+	}
 }
 
 function FindGameController ($scope, $http)
 {
-	checkAuth();
-	$http.post('/', JSON.stringify(
+	$http.post(SERVER_URL, JSON.stringify(
 	{
 		'action': 'getGames',
 		'params':
@@ -54,8 +76,7 @@ function FindGameController ($scope, $http)
 
 function CreateGameController ($scope, $http)
 {
-	checkAuth();
-	$http.post('/', JSON.stringify(
+	$http.post(SERVER_URL, JSON.stringify(
 	{
 		'action': 'getMaps',
 		'params':
@@ -115,10 +136,9 @@ function CreateGameController ($scope, $http)
 
 function LobbyController ($scope, $http, $interval)
 {
-	checkAuth();
 	$interval(function()
 	{
-		$http.post('/', JSON.stringify(
+		$http.post(SERVER_URL, JSON.stringify(
 		{
 			'action': 'getMessages',
 			'params':
@@ -129,10 +149,17 @@ function LobbyController ($scope, $http, $interval)
 			}
 		})).success(function(data) 
 		{
-			for(var i = 0; data.messages[i] != null; ++i)
-				data.messages[i].time = toUTCTime(data.messages[i].time);
+			if(!data.messages)
+				return;
 
-			setCookie('time', data.messages[0].time);
+			for(var i = 0; data.messages[i] != null; ++i)
+				data.messages[i].time = toDateTime(data.messages[i].time);
+
+			/*if(data.messages[0].time)
+				setCookie('time', data.messages[0].time);
+			else
+				setCookie('time', 0);*/
+
 			$scope.messages = data.messages;
 		});
 	}, 1000);
@@ -174,8 +201,29 @@ function LobbyController ($scope, $http, $interval)
 
 function SignoutController ($scope)
 {
-	deleteCookie('sid');
-	window.location = '#signin';
+	send(
+		JSON.stringify({
+			'action': 'signout' ,
+			'params':
+			{
+				'sid': getCookie('sid')
+			}
+		}),
+		function (data)
+		{
+			if(!data) 
+			{
+				setError('Wrong request');
+				return;
+			}
+
+			if(data.result == 'ok')
+			{
+				deleteCookie('sid');
+				window.location = '#signin';
+			}
+		}
+	)
 }
 
 function SigninController ($scope)

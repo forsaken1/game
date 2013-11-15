@@ -1,5 +1,6 @@
 var app = angular.module('game', ['ngRoute'])
 setCookie('time', 0);
+SERVER_URL = 'http://192.168.226.38:3000';
 
 app.
 	config(['$interpolateProvider', function ($interpolateProvider) 
@@ -14,7 +15,7 @@ app.
 			when('/signup', {templateUrl: '/static/signup.html'}).
 			when('/signout', {templateUrl: '/static/empty.html', controller: SignoutController}).
 			when('/lobby', {templateUrl: '/static/lobby.html'}).
-			when('/home', {templateUrl: '/static/home.html', controller: HomePageController}).
+			when('/home', {templateUrl: '/static/home.html'}).
 			when('/create_game', {templateUrl: '/static/create_game.html'}).
 			when('/find_games', {templateUrl: '/static/find_games.html'}).
 			when('/create_map', {templateUrl: '/static/create_map.html'}).
@@ -25,8 +26,7 @@ app.
 function send(data_, success_callback)
 {
 	jQuery.ajax({
-		//url: 'http://172.20.10.8:5000/',
-		url: '/',
+		url: SERVER_URL,
 		type: 'POST',
 		dataType: 'json',
 		data: data_,
@@ -35,35 +35,8 @@ function send(data_, success_callback)
 	});
 }
 
-function toUTCTime(timestamp)
+function toDateTime(timestamp)
 {
-	var d = new Date(timestamp);
-	return d.getYear() + '/' + (d.getMonth() + 1) + '/' + d.getDay() + ' ' + d.getHours() + ':' + d.getMinutes();
-}
-
-function checkAuth()
-{
-	var g = getCookie('sid');
-	send(
-		JSON.stringify(
-		{
-			'action': 'sidValidation',
-			'params':
-			{
-				'sid': g ? g : ''
-			}
-		}),
-		function(data)
-		{
-			if(!data)
-			{
-				setError('Wrong request');
-				return;
-			}
-			if(data.result != 'ok')
-			{
-				window.location = '#signin';
-			}
-		}
-	);
+	var d = new Date(parseInt(timestamp) * 1000);
+	return (d.getYear() + 1900) + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes();
 }
