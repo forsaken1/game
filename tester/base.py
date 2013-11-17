@@ -36,6 +36,7 @@ class BaseTestCase(unittest.TestCase):
 		except:
 			assert resp == 0, resp
 		assert resp.has_key('result'), resp
+		print resp
 		return resp
 
 	def signup_user(self, login = None, passwd = "pass"):

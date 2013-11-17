@@ -5,8 +5,8 @@ MAX_SPEED = 0.2
 ZERO = Point(0, 0)
 
 class player:
-	def __init__(self, sid, login, game, server):
-		self.sid, self.game, self.login, self.server = sid, login, game, server
+	def __init__(self, pid, login, game, server):
+		self.pid, self.login, self.game, self.server = pid, login, game, server
 		
 		self.health = MAX_HEALTH
 		self.status = 0
@@ -19,17 +19,20 @@ class player:
 
 	#----------------------------------function for using on client mess---------------------------------#
 	def action(self, msg):
-		self.was_action = True
+		if not self.is_start:
+			self.is_start = True
+			self.was_action = True
+			self.game.sync_tick()
+			return
+
 		if self.game.c_ticks - 1 <= msg['params']['tick'] <= self.game.c_ticks: 
+			self.was_action = True
 			if msg['action'] != 'empty':
 				getattr(self, msg['action'])(msg['params'])
 			self.game.sync_tick()
 
 	def move(self, params):
-		print params, self.game.ticks
-		if not self.is_start:
-			self.is_start = True
-			return
+		print params
 		self.dv += Point(params['dx'],params['dy'])
 	#def fire(self, params):
 
@@ -37,7 +40,6 @@ class player:
 	def resp(self):
 		spawn = self.game.get_spawn()
 		self.pos = spawn + Point(0.5, 0.5)
-		self.on_floor = self.game.map.above_floor(spawn)
 		self.speed = ZERO
 		self.status = 1
 		self.heals = MAX_HEALTH
@@ -54,16 +56,19 @@ class player:
 			})
 
 	def speed_calc(self):
-		if dv.y != 0 and self.on_floor:		self.speed = Point(self.speed.x, -MAX_SPEED)
-		if not self.server.equal(dv.x, 0):	self.speed.translate(0.02*dv.x/abs(dv.x))
-		elif self.on_floor:
-			if self.speed.x > 0.02:			self.speed.translate(-0.02)
-			elif self.speed.x < -0.02:		self.speed.translate(0.02)
-			else:							self.speed = Point(0, self.speed.y)
-		if self.speed.x > MAX_SPEED:		self.speed = Point(MAX_SPEED, self.speed.y)
-		elif self.speed.x < -MAX_SPEED:		self.speed = Point(-MAX_SPEED, self.speed.y)
-
-
+		is_jump = False
+		if not self.game.map.above_floor(self.pos.translate(-0.5, -0.5)):
+														self.speed = self.speed.translate(0, self.server.ACCEL)
+		else:
+			if self.dv.y < -self.server.eps:			self.speed = Point(self.speed.x, -MAX_SPEED)
+			if not self.server.equal(self.dv.x, 0):		self.speed = self.speed.translate(self.server.ACCEL*self.dv.x/abs(self.dv.x))
+			else:
+				if self.speed.x > self.server.ACCEL:	self.speed = self.speed.translate(-self.server.ACCEL)
+				elif self.speed.x < -self.server.ACCEL:	self.speed = self.speed.translate(self.server.ACCEL)
+				else:									self.speed = Point(0, self.speed.y)
+			if self.speed.x > MAX_SPEED:				self.speed = Point(MAX_SPEED, self.speed.y)
+			elif self.speed.x < -MAX_SPEED:				self.speed = Point(-MAX_SPEED, self.speed.y)
+		
 	def take_weapon(self, dot):
 		pass
 
@@ -72,16 +77,17 @@ class player:
 
 	def at_wall(self, dist, dot):
 		self.pos += self.speed/self.speed.distance(ZERO)*dist
-		if self.server.equal(dot['pt'].x, dot['sq'].x) or self.server.equal(dot['pt'].x, dot['sq'].x + 1):
+		if self.server.equal(dot['pt'].x, dot['sq'].x) and self.speed.x > 0 or \
+		self.server.equal(dot['pt'].x, dot['sq'].x + 1) or self.speed.x < 0:
 			self.speed = Point(0, self.speed.y)
-		
-		else:
+			return True
+
+		elif self.server.equal(dot['pt'].y, dot['sq'].y) and self.speed.y > 0 or \
+			self.server.equal(dot['pt'].y, dot['sq'].y + 1) and self.speed.y < 0:
 			self.speed = Point(self.speed.x, 0)
-			if self.server.equal(dot['pt'].y, dot['sq'].y):
-				self.on_floor = True
-			elif self.server.equal(dot['pt'].y, dot['sq'].y + 1):
-				pass
-			else: raise Exception('ERROR bad collision')	
+			return True
+
+		else: return False	
 
 	def teleport(self, dot):
 		if self.server.equal(dot['sq'].x, int(self.pos.x)) and self.server.equal(dot['sq'].y, int(self.pos.y)):
@@ -90,6 +96,7 @@ class player:
 
 	def go(self):
 		end = self.pos + self.speed
+		if self.speed == ZERO: return
 		collision = {}
 		for i in (-0.5, 0.5):
 			for j in (-0.5, 0.5):
@@ -97,11 +104,11 @@ class player:
 		collision.update(self.game.map.collision_detect(self.pos, end))
 
 		for dist, dot in collision.iteritems():
-			type = dot[2]
+			type = dot['tp']
 			if 'A' <= type <= 'Z': self.take_weapon(dot)
 			elif 'a' <= type <= 'z': self.take_item(dot)
 			elif type == '#': 
-				self.at_wall(dist, dot); return
+				if self.at_wall(dist, dot): return
 			elif '1' <= type <= '9': 
 				if self.teleport(dot): return
 

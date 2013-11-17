@@ -14,12 +14,18 @@ class param_validator:
 		
 	def badPassword(self, password):
 		return type(password) == unicode
+	
+	def get_id(self, sid):
+		cur = self.db.cursor()
+		cur.execute('SELECT id FROM users WHERE sid = %s', (sid,))
+		id = cur.fetchone()
+		if id: id = id[0]
+		return id	
 		
 	def badSid(self, sid):
 		if not self.valid_str(sid): return False
-		cur = self.db.cursor()
-		cur.execute('SELECT id FROM users WHERE sid = %s', (sid,))
-		return cur.fetchone()		
+		return self.get_id(sid)
+			
 
 	def badName(self, name):
 		return self.valid_str(name)
@@ -96,7 +102,7 @@ class param_validator:
 				return self.param_error[param]
 		return None	
 
-class Process:		
+class process:		
 
 	def __init__(self, server):
 		self.server = server
@@ -127,6 +133,7 @@ class Process:
 			action = req['action']	
 			print action
 			params = req['params']
+			print params
 			if action == 'startTesting':
 				return self.start_testing(params)
 			act = getattr(self, action)
@@ -210,10 +217,10 @@ class Process:
 		return self.result()
 		
 	def sendMessage(self, par):
-		sid , gid, text = par['sid'], par['game'], par['text']
+		id , gid, text = self.valid.get_id(par['sid']), par['game'], par['text']
 		cur = self.db.cursor()
 
-		cur.execute('SELECT game_id FROM user_game WHERE sid = %s', (sid,))
+		cur.execute('SELECT game_id FROM user_game WHERE pid = %s', (id,))
 		gid_fact = cur.fetchone()
 		gid_fact = gid_fact[0] if gid_fact else ""
 		if gid_fact != gid:
@@ -277,12 +284,12 @@ class Process:
 		return self.result(param = {'games': res})
 		
 	def joinGame(self, par):
-		sid = par['sid']	
+		id = self.valid.get_id(par['sid'])
 		gid = par['game']
 		cur = self.db.cursor()
 		if par['game'] == "":
 			return self.result('badGame')
-		cur.execute('SELECT id FROM user_game WHERE sid = %s', (sid,))
+		cur.execute('SELECT id FROM user_game WHERE pid = %s', (id,))
 		if cur.fetchone():
 			return self.result('alreadyInGame')					
 			
@@ -293,28 +300,28 @@ class Process:
 		if playersCount >= maxPlayers:
 			return self.result('gameFull')
 			
-		cur.execute('SELECT login FROM users WHERE sid = %s', (sid,))	
+		cur.execute('SELECT login FROM users WHERE id = %s', (id,))	
 		login = cur.fetchone()[0]
-		cur.execute('INSERT INTO user_game (sid, login, game_id) VALUES(%s, %s, %s)', (sid, login, gid))
+		cur.execute('INSERT INTO user_game (pid, login, game_id) VALUES(%s, %s, %s)', (id, login, gid))
 		self.db.commit()
 
-		self.server.add_player(sid, login, gid)
+		self.server.add_player(id, login, gid)
 
 		return self.result()
 		
 	def leaveGame(self, par):		
-		sid = par['sid']
+		id = self.valid.get_id(par['sid'])
 		cur = self.db.cursor()
-		cur.execute('SELECT game_id FROM user_game WHERE sid = %s', (sid,))
+		cur.execute('SELECT game_id FROM user_game WHERE pid = %s', (id,))
 		game = cur.fetchone()
 		if not game: 
 			return self.result('notInGame')
 		game = game[0]			
 		
-		cur.execute('DELETE from user_game WHERE sid = %s', (sid, ))
+		cur.execute('DELETE from user_game WHERE pid = %s', (id, ))
 		self.db.commit()
 		
-		self.server.erase_player(sid, game)
+		self.server.erase_player(id, game)
 
 		cur.execute('SELECT count(*) FROM user_game WHERE game_id = %s', (game,))
 		if not cur.fetchone()[0]:
@@ -349,10 +356,10 @@ class Process:
 		return self.result(param = {'maps': res})
 
 	def getGameParams(self, par):
-		sid = par['sid']
+		id = self.valid.get_id(par['sid'])
 		cur = self.db.cursor()
-		cur.execute('SELECT game_id FROM user_game WHERE sid = %s', (sid,))
+		cur.execute('SELECT game_id FROM user_game WHERE pid = %s', (id,))
 		game = cur.fetchone()
 		if not game: 
 			return self.result('notInGame')
-		return self.result(param = {'tickSize': self.server.tick, 'accuracy': self.server.eps})
+		return self.result(param = {"tickSize": self.server.tick_size, "accuracy": self.server.eps})

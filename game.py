@@ -12,11 +12,10 @@ class game:
 		self.c_spawns, c_items = map.get_attr()
 		self.items = [0]*c_items
 		self.mess = ''
-		self.pl_mess = pr_mess = []
+		self.pl_mess, self.pr_mess = [], []
 
 		self.c_ticks = 0
-		self.players = []
-		self.projects = []
+		self.players, self.projects = [], []
 		
 
 	def join(self, player):
@@ -43,7 +42,7 @@ class game:
 	def tick(self):
 		self.c_ticks += 1
 
-		self.pl_mess = self.pr_mess = []
+		self.pl_mess, self.pr_mess = [], []
 		#for p in project
 		#
 		for p in self.players:
@@ -51,7 +50,6 @@ class game:
 		for i in self.items:
 			i -= self.server.tick_size
 		self.set_mess()
-		print self.pl_mess
 		for p in self.players:
 			p.write_mess()
 

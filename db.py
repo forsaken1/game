@@ -53,7 +53,7 @@ def create_db():
 	cursor.execute(sql)
 	sql = '''CREATE TABLE IF NOT EXISTS `user_game` (
 			`id` int(11) NOT NULL AUTO_INCREMENT,
-			`sid` varchar(64) CHARACTER SET latin1,
+			`pid` varchar(64) CHARACTER SET latin1,
 			`login` varchar(255) CHARACTER SET latin1 NOT NULL,
 			`game_id` int(11) NOT NULL,
 			PRIMARY KEY (`id`)

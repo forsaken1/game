@@ -14,14 +14,15 @@ def all_types_wo_wall():
 	while chr(i) < 'Z':
 		i+=1
 		types += chr(i)
+	return types
 
 class map:
 
 	def __init__(self, map, server):
 		self.server = server
 		self.height, self.width = len(map), len(map[0])	
-		self.spawns = self.map = []
-		self.items = self.tps = {}					# tps - {tps: next_tps}, item - {coord: (number, type)}
+		self.spawns, self.map = [], []
+		self.items, self.tps = {}, {}					# tps - {tps: next_tps}, item - {coord: (number, type)}
 
 		self.map.append('#'*self.width)
 		num_tps = {}
@@ -37,11 +38,11 @@ class map:
 					self.items[Point(x,y)] = (num_item, dot)
 					num_item +=1
 				if '0' <= dot <= '9': 
-					if not num_tps[dot]:
+					if not num_tps.has_key(dot):
 					   num_tps[dot] = Point(x,y)
 					else:
-						tps[Point(x,y)] = num_tps[dot]
-						pts[num_tps[dot]] = Point(x,y)
+						self.tps[Point(x,y)] = num_tps[dot]
+						self.tps[num_tps[dot]] = Point(x,y)
 		self.map.append('#'*self.width)
 
 	def above_floor(self, x):
@@ -52,23 +53,25 @@ class map:
 
 
 
-	def collision_detect(self, start, end, types = all_types_wo_wall()):
+	def collision_detect(self, start, end, types = all_types_wo_wall()):			# angle bug six
 		""" return {dist:{'sq':square, 'pt': coll_point, 'tp':dot_type}}"""
 
 		coll = {}
 		seg = Segment(start, end)
-		for i in range(int(start.y), int(end.y) + 1):
-			for j in range(int(start.x), int(end.x) + 1):
-				dot_type = map[i][j]
+		for i in range(min(int(start.y),int(end.y)), max(int(start.y),int(end.y)) + 1):
+			for j in range(min(int(start.x),int(end.x)), max(int(start.x),int(end.x)) + 1):
+				dot_type = self.map[i][j]
 				if dot_type in types:
-					pol = Polygon((j, i), (j + 1, i), (j + 1, i - 1), (j, i - 1))
+					pol = Polygon((j, i), (j + 1, i), (j + 1, i + 1), (j, i + 1))
 					intersec = pol.intersection(seg)
 					if intersec:
 						min_dist, min_point = start.distance(intersec[0]), intersec[0]
 						for p in intersec:
+							if type(p) == Segment:
+								continue
 							dist, point = start.distance(p), p
 							if dist < min_dist:
 								min_dist, min_point = dist, point
-						coll[min_dist] = {'sq': Point(j,i),'pt': min_point, 'tp': dot_type}
+						coll[min_dist] = {'sq': Point(j,i),'pt': min_point, 'tp': dot_type}		# coll type list ness
 
 		return coll
