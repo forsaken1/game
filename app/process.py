@@ -317,10 +317,10 @@ class Process:
 
 	def get_maps(self, par):			
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
-		cur.execute('SELECT id, name, map, maxPlayers FROM maps')	
+		cur.execute('SELECT id, name, maxPlayers FROM maps')	
 		res = cur.fetchall()
-		for map in res:
-			map['map'] = map['map'].split('\n')
+		#for _map in res:
+		#	_map['map'] = _map['map'].split('\n')
 			
 		return jsonify(result='ok', maps=res, message='All maps')
 

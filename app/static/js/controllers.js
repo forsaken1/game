@@ -1,5 +1,6 @@
-function CreateMapController($scope)
+function CreateMapController($scope, $interval)
 {
+	$interval.cancel(SET_INTERVAL_HANDLER);
 	$scope.create_map = function()
 	{
 		send(
@@ -9,8 +10,8 @@ function CreateMapController($scope)
 				{
 					'sid': getCookie('sid'),
 					'name': $scope.name,
-					'maxPlayers': $scope.maxPlayers,
-					'map': $('#map').val()
+					'maxPlayers': parseInt($scope.maxPlayers),
+					'map': $('#map').val().split("\n")
 				}
 			}),
 			function(data)
@@ -22,7 +23,7 @@ function CreateMapController($scope)
 				}
 				if(data.result == 'ok')
 				{
-					setMessage('Game successfuly created');
+					setMessage('Map successfuly created');
 				}
 				else
 					setError(data.message);
@@ -31,8 +32,9 @@ function CreateMapController($scope)
 	}
 }
 
-function FindGameController ($scope, $http)
+function FindGameController ($scope, $http, $interval)
 {
+	$interval.cancel(SET_INTERVAL_HANDLER);
 	$http.post(SERVER_URL, JSON.stringify(
 	{
 		'action': 'getGames',
@@ -72,10 +74,38 @@ function FindGameController ($scope, $http)
 			}
 		)
 	}
+	$scope.leave_game = function()
+	{
+		send(
+			JSON.stringify(
+			{
+				'action': 'leaveGame',
+				'params': 
+				{
+					'sid': getCookie('sid')
+				}
+			}),
+			function(data)
+			{
+				if(!data)
+				{
+					setError('Wrong request');
+					return;
+				}
+				if(data.result == 'ok')
+				{
+					setMessage('You disconnected from game');
+				}
+				else
+					setError(data.message);
+			}
+		)
+	}
 }
 
-function CreateGameController ($scope, $http)
+function CreateGameController ($scope, $http, $interval)
 {
+	$interval.cancel(SET_INTERVAL_HANDLER);
 	$http.post(SERVER_URL, JSON.stringify(
 	{
 		'action': 'getMaps',
@@ -136,7 +166,8 @@ function CreateGameController ($scope, $http)
 
 function LobbyController ($scope, $http, $interval)
 {
-	$interval(function()
+	$interval.cancel(SET_INTERVAL_HANDLER);
+	SET_INTERVAL_HANDLER = $interval(function()
 	{
 		$http.post(SERVER_URL, JSON.stringify(
 		{
@@ -199,8 +230,9 @@ function LobbyController ($scope, $http, $interval)
 	}
 }
 
-function SignoutController ($scope)
+function SignoutController ($scope, $interval)
 {
+	$interval.cancel(SET_INTERVAL_HANDLER);
 	send(
 		JSON.stringify({
 			'action': 'signout' ,
@@ -217,17 +249,15 @@ function SignoutController ($scope)
 				return;
 			}
 
-			if(data.result == 'ok')
-			{
-				deleteCookie('sid');
-				window.location = '#signin';
-			}
+			deleteCookie('sid');
+			window.location = '#signin';
 		}
 	)
 }
 
-function SigninController ($scope)
+function SigninController ($scope, $interval)
 {
+	$interval.cancel(SET_INTERVAL_HANDLER);
 	$scope.signin = function()
 	{
 		send(
@@ -261,8 +291,9 @@ function SigninController ($scope)
 	}
 }
 
-function SignupController ($scope)
+function SignupController ($scope, $interval)
 {
+	$interval.cancel(SET_INTERVAL_HANDLER);
 	$scope.signup = function()
 	{
 		if(!$scope.login)

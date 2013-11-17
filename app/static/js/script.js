@@ -1,6 +1,8 @@
 var app = angular.module('game', ['ngRoute'])
 setCookie('time', 0);
 SERVER_URL = 'http://192.168.226.38:3000';
+SERVER_URL = '/';
+SET_INTERVAL_HANDLER = null;
 
 app.
 	config(['$interpolateProvider', function ($interpolateProvider) 
