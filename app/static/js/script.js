@@ -22,7 +22,7 @@ app.
 			when('/find_games', {templateUrl: '/static/find_games.html'}).
 			when('/create_map', {templateUrl: '/static/create_map.html'}).
 			when('/game', {templateUrl: '/static/game.html'}).
-			otherwise({redirectTo: '/home'});
+			otherwise({redirectTo: '/signin'});
 	}]);
 
 function send(data_, success_callback)
