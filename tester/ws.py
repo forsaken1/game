@@ -173,20 +173,40 @@ class WebSocketTestCase(BaseTestCase):
 	#		if(s >= 2. - BaseTestCase.accuracy):
 	#			s = 0.5; tps+=1				
 	
-	def test_max_speed(self):
-		map = [	"1$.......1"]
-		ws = self.connect(map)				
-		v = 0
-		while v <= MAX_SPEED:
+	#def test_max_speed(self):
+	#	map = [	"1$.......1"]
+	#	ws = self.connect(map)				
+	#	v = 0
+	#	while v <= MAX_SPEED:
+	#		resp = self.recv_ws(ws)
+	#		pl = resp['players'][0]
+	#		assert self.equal(pl['vx'], v), (pl, v)
+	#		self.move(ws, resp['tick'], 1)
+	#		v+=ACCEL
+
+	#	resp = self.recv_ws(ws)
+	#	pl = resp['players'][0]
+	#	assert self.equal(pl['vx'], MAX_SPEED), (pl, v)
+
+	def test_tp_angle(self):
+		map = [	"1.....",
+				"$.1..."]
+		ws = self.connect(map)	
+		resp = self.recv_ws(ws)			
+		vy = 0; y = 1.5
+		self.move(ws, resp['tick'], 1, -1)
+		vy = -MAX_SPEED
+		y = 1.5 + vy
+		while y > 1:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl['vx'], v), (pl, v)
-			self.move(ws, resp['tick'], 1)
-			v+=ACCEL
-
+			assert self.equal(pl['vy'], vy) and self.equal(pl['y'], y) and self.equal(pl['vx'], ACCEL), (pl, vy, y)
+			self.move(ws, resp['tick'])
+			vy+=GRAVITY; y += vy
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl['vx'], MAX_SPEED), (pl, v)
+		assert self.equal(pl['vx'], ACCEL) and self.equal(pl['vy'], vy)\
+		    and self.equal(pl['y'], 1.5) and self.equal(pl['x'], 2.5), pl
 
 
 	#def test_wall_coll(self):

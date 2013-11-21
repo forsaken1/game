@@ -24,7 +24,7 @@ class map:
 		self.spawns, self.map = [], []
 		self.items, self.tps = {}, {}					# tps - {tps: next_tps}, item - {coord: (number, type)}
 
-		self.map.append('#'*self.width)
+		self.map.append('#'*(self.width+2))
 		num_tps = {}
 		num_item = 0
 		for i in range(self.height):				# coordinates w/o border
@@ -43,7 +43,7 @@ class map:
 					else:
 						self.tps[Point(x,y)] = num_tps[dot].translate(0.5, 0.5)
 						self.tps[num_tps[dot]] = Point(x,y).translate(0.5, 0.5)
-		self.map.append('#'*self.width)
+		self.map.append('#'*(self.width+2))
 
 	def is_wall(self, x):
 		return self.map[int(x.y)][int(x.x)] == '#'

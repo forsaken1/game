@@ -11,8 +11,13 @@ from ws import WebSocketTestCase
 	
 def tester(case = 'ALL'):
 	f = open('log.txt', "w")
-	suite = unittest.TestLoader().loadTestsFromTestCase(StartTestCase)
-	unittest.TextTestRunner(f).run(suite)
+	suite = unittest.TestSuite()
+	suite.addTest(StartTestCase("test_startTesting"))
+	runner = unittest.TextTestRunner(f)
+	runner.run(suite)
+	suite = unittest.TestSuite()
+	suite.addTest(StartTestCase("test_getGameParam_ok"))
+	runner.run(suite)
 	cases = {
 	'A': AuthTestCase,
 	'C': ChatTestCase,
@@ -21,9 +26,8 @@ def tester(case = 'ALL'):
 	'WS': WebSocketTestCase}
 	if cases.has_key(case):
 		suite = unittest.TestLoader().loadTestsFromTestCase(cases[case])
-		unittest.TextTestRunner(f).run(suite)
+		runner.run(suite)
 	else:
-		runner = unittest.TextTestRunner(f)
 		unittest.main(testRunner=runner)
 	f.close()		
 	
