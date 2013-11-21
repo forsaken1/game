@@ -41,8 +41,8 @@ class map:
 					if not num_tps.has_key(dot):
 					   num_tps[dot] = Point(x,y)
 					else:
-						self.tps[Point(x,y)] = num_tps[dot]
-						self.tps[num_tps[dot]] = Point(x,y)
+						self.tps[Point(x,y)] = num_tps[dot].translate(0.5, 0.5)
+						self.tps[num_tps[dot]] = Point(x,y).translate(0.5, 0.5)
 		self.map.append('#'*self.width)
 
 	def is_wall(self, x):
