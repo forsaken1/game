@@ -131,9 +131,7 @@ class process:
 		try:
 			req = json.loads(req)
 			action = req['action']	
-			print action
 			params = req['params']
-			print params
 			if action == 'startTesting':
 				return self.start_testing(params)
 			act = getattr(self, action)

@@ -8,21 +8,30 @@ from game_preparing import GamePreparingTestCase
 from chat import ChatTestCase	
 from start import StartTestCase
 from ws import WebSocketTestCase
-		
-if __name__ == '__main__':				# host, port bug
+	
+def tester(case = 'ALL'):
 	f = open('log.txt', "w")
 	suite = unittest.TestLoader().loadTestsFromTestCase(StartTestCase)
 	unittest.TextTestRunner(f).run(suite)
-	if len(sys.argv) == 2:
-		cases = {
-		'A': AuthTestCase,
-		'C': ChatTestCase,
-		'GP': GamePreparingTestCase,
-		'M': MapTestCase,
-		'WS': WebSocketTestCase}
-		suite = unittest.TestLoader().loadTestsFromTestCase(cases[sys.argv[1]])
+	cases = {
+	'A': AuthTestCase,
+	'C': ChatTestCase,
+	'GP': GamePreparingTestCase,
+	'M': MapTestCase,
+	'WS': WebSocketTestCase}
+	if cases.has_key(case):
+		suite = unittest.TestLoader().loadTestsFromTestCase(cases[case])
 		unittest.TextTestRunner(f).run(suite)
 	else:
 		runner = unittest.TextTestRunner(f)
 		unittest.main(testRunner=runner)
-	f.close()
+	f.close()		
+	
+	
+if __name__ == '__main__':				# host, port bug
+	if len(sys.argv) == 2:
+		tester(sys.argv[1])
+	else:
+		tester()
+	
+	

@@ -11,7 +11,6 @@ from db import create_db
 from process import process
 from server import *
 from ws_connection import *
-
 TICK, EPS = 30, 1e-6
 
 class post(Resource):
@@ -40,7 +39,7 @@ class post(Resource):
 
 if __name__ == '__main__':
 	create_db()
-	s = server(TICK, EPS)
+	s = server(TICK, EPS)	
 	p = process(s) 
 
 	if len(sys.argv) > 1 and sys.argv[1] == 'debug':
@@ -63,3 +62,5 @@ if __name__ == '__main__':
 	lc = LoopingCall(s.tick)
 	lc.start(0.03)
 	reactor.run()
+
+	

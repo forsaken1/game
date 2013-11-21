@@ -45,8 +45,8 @@ class map:
 						self.tps[num_tps[dot]] = Point(x,y)
 		self.map.append('#'*self.width)
 
-	def above_floor(self, x):
-		return self.map[int(x.y + 1 + self.server.eps)][int(x.x + self.server.eps)] == '#' 
+	def is_wall(self, x):
+		return self.map[int(x.y)][int(x.x)] == '#'
 
 	def get_attr(self):
 		return [len(self.spawns), len(self.items)]
@@ -65,13 +65,14 @@ class map:
 					pol = Polygon((j, i), (j + 1, i), (j + 1, i + 1), (j, i + 1))
 					intersec = pol.intersection(seg)
 					if intersec:
-						min_dist, min_point = start.distance(intersec[0]), intersec[0]
+						min_dist, min_point = None, None
 						for p in intersec:
-							if type(p) == Segment:
-								continue
-							dist, point = start.distance(p), p
-							if dist < min_dist:
-								min_dist, min_point = dist, point
-						coll[min_dist] = {'sq': Point(j,i),'pt': min_point, 'tp': dot_type}		# coll type list ness
-
+							if type(p) == Point:
+								dist, point = start.distance(p), p
+								if min_dist is None or dist < min_dist:
+									min_dist, min_point = dist, point
+						if not coll.has_key(min_dist):
+							coll[min_dist] = [{'sq': Point(j,i),'pt': min_point, 'tp': dot_type}]
+						else: 
+							coll[min_dist].append({'sq': Point(j,i),'pt': min_point, 'tp': dot_type})
 		return coll

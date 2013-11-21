@@ -5,7 +5,7 @@ from map import *
 class server:
 	def __init__(self, tick, eps):
 		print 'start'
-		self.ACCEL = 0.02
+		self.ACCEL, self.GRAVITY, self.RUB, self.MAX_SPEED = 0.02, 0.02, 0.02, 0.2
 		self.tick_size, self.eps = tick, eps
 		self.games, self.players, self.maps = {}, {}, {}
 		self.sync_mode = False
@@ -21,10 +21,6 @@ class server:
 		pl = player(pid, login, game, self)
 		game.join(pl)	
 		self.players[pid] = pl
-		#for pl in self.games[gid].players:
-		#	print login
-		#for g in self.games.keys():
-		#	print g
 
 	def add_map(self, id, scheme):
 		self.maps[id] = map(scheme, self)

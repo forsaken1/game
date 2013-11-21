@@ -19,6 +19,7 @@ class BaseTestCase(unittest.TestCase):
 			return ret
 
 	def startTesting(self, sync = True):
+		print sync
 		param = {'websocketMode': 'sync' if sync else 'async'}
 		resp = self.send('startTesting', param)
 		assert resp["result"] == "ok", resp
@@ -36,7 +37,7 @@ class BaseTestCase(unittest.TestCase):
 		except:
 			assert resp == 0, resp
 		assert resp.has_key('result'), resp
-		print resp
+		#print resp
 		return resp
 
 	def signup_user(self, login = None, passwd = "pass"):
