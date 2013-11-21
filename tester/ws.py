@@ -155,23 +155,23 @@ class WebSocketTestCase(BaseTestCase):
 	#	pl = resp['players'][0]
 	#	assert self.equal(pl['vy'], 2*GRAVITY) and self.equal(pl['y'], 0.5 + s(t = 2, a = GRAVITY)), pl		
 
-	def test_teleportation(self):
-		map = [	"1........",
-				"$........",
-				"1........"]	
-		ws = self.connect(map)
-		s, v = 1.5, 0	
-		tps = 0
-		while(tps < 2):
-			resp = self.recv_ws(ws)
-			pl = resp['players'][0]
-			assert self.equal(pl['y'], s) and self.equal(pl['vy'], v), (pl, s, v)
-			self.move(ws, resp['tick'])
-			v += GRAVITY
-			if v >= MAX_SPEED: v = MAX_SPEED
-			s += v
-			if(s >= 2. - BaseTestCase.accuracy):
-				s = 0.5; tps+=1				
+	#def test_teleportation(self):
+	#	map = [	"1........",
+	#			"$........",
+	#			"1........"]	
+	#	ws = self.connect(map)
+	#	s, v = 1.5, 0	
+	#	tps = 0
+	#	while(tps < 2):
+	#		resp = self.recv_ws(ws)
+	#		pl = resp['players'][0]
+	#		assert self.equal(pl['y'], s) and self.equal(pl['vy'], v), (pl, s, v)
+	#		self.move(ws, resp['tick'])
+	#		v += GRAVITY
+	#		if v >= MAX_SPEED: v = MAX_SPEED
+	#		s += v
+	#		if(s >= 2. - BaseTestCase.accuracy):
+	#			s = 0.5; tps+=1				
 	
 	def test_max_speed(self):
 		map = [	"1$.......1"]
@@ -187,7 +187,8 @@ class WebSocketTestCase(BaseTestCase):
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
 		assert self.equal(pl['vx'], MAX_SPEED), (pl, v)
-			
+
+
 	#def test_wall_coll(self):
 	#	map = self.get_map(scheme = [	"#....#........#",
 	#									"#....$........#",
