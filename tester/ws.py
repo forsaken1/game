@@ -172,7 +172,22 @@ class WebSocketTestCase(BaseTestCase):
 			s += v
 			if(s >= 2. - BaseTestCase.accuracy):
 				s = 0.5; tps+=1				
+	
+	def test_max_speed(self):
+		map = [	"1$.......1"]
+		ws = self.connect(map)				
+		v = 0
+		while v <= MAX_SPEED:
+			resp = self.recv_ws(ws)
+			pl = resp['players'][0]
+			assert self.equal(pl['vx'], v), (pl, v)
+			self.move(ws, resp['tick'], 1)
+			v+=ACCEL
 
+		resp = self.recv_ws(ws)
+		pl = resp['players'][0]
+		assert self.equal(pl['vx'], MAX_SPEED), (pl, v)
+			
 	#def test_wall_coll(self):
 	#	map = self.get_map(scheme = [	"#....#........#",
 	#									"#....$........#",
