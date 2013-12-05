@@ -12,19 +12,21 @@
 
 Язык программирования: Python 2.7
 
-Framework: Flask 0.9
+Framework: Twisted
 
 ### Установка (для Windows)
 
 * Устанавливаем [Python 2.7](http://python.org/download/)
-* Заводим папку проекта
-* Скачиваем [virtualenv.py](https://raw.github.com/pypa/virtualenv/1.9.X/virtualenv.py) в папку проекта
-* Создаем новое окружение командой `python virtualenv.py flask`
-* Устанавливаем Flask с расширениями командой `flask/Scripts/pip install flask==0.9`
-* Копируем файлы из этого репозитория в папку проекта
-* Установить gevent, gevent-websocket(например `easy_install-2.7.exe gevent`, `easy_install-2.7.exe gevent-websocket`)
+* Пакеты для сервера:
+1. twisted
+2. autobahn
+3. zope.interface
+4. sympy
+5. Так же вам понадобиться MySQL server с поддержкой транзакций
+* Пакеты для тестера:
+1. requests
+2. websocket-client
 
-* Так же вам понадобиться MySQL server с поддержкой транзакций
 #### Запуск сервера
 
 Заходим в директорию проекта и используем команду `C:/../flask/Scripts/python run.py`, где `run.py` - файл запуска сервера. 
