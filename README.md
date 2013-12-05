@@ -15,17 +15,16 @@
 Framework: Twisted
 
 ### Установка (для Windows)
-
-	* Устанавливаем [Python 2.7](http://python.org/download/)
-	* Пакеты для сервера:
-		- twisted
-		- autobahn
-		- zope.interface
-		- sympy
-		- Так же вам понадобиться MySQL server с поддержкой транзакций
-	* Пакеты для тестера:
-		- requests
-		- websocket-client
+* Устанавливаем [Python 2.7](http://python.org/download/)
+* Пакеты для сервера:
+	- twisted
+	- autobahn
+	- zope.interface
+	- sympy
+	- Так же вам понадобиться MySQL server с поддержкой транзакций
+* Пакеты для тестера:
+	- requests
+	- websocket-client
 
 #### Запуск сервера
 
