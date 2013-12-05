@@ -60,7 +60,8 @@ class BaseTestCase(unittest.TestCase):
 		assert resp["result"] == "ok", resp
 		return sid
 		
-	def create_game(self, is_ret = False, sid = None, name = None, map = None, maxPlayers = 8):	#add map id
+	def create_game(self, is_ret = False, sid = None, name = None, map = None, maxPlayers = 8,\
+		accel = 0.02, gravity = 0.02, fric = 0.02, max_speed = 0.2):
 		if name is None: name = self.default('game')	
 		if sid is None: sid = self.signin_user()
 		if map is None: map = BaseTestCase.defMap		
@@ -69,7 +70,11 @@ class BaseTestCase(unittest.TestCase):
 			"sid": sid,
 			"name": name,
 			"map": map,
-			"maxPlayers": maxPlayers
+			"maxPlayers": maxPlayers,
+			"accel": accel,
+			"gravity": gravity,
+			"fric": fric,
+			"max_speed": max_speed
 		})
 		if is_ret:
 			return resp

@@ -16,8 +16,8 @@ class ws_connection(WebSocketServerProtocol):
 
 	def onMessage(self, msg, binary):
 		msg = json.loads(msg)
-		print '+++++', msg
 		if self.player is None:
+			self.factory.process.valid.get_id(msg['params']['sid'])
 			pid = self.factory.process.valid.get_id(msg['params']['sid'])
 			self.player = self.factory.process.server.players[pid]
 			self.player.connects.append(self)

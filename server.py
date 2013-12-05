@@ -5,7 +5,6 @@ from map import *
 class server:
 	def __init__(self, tick, eps):
 		print 'start'
-		self.ACCEL, self.GRAVITY, self.RUB, self.MAX_SPEED = 0.02, 0.02, 0.02, 0.2
 		self.tick_size, self.eps = tick, eps
 		self.games, self.players, self.maps = {}, {}, {}
 		self.sync_mode = False
@@ -13,8 +12,8 @@ class server:
 	def equal(self, x, y):
 		return abs(x-y) < self.eps
 
-	def add_game(self, map_id, id):
-		self.games[id] = game(self.maps[map_id], self)
+	def add_game(self, map_id, id, accel, friction, gravity, MaxVelocity):
+		self.games[id] = game(self.maps[map_id], self, accel, friction, gravity, MaxVelocity)
 
 	def add_player(self, pid, login, gid):
 		game = self.games[gid]

@@ -6,7 +6,7 @@ def create_db():
 	con = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='')	
 	cursor = con.cursor()
 	cursor.execute('DROP DATABASE IF EXISTS %s'% DB_NAME)	
-	cursor.execute('CREATE DATABASE IF NOT EXISTS %s'% DB_NAME)
+	cursor.execute('CREATE DATABASE %s'% DB_NAME)
 	cursor.execute('use ' + DB_NAME)   
 	sql = '''CREATE TABLE IF NOT EXISTS `users` (
 			`id` int(11) NOT NULL AUTO_INCREMENT,
@@ -36,6 +36,10 @@ def create_db():
 			`map` int(11) NOT NULL,
 			`maxPlayers` int(11) NOT NULL,
 			`status` bit(1) DEFAULT b'1' NOT NULL,
+			`accel` float(11) NOT NULL,
+			`maxVelocity` float(11) NOT NULL,
+			`friction` float(11) NOT NULL,
+			`gravity` float(11) NOT NULL,												
 			PRIMARY KEY (`id`)
 			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1
 			ENGINE=INNODB;
