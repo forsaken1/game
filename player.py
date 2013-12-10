@@ -65,22 +65,22 @@ class player:
 	def speed_calc(self):
 		if self.above_floor():
 			if self.dv.y < -self.server.eps:
-				self.speed = Point(self.speed.x, -self.server.MAX_SPEED)
+				self.speed = Point(self.speed.x, -self.game.MAX_SPEED)
 			if abs(self.dv.x) < self.server.eps:
-				if abs(self.speed.x) < self.server.RUB:
+				if abs(self.speed.x) < self.game.RUB:
 					self.speed = Point(0, self.speed.y)
 				else:
-					self.speed -= Point(sign(self.speed.x)*self.server.RUB, 0)
+					self.speed -= Point(sign(self.speed.x)*self.game.RUB, 0)
 		else:
-			self.speed += Point(0, self.server.GRAVITY)
+			self.speed += Point(0, self.game.GRAVITY)
 
 		if abs(self.dv.x) > self.server.eps:
-			self.speed += Point(sign(self.dv.x)*self.server.ACCEL, 0)
+			self.speed += Point(sign(self.dv.x)*self.game.ACCEL, 0)
 		
-		if abs(self.speed.x) > self.server.MAX_SPEED:
-			self.speed = Point(sign(self.speed.x)*self.server.MAX_SPEED, self.speed.y)
-		if abs(self.speed.y) > self.server.MAX_SPEED:
-			self.speed = Point(self.speed.x, sign(self.speed.y)*self.server.MAX_SPEED)
+		if abs(self.speed.x) > self.game.MAX_SPEED:
+			self.speed = Point(sign(self.speed.x)*self.game.MAX_SPEED, self.speed.y)
+		if abs(self.speed.y) > self.game.MAX_SPEED:
+			self.speed = Point(self.speed.x, sign(self.speed.y)*self.game.MAX_SPEED)
 		
 		self.dv = ZERO
 

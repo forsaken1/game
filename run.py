@@ -28,7 +28,6 @@ class post(Resource):
 		request.setHeader('Access-Control-Allow-Origin', '*')
 		request.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 		request.setHeader("Content-Type", "application/json")
-		print resp
 		return resp
 
 	def render_OPTIONS(self,request):
@@ -60,7 +59,7 @@ if __name__ == '__main__':
 	from twisted.internet import reactor
 	reactor.listenTCP(5000, site)
 	lc = LoopingCall(s.tick)
-	lc.start(0.03)
+	lc.start(TICK*0.001)
 	reactor.run()
 
 	

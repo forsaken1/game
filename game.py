@@ -6,7 +6,8 @@ from datetime import datetime
 
 class game:
 
-	def __init__(self, map, server):
+	def __init__(self, map, server, accel, friction, gravity, MaxVelocity):
+		self.ACCEL, self.GRAVITY, self.RUB, self.MAX_SPEED = accel, friction, gravity, MaxVelocity
 		self.map, self.server = map, server
 		self.cur_spawn = 0
 		self.c_spawns, c_items = map.get_attr()
@@ -21,9 +22,9 @@ class game:
 	def join(self, player):
 		self.players.append(player)
 
-	def leave(self, sid):
+	def leave(self, pid):
 		for pl in self.players:
-			if pl.sid == sid: del pl
+			if pl.pid == pid: del pl
 
 	def set_mess(self):
 		self.mess = json.dumps({

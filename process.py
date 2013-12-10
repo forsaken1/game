@@ -224,7 +224,7 @@ class process:
 		if gid_fact != gid:
 			return self.result('badGame')
 
-		cur.execute('SELECT login FROM users WHERE sid = %s', (sid,))
+		cur.execute('SELECT login FROM users WHERE id = %s', (id,))
 		login = cur.fetchone()[0]
 		query = 'INSERT INTO messages (login, text, time, game_id) VALUES (%s, %s, %s,'+(str(gid) if gid else "NULL")+')'
 		cur.execute(query, (login, text, int(time.time())))
@@ -238,10 +238,17 @@ class process:
 		cur.execute(query, (since, ))
 		mess = cur.fetchall()
 		return self.result(param = {'messages': mess})
-		
+
 	def createGame(self, par):
 		sid = par['sid']
+		accel, friction, gravity, MaxVelocity = 0.02, 0.02, 0.02, 0.2
+		if par.has_key('consts'):
+			consts = par['consts']
+			accel=consts['accel']; maxVelocity=consts['maxVelocity']; friction=consts['friction']; gravity=consts['gravity']
+			if all(0<i<=0.1 for i in (consts['accel'], consts['friction'], consts['gravity'])) and 0<consts['maxVelocity']<1:
+				accel, friction, gravity, MaxVelocity = consts['accel'], consts['friction'], consts['gravity'], consts['maxVelocity']
 			
+
 		cur = self.db.cursor()			
 		cur.execute('SELECT id FROM games WHERE name = %s', (par['name'],))
 		if cur.fetchone():
@@ -254,11 +261,12 @@ class process:
 			return self.result('badMaxPlayers')
 		
 		cur = self.db.cursor()
-		cur.execute("INSERT INTO games (name, map, maxPlayers) VALUES(%s, %s, %s)", (par['name'], par['map'], par['maxPlayers']))
+		cur.execute("INSERT INTO games (name, map, maxPlayers, accel, friction, gravity, MaxVelocity)\
+			VALUES(%s, %s, %s,%s,%s,%s,%s)", (par['name'], par['map'], par['maxPlayers'], accel, friction, gravity, MaxVelocity))
 		self.db.commit()
 
 		gid = cur.lastrowid
-		self.server.add_game(map, gid)
+		self.server.add_game(map, gid, accel, friction, gravity, MaxVelocity)
 
 		ret = self.joinGame({'sid': sid, 'game': gid})
 		if json.loads(ret)['result'] == 'ok':
@@ -360,4 +368,12 @@ class process:
 		game = cur.fetchone()
 		if not game: 
 			return self.result('notInGame')
-		return self.result(param = {"tickSize": self.server.tick_size, "accuracy": self.server.eps})
+		game = game[0]
+		cur.execute('SELECT accel, maxVelocity, gravity, friction FROM games WHERE id = %s', (game,))
+		param = {"tickSize": self.server.tick_size, "accuracy": self.server.eps}
+		keys = ('accel', 'maxVelocity', 'gravity', 'friction')
+		vals = cur.fetchone()
+		for i in range(4):
+			param[keys[i]] = vals[i]
+		return self.result(param = param)
+
