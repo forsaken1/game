@@ -1,0 +1,21 @@
+<!doctype html>
+<html ng-app = 'game'>
+    <head>
+        <title>Game</title>
+        <link rel = 'stylesheet' href = '{{ url_for("static", filename="css/bootstrap.css") }}'>
+        <link rel = 'stylesheet' href = '{{ url_for("static", filename="css/bootstrap-theme.css") }}'>
+        <script src = '{{ url_for("static", filename="js/angular.js") }}'></script>
+        <script src = '{{ url_for("static", filename="js/angular-route.js") }}'></script>
+        <script src = '{{ url_for("static", filename="js/jquery.js") }}'></script>
+        <script src = '{{ url_for("static", filename="js/cookie.js") }}'></script>
+        <script src = '{{ url_for("static", filename="js/alert.js") }}'></script>
+        <script src = '{{ url_for("static", filename="js/controllers.js") }}'></script>
+        <script src = '{{ url_for("static", filename="js/script.js") }}'></script>
+    </head>
+
+    <body>
+    	<div align = center style = 'width: 100%'>
+            <div ng-view></div>
+    	</div>
+    </body>
+</html>
