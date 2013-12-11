@@ -1,7 +1,7 @@
 var app = angular.module('game', ['ngRoute'])
 setCookie('time', 0);
 SERVER_URL = 'http://192.168.226.38:3000';
-SERVER_URL = '/';
+SERVER_URL = 'http://localhost:5000';
 SET_INTERVAL_HANDLER = null;
 
 app.
@@ -13,15 +13,15 @@ app.
 	config(['$routeProvider', function ($routeProvider) 
 	{
 		$routeProvider.
-			when('/signin', {templateUrl: '/static/signin.html'}).
-			when('/signup', {templateUrl: '/static/signup.html'}).
-			when('/signout', {templateUrl: '/static/empty.html', controller: SignoutController}).
-			when('/lobby', {templateUrl: '/static/lobby.html'}).
-			when('/home', {templateUrl: '/static/home.html'}).
-			when('/create_game', {templateUrl: '/static/create_game.html'}).
-			when('/find_games', {templateUrl: '/static/find_games.html'}).
-			when('/create_map', {templateUrl: '/static/create_map.html'}).
-			when('/game', {templateUrl: '/static/game.html'}).
+			when('/signin', {templateUrl: '/signin.html'}).
+			when('/signup', {templateUrl: '/signup.html'}).
+			when('/signout', {templateUrl: '/empty.html', controller: SignoutController}).
+			when('/lobby', {templateUrl: '/lobby.html'}).
+			when('/home', {templateUrl: '/home.html'}).
+			when('/create_game', {templateUrl: '/create_game.html'}).
+			when('/find_games', {templateUrl: '/find_games.html'}).
+			when('/create_map', {templateUrl: '/create_map.html'}).
+			when('/game', {templateUrl: '/game.html'}).
 			otherwise({redirectTo: '/signin'});
 	}]);
 
