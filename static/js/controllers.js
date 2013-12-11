@@ -68,6 +68,7 @@ function FindGameController ($scope, $http, $interval)
 				if(data.result == 'ok')
 				{
 					setMessage('You will be redirected to game...');
+					window.location = '#game';
 				}
 				else
 					setError(data.message);
@@ -156,6 +157,7 @@ function CreateGameController ($scope, $http, $interval)
 				if(data.result == 'ok')
 				{
 					setMessage('Game successfully created');
+					window.location = '#game';
 				}
 				else
 					setError(data.message);

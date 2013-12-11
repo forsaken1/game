@@ -2,6 +2,7 @@ var app = angular.module('game', ['ngRoute'])
 setCookie('time', 0);
 SERVER_URL = 'http://192.168.226.38:3000';
 SERVER_URL = 'http://localhost:5000';
+SERVER_WEBSOCKET_URL = SERVER_URL + '/websocket';
 SET_INTERVAL_HANDLER = null;
 
 app.
@@ -21,7 +22,7 @@ app.
 			when('/create_game', {templateUrl: '/create_game.html'}).
 			when('/find_games', {templateUrl: '/find_games.html'}).
 			when('/create_map', {templateUrl: '/create_map.html'}).
-			when('/game', {templateUrl: '/game.html'}).
+			when('/game', {templateUrl: '/game.html', controller: Game}).
 			otherwise({redirectTo: '/signin'});
 	}]);
 
