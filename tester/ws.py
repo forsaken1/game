@@ -224,20 +224,4 @@ class WebSocketTestCase(BaseTestCase):
 
 		pl1 = resp1['players'][0]; pl2 = resp2['players'][1]
 		assert pl1['x'] >=  1.5 and pl2['x'] <= 0.5, (pl1, pl2)		###change to equal, when wall collision will done 
-			
-	#def test_wall_coll(self):
-	#	map = self.get_map(scheme = [	"#....#........#",
-	#									"#....$........#",
-	#									"###############"])
-	#	sid = self.create_game(map = map)
-	#	ws = self.send_ws('move', {'sid': sid, 'tick': 0, 'dx': 0, 'dy': 0})
-	#	resp = self.recv_ws(ws)
-	#	pl1 = resp['players'][0]
-	#	assert self.equal(pl1['x'], 5.5) and self.equal(pl1['y'], 1.5) \
-	#		and self.equal(pl1['vx'], 0) and self.equal(pl1['vy'], 0), pl1
 
-	#	self.send_ws('move', {'sid': sid, 'tick': resp['tick'], 'dx': 0, 'dy': -1}, ws)
-	#	resp = self.recv_ws(ws)
-	#	pl1 = resp['players'][0]
-	#	assert self.equal(pl1['x'], 5.5) and self.equal(pl1['y'], 1.5) \
-	#		and self.equal(pl1['vx'], 0) and self.equal(pl1['vy'], 0), pl1
