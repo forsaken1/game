@@ -127,20 +127,6 @@ class player:
 	def take_item(self, dot):
 		pass
 
-	def at_wall(self, dist, dot):
-		return False
-		self.pos += self.speed/self.speed.distance(ZERO)*dist
-		if self.server.equal(dot['pt'].x, dot['sq'].x) and self.speed.x > 0 or \
-		self.server.equal(dot['pt'].x, dot['sq'].x + 1) or self.speed.x < 0:
-			self.speed = Point(0, self.speed.y)
-			return True
-
-		elif self.server.equal(dot['pt'].y, dot['sq'].y) and self.speed.y > 0 or \
-			self.server.equal(dot['pt'].y, dot['sq'].y + 1) and self.speed.y < 0:
-			self.speed = Point(self.speed.x, 0)
-			return True
-
-		else: return False	
 
 	def teleport(self, dot):
 		self.pos = self.map.tps[dot]
@@ -149,7 +135,11 @@ class player:
 	def peak2peak(self, dist, speed):
 		dist_size = dist.distance(ZERO)
 		speed_size = speed.distance(ZERO)
-		return dist_size < self.eps or (speed.scale(dist_size/speed_size, dist_size/speed_size) - dist).distance(ZERO)<eps 
+		return speed_size > dist_size and\
+				(dist_size < self.eps or\
+				abs(speed.x) < self.eps and abs(dist.x) < self.eps or\
+				abs(speed.y) < self.eps and abs(dist.y) < self.eps or\
+				(speed.scale(dist_size/speed_size, dist_size/speed_size) - dist).distance(ZERO)<self.eps)
 
 	def go(self):
 		if self.speed.distance(ZERO) < self.eps: return
@@ -157,14 +147,14 @@ class player:
 		dir1 = Point(1 if dir.x else -1, 1 if dir.y else -1)
 		#undir = dir.scale(-1,-1)
 		center_cell = Point(*cell_index(self.pos))
-		forward = self.pos + dir1.scale((1-self.eps)/2, (1-self.eps)/2)
+		forward = self.pos + dir1.scale(.5-self.eps, .5-self.eps)
 		forward_cell = Point(*cell_index(forward))
 		
 		collisions = {}
 
-		dist = forward_cell + dir- forward
+		dist = forward_cell+dir-forward-dir1.scale(self.eps, self.eps) 
 		is_reach_x = abs(self.speed.x) > abs(dist.x); is_reach_y = abs(self.speed.y) > abs(dist.y);
-		if is_reach_x and is_reach_y and self.peak2peak(dist, self.speed):
+		if self.peak2peak(dist, self.speed):
 			add_col(collisions,  dist.x/self.speed.x, (0,2))
 		else:
 			if is_reach_x:
@@ -174,7 +164,7 @@ class player:
 				 
 		dist = center_cell + dir - self.pos		
 		is_reach_x = abs(self.speed.x) > abs(dist.x); is_reach_y = abs(self.speed.y) > abs(dist.y);
-		if is_reach_x and is_reach_y and self.peak2peak(dist, self.speed):
+		if self.peak2peak(dist, self.speed):
 			add_col(collisions,  dist.x/self.speed.x, (1,2))
 		else:
 			if is_reach_x:
@@ -185,39 +175,47 @@ class player:
 		passed_time = 0
 		for time in collisions.keys():
 			for coll in collisions[time]:
-				offset = dir1.scale(int(bool(coll[1] - 1) and abs(self.speed.x) > self.eps), int(bool(coll[1])) and abs(self.speed.y) > self.eps)
+
+				offset = dir1.scale(int(bool(coll[1] - 1)), int(bool(coll[1])))
 				if coll[0]:
 					coll_cell = center_cell + offset
-					print coll_cell
 					el = self.map.el_by_point(coll_cell)
 					if '0'<=el<='9': self.teleport(coll_cell); return
 					elif 'a'<=el<='z': self.take_item(coll_item)
 					elif 'A'<=el<='Z': self.take_weapon(coll_item)
 
 				else:				# todo (0,0) collision
+					null_x = abs(self.speed.x) < self.eps; null_y = abs(self.speed.y) < self.eps
+					if coll[1] == 2 and (null_x or null_y):
+						if self.map.is_wall(forward_cell + offset.scale(null_y, null_x)):
+							self.pos += self.speed*(time - passed_time)
+							self.speed = ZERO
+							return
+						break
 					coll_cell = forward_cell + offset
+
 					if self.map.is_wall(coll_cell):
 						if time < self.eps and coll[1] == 2 and dir.y == 1:
-							self.speed.y = 0
+							self.speed.scale(1, 0)
 							break
 						self.pos += self.speed*(time - passed_time)
 						passed_time = time
-						self.speed.scale(int(not offset.x), int(not offset.y))
+						self.speed = self.speed.scale(int(not offset.x), int(not offset.y))
 						return
 						# trace += cur dot
 					else:
 						if offset.x:					# add multi intersection proofer if maxVel > 0.5
-							neighbor = coll_cell.translate(0, -dir1.y)
+							neighbor = coll_cell.translate(0, -offset.y)
 							if abs(self.speed.y) > self.eps and self.map.is_wall(neighbor):
 								self.pos += self.speed*(time - passed_time)
 								passed_time = time
-								self.speed = Point(self.speed.x, 0)
+								self.speed = Point(0, self.speed.y)
 						if offset.y:
-							neighbor = coll_cell.translate(-dir1.x, 0)
+							neighbor = coll_cell.translate(-offset.x, 0)
 							if abs(self.speed.x) > self.eps and self.map.is_wall(coll_cell):
 								self.pos += self.speed*(time - passed_time)
 								passed_time = time
-								self.speed.y = 0
+								self.speed = Point(self.speed.x, 0)
 		self.pos += self.speed.scale(1-passed_time, 1-passed_time)
 
 
@@ -231,11 +229,10 @@ class player:
 				self.resp()
 
 		else:
+			#t = time.time()
 			self.speed_calc()
-
-			t = 1000*time.time()
+			#print (time.time()-t)*1000
 			self.go()
-			print time.time()*1000 - t
 		self.cur_consist()
 		return
 
