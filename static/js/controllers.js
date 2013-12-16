@@ -135,6 +135,7 @@ function CreateGameController ($scope, $http, $interval)
 			setError('Wrong number: max players');
 			return;
 		}
+		var map_id = parseInt($scope.map_id);
 		send(
 			JSON.stringify(
 			{
@@ -143,7 +144,7 @@ function CreateGameController ($scope, $http, $interval)
 				{
 					'sid': getCookie('sid'), 
 					'name': $scope.name, 
-					'map': parseInt($scope.map_id),
+					'map': map_id,
 					'maxPlayers': parseInt($scope.maxPlayers)
 				}
 			}),
@@ -157,6 +158,7 @@ function CreateGameController ($scope, $http, $interval)
 				if(data.result == 'ok')
 				{
 					setMessage('Game successfully created');
+					setCookie('map_id', map_id);
 					window.location = '#game';
 				}
 				else
