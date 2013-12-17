@@ -20,6 +20,7 @@ function Game($http)
 		}
 		MAP = MAPS[getCookie('map_id')];
 
+		var socket = new WebSocket('ws://' + SERVER_URL + '/websocket');
 		var canvas = document.getElementById('canvas');
 		var CTX = canvas.getContext('2d');
 		var CTX_X = 0, CTX_Y = 0;
@@ -36,6 +37,30 @@ function Game($http)
 		respawn.src = '/graphics/map/respawn.png';
 		border.src = '/graphics/map/border.png'; //todo: сделать границу
 
+		// Sockets
+		socket.onopen = function() 
+		{ 
+			console.log("Соединение установлено."); 
+		};
+
+		socket.onclose = function(event) { 
+			if (event.wasClean) {
+				console.log('Соединение закрыто чисто');
+			} else {
+				console.log('Обрыв соединения'); // например, "убит" процесс сервера
+			}
+			console.log('Код: ' + event.code + ' причина: ' + event.reason);
+		};
+		 
+		socket.onmessage = function(event) { 
+			console.log("Получены данные " + event.data);
+		};
+
+		socket.onerror = function(error) { 
+			console.log("Ошибка " + error.message); 
+		};
+
+		// Draw
 		this.drawMap = function()
 		{
 			CTX.fillRect(0, 0, canvas.width, canvas.height);
@@ -54,6 +79,7 @@ function Game($http)
 
 		setInterval(drawMap, 25);
 
+		// Keys
 		onKeyDown[32] = function()
 		{
 
