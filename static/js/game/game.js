@@ -1,4 +1,4 @@
-function Game($http)
+function Game($http, WebSocket)
 {
 	var BLOCK_SIZE = 50;
 	var MAX_MAP_SIZE = 100;
@@ -21,7 +21,6 @@ function Game($http)
 		}
 		MAP = MAPS[getCookie('map_id')];
 
-		var socket = new WebSocket('ws://' + SERVER_URL_DOMAIN + '/websocket');
 		var canvas = document.getElementById('canvas');
 		var CTX = canvas.getContext('2d');
 		var CTX_X = 0, CTX_Y = 0;
@@ -39,12 +38,12 @@ function Game($http)
 		border.src = '/graphics/map/border.png'; //todo: сделать границу
 
 		// Sockets
-		socket.onopen = function() 
+		WebSocket.onopen = function() 
 		{ 
 			console.log("Connection is established"); 
 		};
 
-		socket.onclose = function(event) { 
+		WebSocket.onclose = function(event) { 
 			if (event.wasClean) {
 				console.log('Connection closed');
 			} else {
@@ -53,11 +52,11 @@ function Game($http)
 			console.log('Error code: ' + event.code + ' reason: ' + event.reason);
 		};
 		 
-		socket.onmessage = function(event) { 
+		WebSocket.onmessage = function(event) { 
 			console.log("Data " + event.data);
 		};
 
-		socket.onerror = function(error) { 
+		WebSocket.onerror = function(error) { 
 			console.log("Error " + error.message); 
 		};
 
@@ -117,7 +116,7 @@ function Game($http)
 		// Start
 		setInterval(drawMap, 25);
 
-		socket.send(JSON.stringify(
+		WebSocket.send(JSON.stringify(
 		{
 			'action': 'move',
 			'params':

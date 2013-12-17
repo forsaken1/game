@@ -1,4 +1,4 @@
-var app = angular.module('game', ['ngRoute'])
+var app = angular.module('game', ['ngRoute', 'angular-websocket'])
 setCookie('time', 0);
 SERVER_URL = 'http://192.168.226.38:3000';
 SERVER_URL_DOMAIN = 'localhost:5000';
@@ -7,6 +7,12 @@ SERVER_WEBSOCKET_URL = SERVER_URL + '/websocket';
 SET_INTERVAL_HANDLER = null;
 
 app.
+	config(function(WebSocketProvider)
+	{
+		WebSocketProvider.
+			prefix('').
+			uri('ws://' + SERVER_URL_DOMAIN + '/websocket');
+	}).
 	config(['$interpolateProvider', function ($interpolateProvider) 
 	{
 		$interpolateProvider.startSymbol('[[');
