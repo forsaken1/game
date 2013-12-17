@@ -1,9 +1,10 @@
 function Game($http)
 {
-	var MAPS = Array(100);
-	var MAP;
+	var BLOCK_SIZE = 50;
+	var MAX_MAP_SIZE = 100;
+	var MAX_MAPS_COUNT = 100;
+	var MAPS = Array(MAX_MAPS_COUNT);
 
-	//todo: синхронная загрузка
 	$http.post(SERVER_URL, JSON.stringify(
 	{
 		'action': 'getMaps',
@@ -19,23 +20,73 @@ function Game($http)
 		}
 		MAP = MAPS[getCookie('map_id')];
 
-		canvas = document.getElementById('canvas');
+		var canvas = document.getElementById('canvas');
 		var CTX = canvas.getContext('2d');
-		CTX.fillRect(0, 0, canvas.width, canvas.height);
+		var CTX_X = 0, CTX_Y = 0;
+		var onKeyUp = [];
+		var onKeyDown = [];
 
 		var block = new Image();
-		block.src = '/graphics/map/block.jpg';
+		var portal = new Image();
+		var border = new Image();
+		var respawn = new Image();
 
-		block.onload = function() 
+		block.src = '/graphics/map/block.png';
+		portal.src = '/graphics/map/portal.png';
+		respawn.src = '/graphics/map/respawn.png';
+		border.src = '/graphics/map/border.png'; //todo: сделать границу
+
+		this.drawMap = function()
 		{
+			CTX.fillRect(0, 0, canvas.width, canvas.height);
+
 			for(var i = 0; i < MAP.length; ++i)
 			{
 				for(var j = 0; j < MAP[i].length; ++j)
 				{
-					if(MAP[i][j] == '#')
-						CTX.drawImage(block, j * 50, i * 50);
+					!MAP[i][j] && CTX.drawImage(border, j * BLOCK_SIZE, i * BLOCK_SIZE);
+					MAP[i][j] == '#' &&	CTX.drawImage(block, j * BLOCK_SIZE, i * BLOCK_SIZE);
+					MAP[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE, i * BLOCK_SIZE);
+					/^\d+$/.test(MAP[i][j]) && CTX.drawImage(portal, j * BLOCK_SIZE, i * BLOCK_SIZE);
 				}
-			}
+			}			
+		}
+
+		setInterval(drawMap, 25);
+
+		onKeyDown[32] = function()
+		{
+
+		}
+
+		onKeyDown[37] = function()
+		{
+			CTX.translate(CTX_X - 5, CTX_Y);
+		}
+
+		onKeyDown[39] = function()
+		{
+			CTX.translate(CTX_X + 5, CTX_Y);
+		}
+
+		onKeyUp[37] = function()
+		{
+
+		}
+
+		onKeyUp[39] = function()
+		{
+
+		}
+
+		document.body.onkeydown = function(e)
+		{
+			onKeyDown[e.keyCode] && onKeyDown[e.keyCode]();
+		}
+
+		document.body.onkeyup = function(e)
+		{
+			onKeyUp[e.keyCode] && onKeyUp[e.keyCode]();
 		}
 	});
 }
