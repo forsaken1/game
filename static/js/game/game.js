@@ -14,13 +14,14 @@ function Game($http)
 		}
 	})).success(function(data) 
 	{
+		// Init
 		for(var i = 0; i < data.maps.length; ++i)
 		{
 			MAPS[data.maps[i].id] = data.maps[i].map;
 		}
 		MAP = MAPS[getCookie('map_id')];
 
-		var socket = new WebSocket('ws://' + SERVER_URL + '/websocket');
+		var socket = new WebSocket('ws://' + SERVER_URL_DOMAIN + '/websocket');
 		var canvas = document.getElementById('canvas');
 		var CTX = canvas.getContext('2d');
 		var CTX_X = 0, CTX_Y = 0;
@@ -40,24 +41,24 @@ function Game($http)
 		// Sockets
 		socket.onopen = function() 
 		{ 
-			console.log("Соединение установлено."); 
+			console.log("Connection is established"); 
 		};
 
 		socket.onclose = function(event) { 
 			if (event.wasClean) {
-				console.log('Соединение закрыто чисто');
+				console.log('Connection closed');
 			} else {
-				console.log('Обрыв соединения'); // например, "убит" процесс сервера
+				console.log('Connection interrupted');
 			}
-			console.log('Код: ' + event.code + ' причина: ' + event.reason);
+			console.log('Error code: ' + event.code + ' reason: ' + event.reason);
 		};
 		 
 		socket.onmessage = function(event) { 
-			console.log("Получены данные " + event.data);
+			console.log("Data " + event.data);
 		};
 
 		socket.onerror = function(error) { 
-			console.log("Ошибка " + error.message); 
+			console.log("Error " + error.message); 
 		};
 
 		// Draw
@@ -76,8 +77,6 @@ function Game($http)
 				}
 			}			
 		}
-
-		setInterval(drawMap, 25);
 
 		// Keys
 		onKeyDown[32] = function()
@@ -114,5 +113,20 @@ function Game($http)
 		{
 			onKeyUp[e.keyCode] && onKeyUp[e.keyCode]();
 		}
+
+		// Start
+		setInterval(drawMap, 25);
+
+		socket.send(JSON.stringify(
+		{
+			'action': 'move',
+			'params':
+			{
+				'sid': getCookie('sid'),
+				'tick': 1,
+				'dx': 0,
+				'dy': 0
+			}
+		}));
 	});
 }

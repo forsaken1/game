@@ -1,7 +1,8 @@
 var app = angular.module('game', ['ngRoute'])
 setCookie('time', 0);
 SERVER_URL = 'http://192.168.226.38:3000';
-SERVER_URL = 'http://localhost:5000';
+SERVER_URL_DOMAIN = 'localhost:5000';
+SERVER_URL = 'http://' + SERVER_URL_DOMAIN;
 SERVER_WEBSOCKET_URL = SERVER_URL + '/websocket';
 SET_INTERVAL_HANDLER = null;
 
