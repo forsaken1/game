@@ -1,0 +1,59 @@
+<div class = 'header'>
+    <div class="navbar navbar-default">
+    	<div class="container">
+      		<div class="navbar-header">
+        		<a class="navbar-brand" href="">Game</a>
+      		</div>
+      		<div class="navbar-collapse collapse">
+		        <ul class="nav navbar-nav">
+		          	<li><a href="#signin">Signin</a></li>
+		          	<li class = 'active'><a href="#signup">Signup</a></li>
+		        </ul>
+      		</div>
+    	</div>
+  	</div>
+</div>
+<div id = 'message'></div>
+<div id = 'error'></div>
+
+<form ng-controller = 'SignupController' style = 'width: 300px'>
+
+	<div class = 'form-group'>
+		<label for = 'login'>Login</label>
+
+		<input 
+			placeholder="Enter login" 
+			class = 'form-control' 
+			ng-model="login" 
+			id = 'login'
+			required 
+		>
+	</div>
+
+	<div class = 'form-group'>
+		<label for = 'password'>Password</label>
+
+		<input 
+			placeholder="Enter password" 
+			class = 'form-control' 
+			ng-model="password" 
+			id = 'password' 
+			type = password
+			required 
+		>
+	</div>
+
+	<div class = 'form-group'>
+		<label>Password confirmation</label>
+		<input 
+			placeholder="Confirm password" 
+			class = 'form-control'
+			ng-model="pass_conf" 
+			id = 'pass_conf' 
+			type = password
+			required 
+		>
+	</div>
+
+	<input class = 'btn btn-primary' type = button value = 'Submit' ng-click = 'signup()'>
+</form>
