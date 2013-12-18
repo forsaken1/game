@@ -1,4 +1,4 @@
-function Game($http, WebSocket)
+function GameController($http)
 {
 	var BLOCK_SIZE = 50;
 	var MAX_MAP_SIZE = 100;
@@ -21,9 +21,10 @@ function Game($http, WebSocket)
 		}
 		MAP = MAPS[getCookie('map_id')];
 
+		var ws = new WebSocket('ws://' + SERVER_URL_DOMAIN + '/websocket');
 		var canvas = document.getElementById('canvas');
 		var CTX = canvas.getContext('2d');
-		var CTX_X = 0, CTX_Y = 0;
+		var CTX_X = 0, CTX_Y = 0, TICK = 0;
 		var onKeyUp = [];
 		var onKeyDown = [];
 
@@ -38,12 +39,23 @@ function Game($http, WebSocket)
 		border.src = '/graphics/map/border.png'; //todo: сделать границу
 
 		// Sockets
-		WebSocket.onopen = function() 
-		{ 
+		ws.onopen = function() 
+		{
 			console.log("Connection is established"); 
+			ws.send(JSON.stringify(
+			{
+				'action': 'move',
+				'params':
+				{
+					'sid': getCookie('sid'),
+					'tick': 1,
+					'dx': 0,
+					'dy': 0
+				}
+			}));
 		};
 
-		WebSocket.onclose = function(event) { 
+		ws.onclose = function(event) { 
 			if (event.wasClean) {
 				console.log('Connection closed');
 			} else {
@@ -52,11 +64,11 @@ function Game($http, WebSocket)
 			console.log('Error code: ' + event.code + ' reason: ' + event.reason);
 		};
 		 
-		WebSocket.onmessage = function(event) { 
-			console.log("Data " + event.data);
+		ws.onmessage = function(event) { 
+			console.log(event.data);
 		};
 
-		WebSocket.onerror = function(error) { 
+		ws.onerror = function(error) { 
 			console.log("Error " + error.message); 
 		};
 
@@ -86,6 +98,19 @@ function Game($http, WebSocket)
 		onKeyDown[37] = function()
 		{
 			CTX.translate(CTX_X - 5, CTX_Y);
+
+			ws.send(JSON.stringify(
+			{
+				'action': 'move',
+				'params':
+				{
+					'sid': getCookie('sid'),
+					'tick': 1,
+					'dx': 10,
+					'dy': 0
+				}
+			}));
+			console.log('down');
 		}
 
 		onKeyDown[39] = function()
@@ -95,7 +120,18 @@ function Game($http, WebSocket)
 
 		onKeyUp[37] = function()
 		{
-
+			ws.send(JSON.stringify(
+			{
+				'action': 'move',
+				'params':
+				{
+					'sid': getCookie('sid'),
+					'tick': 1,
+					'dx': 0,
+					'dy': 0
+				}
+			}));
+			console.log('up');
 		}
 
 		onKeyUp[39] = function()
@@ -116,16 +152,6 @@ function Game($http, WebSocket)
 		// Start
 		setInterval(drawMap, 25);
 
-		WebSocket.send(JSON.stringify(
-		{
-			'action': 'move',
-			'params':
-			{
-				'sid': getCookie('sid'),
-				'tick': 1,
-				'dx': 0,
-				'dy': 0
-			}
-		}));
+		
 	});
 }
