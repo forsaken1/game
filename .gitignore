@@ -9,8 +9,6 @@ virtualenv
 .rar
 log.txt
 
-static/jquery.js
-
 #cfg.php
 
 *.pydevproject
