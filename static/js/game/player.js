@@ -1,104 +1,21 @@
-function Player(startX, startY)
+function Player(ctx)
 {
-	this.x = startX;
-	this.y = startY;
-	this.dx = 0;
-	this.dy = 0;
-	this.speed = 6;
-	this.jumpSpeed = 10;
-	this.jumpHeigth = 15;
-	this.gravitation = 8;
-	this.moving = false;
-	this.animationPicCount = 4;
-	this.animationFrameNumber = 0;
-	this.direction = 0; // to left == 0, right == 1
-	this.jumpIterator = 0;
-	
-	this.animation = [];
-	this.animation[0] = [];
-	this.animation[1] = [];
-	
-	for(var i = 0; i < this.animationPicCount; ++i)
+	this.sprite = new Image();
+	this.sprite.src = '/graphics/players/p.png';
+	this.ctx = ctx;
+	this.x = 0;
+	this.y = 0;
+
+	var handler = this;
+
+	this.setCoords = function(x, y)
 	{
-		this.animation[0][i] = new Image();
-		this.animation[0][i].src = 'graphics/pl' + (i + 1) + '.png';
-		this.animation[1][i] = new Image();
-		this.animation[1][i].src = 'graphics/pr' + (i + 1) + '.png';
+		handler.x = x;
+		handler.y = y;
 	}
-	
-	this.getAnimationNumber = function()
+
+	this.draw = function()
 	{
-		if(!this.moving)
-			return 0;
-			
-		if(this.animationFrameNumber >= this.animationPicCount - 1)
-			return this.animationFrameNumber = 0;
-		
-		return ++this.animationFrameNumber;
-	}
-	
-	this.getAnimationDirection = function()
-	{
-		return this.direction;
-	}
-	
-	this.getX = function()
-	{
-		return this.x = this.x + this.dx;
-	}
-	
-	this.getY = function()
-	{
-		if(this.jumpIterator > 0)
-		{
-			--this.jumpIterator;
-		}
-		else
-		{
-			this.dy = 0;
-		}
-		return this.y = this.y + this.dy;
-	}
-	
-	this.getSprite = function()
-	{
-		return this.animation[this.direction][this.getAnimationNumber()];
-	}
-	
-	this.moveLeft = function()
-	{
-		this.direction = 0;
-		this.dx = - this.speed;
-		this.moving = true;
-	}
-	
-	this.moveRight = function()
-	{
-		this.direction = 1;
-		this.dx = this.speed;
-		this.moving = true;
-	}
-	
-	this.stopLeft = function()
-	{
-		if(this.dx < 0)
-			this.dx = 0;
-		this.moving = false;
-	}
-	
-	this.stopRight = function()
-	{
-		if(this.dx > 0)
-			this.dx = 0;
-		this.moving = false;
-	}
-	
-	this.jump = function()
-	{
-		if(this.jumpIterator <= 0)
-		{
-			this.jumpIterator = this.jumpHeigth;
-			this.dy = - this.jumpSpeed;
-		}
+		handler.ctx.drawImage(handler.sprite, handler.x, handler.y);
 	}
 }

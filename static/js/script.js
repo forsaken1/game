@@ -44,3 +44,8 @@ function toDateTime(timestamp)
 	var d = new Date(parseInt(timestamp) * 1000);
 	return (d.getYear() + 1900) + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes();
 }
+
+function c(data)
+{
+	console.log(data);
+}
