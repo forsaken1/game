@@ -25,4 +25,4 @@ class point:
 		return (self.x*self.x+self.y*self.y)**.5
 
 	def direct(self):
-		return point(int(vect.x>=0), int(vect.y>=0))
+		return point(int(self.x>=0), int(self.y>=0))

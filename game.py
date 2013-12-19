@@ -35,10 +35,9 @@ class game:
 		})
 
 	def get_spawn(self):
-		ret = self.map.spawns[self.cur_spawn]
-		self.cur_spawn +=1
-		self.cur_spawn %= self.c_spawns
-		return ret	
+		ret = point(*self.map.spawns[self.cur_spawn])
+		self.cur_spawn = (self.cur_spawn+1) % self.c_spawns
+		return ret
 
 	def tick(self):
 		self.c_ticks += 1

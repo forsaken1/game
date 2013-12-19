@@ -16,7 +16,7 @@ def tester(case = 'ALL'):
 	runner = unittest.TextTestRunner(f)
 	runner.run(suite)
 	suite = unittest.TestSuite()
-	suite.addTest(StartTestCase("test_getGameParam_ok"))
+	suite.addTest(StartTestCase("test_getGameConsts_ok"))
 	runner.run(suite)
 	cases = {
 	'A': AuthTestCase,

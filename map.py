@@ -1,7 +1,4 @@
-from sympy.geometry import *
-
-
-
+from point import *
 class map:
 
 	def __init__(self, map, server):
@@ -19,16 +16,16 @@ class map:
 				dot = map[i][j]
 				x, y = j+1, i+1
 				if dot == '$': 
-					self.spawns.append(Point(x,y))
+					self.spawns.append((x,y))
 				if 'a' <= dot <= 'Z': 
-					self.items[Point(x,y)] = (num_item, dot)
+					self.items[(x,y)] = (num_item, dot)
 					num_item +=1
 				if '0' <= dot <= '9': 
 					if not num_tps.has_key(dot):
-					   num_tps[dot] = Point(x,y)
+					   num_tps[dot] = (x,y)
 					else:
-						self.tps[Point(x,y)] = num_tps[dot].translate(0.5, 0.5)
-						self.tps[num_tps[dot]] = Point(x,y).translate(0.5, 0.5)
+						self.tps[(x,y)] = (num_tps[dot][0]+.5, num_tps[dot][1]+.5)
+						self.tps[num_tps[dot]] = (x +.5,y + .5)
 		self.map.append('#'*(self.width+2))
 
 	def is_wall(self, x):
