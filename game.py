@@ -10,7 +10,8 @@ class game:
 		self.ACCEL, self.GRAVITY, self.RUB, self.MAX_SPEED = accel, friction, gravity, MaxVelocity
 		self.map, self.server = map, server
 		self.cur_spawn = 0
-		self.c_spawns, c_items = map.get_attr()
+		attr = map.get_attr()
+		self.c_spawns, c_items = attr[0], attr[1]
 		self.items = [0]*c_items
 		self.mess = ''
 		self.pl_mess, self.pr_mess = [], []
@@ -48,7 +49,7 @@ class game:
 		for p in self.players:
 			p.tick()
 		for i in self.items:
-			i -= self.server.tick_size
+			i = 0 if i <= 1 else i-1
 		self.set_mess()
 		for p in self.players:
 			p.write_mess()

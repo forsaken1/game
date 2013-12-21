@@ -128,6 +128,7 @@ class process:
 		self.db.close()
 
 	def process(self, req):
+		print req
 		try:
 			req = json.loads(req)
 			action = req['action']	

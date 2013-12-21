@@ -17,7 +17,7 @@ class map:
 				x, y = j+1, i+1
 				if dot == '$': 
 					self.spawns.append((x,y))
-				if 'a' <= dot <= 'Z': 
+				if 'A' <= dot <= 'z': 
 					self.items[(x,y)] = (num_item, dot)
 					num_item +=1
 				if '0' <= dot <= '9': 

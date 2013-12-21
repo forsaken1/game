@@ -25,6 +25,7 @@ class post(Resource):
 	def render_POST(self, request):
 		text = request.content.getvalue()
 		resp = self.p.process(text)
+		print resp
 		request.setHeader('Access-Control-Allow-Origin', '*')
 		request.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 		request.setHeader("Content-Type", "application/json")
@@ -47,7 +48,7 @@ if __name__ == '__main__':
 	else:
 		debug = False
 
-	factory = ws_factory(p, "ws://localhost:5000", debug = debug, debugCodePaths = debug)
+	factory = ws_factory(p, "ws://0.0.0.0:5000", debug = debug, debugCodePaths = debug)
 	resource = WebSocketResource(factory)
 
 	root = File(".")

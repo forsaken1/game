@@ -5,7 +5,7 @@ def_map_scheme = [	"#$........#",
 
 
 class BaseTestCase(unittest.TestCase):
-	HOST, PORT = 'localhost', '5000'
+	HOST, PORT = '192.168.0.101', '5000'
 	counter = {'user':0, 'game':0, 'map': 0}
 	defMap = 0
 
@@ -26,6 +26,7 @@ class BaseTestCase(unittest.TestCase):
 		BaseTestCase.defMap = self.get_map()				# there's always default map in DB
 
 	def send(self, action = None, params = None, dict = None, wo_dumps = False):
+		print action, params
 		if dict: 
 			query = dict if wo_dumps else json.dumps(dict)
 		else: 
@@ -37,7 +38,6 @@ class BaseTestCase(unittest.TestCase):
 		except:
 			assert resp == 0, resp
 		assert resp.has_key('result'), resp
-		#print resp
 		return resp
 
 	def signup_user(self, login = None, passwd = "pass"):
@@ -71,10 +71,11 @@ class BaseTestCase(unittest.TestCase):
 			"name": name,
 			"map": map,
 			"maxPlayers": maxPlayers,
+			"consts": {
 			"accel": accel,
 			"gravity": gravity,
-			"fric": fric,
-			"max_speed": max_speed
+			"friction": fric,
+			"maxVelocity": max_speed}
 		})
 		if is_ret:
 			return resp
@@ -93,13 +94,15 @@ class BaseTestCase(unittest.TestCase):
 		assert resp["result"] == "ok", resp
 		return sid
 
-	def get_game(self, is_ret = False, maxPlayers = 8, sid_returned = False, map = None):				# unsorted massive bug
+	def get_game(self, is_ret = False, maxPlayers = 8, sid_returned = False, map = None,\
+			  accel = 0.02, gravity = 0.02, fric = 0.02, max_speed = 0.2):				# unsorted massive bug
 		sid = self.signin_user()
 		resp = self.send("getGames", {"sid": sid})
 		old_games = resp['games']		
 		name = self.default('game')
 		if map is None: map = self.get_map()
-		sid = self.create_game(name = name, map = map, maxPlayers = maxPlayers)
+		sid = self.create_game(name = name, map = map, maxPlayers = maxPlayers,\
+			accel = accel, gravity = gravity, fric = fric, max_speed = max_speed)
 		resp = self.send("getGames", {"sid": sid})
 		if is_ret: return resp
 		assert resp.has_key('games'), resp

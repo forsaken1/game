@@ -2,7 +2,15 @@ from point import *
 import time
 
 MAX_HEALTH = 100
+RESP_ITEM = 300
 ZERO = point(0, 0)
+weapons = {
+		   'P': (1, 10, 10, .3),
+		   'M': (1, 10, 5, .3),
+		   'K': (.5, 5, 3, .5),
+		   'R': (1, 30, 25, 0.5),
+		   'A': (100, 15, 15, 0.3)}
+
 
 def sign(x):
 	return 1 if x > 0 else -1
@@ -44,6 +52,9 @@ class player:
 
 		self.is_start, self.was_action = False, False
 
+		self.weapon = 'K'; self.last_fire_tick = 0; self.weapon_angle = -1
+		self.kills = 0; self.death = 0
+
 		self.connects = []
 
 	#---------------------------function for using on client mess---------------------------------#
@@ -62,14 +73,19 @@ class player:
 
 	def move(self, params):
 		self.dv += point(params['dx'],params['dy'])
+
+
+
 	#def fire(self, params):
+		
+
 
 	#----------------------------------function for using on tick---------------------------------#
 	def resp(self):
 		spawn = self.game.get_spawn()
 		self.pos = spawn + point(0.5, 0.5)
 		self.speed = point(0,0)
-		self.heals = MAX_HEALTH
+		self.health = MAX_HEALTH
 
 	def cur_consist(self):
 		self.game.pl_mess.append([
@@ -77,9 +93,13 @@ class player:
 			self.pos.y-1,
 			self.speed.x,
 			self.speed.y,
-			self.health,
+			self.weapon,
+			self.weapon_angle,
 			self.login,
-			self.respawn
+			self.health,
+			self.respawn,
+			self.kills,
+			self.death
 			])
 
 	def above_floor(self):
@@ -110,11 +130,15 @@ class player:
 		
 		self.dv = ZERO
 
-	def take_weapon(self, dot):
-		pass
-
 	def take_item(self, dot):
-		pass
+		dot = dot.to_turple()
+		item = self.map.items[dot]
+		if not self.game.items[item[0]]:
+			self.game.items[item[0]] = RESP_ITEM
+			if item[1] == 'm':
+				self.health = MAX_HEALTH
+			else: 
+				self.weapon = item[1]
 
 
 	def teleport(self, dot):
@@ -181,7 +205,7 @@ class player:
 						 
 					el = self.map.map[coll_cell.y][coll_cell.x]
 					if '0'<=el<='9': self.teleport(coll_cell); return
-					elif 'a'<=el<='Z': self.take_item(coll_item)
+					elif 'A'<=el<='z': self.take_item(coll_cell)
 
 				else:				# todo (0,0) collision
 					coll_cell = forward_cell + offset
