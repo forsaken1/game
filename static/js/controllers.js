@@ -290,6 +290,7 @@ function SigninController ($scope, $interval)
 					setError(data.message);
 
 				setCookie('sid', data.sid);
+				setCookie('login', $scope.login);
 			}
 		);
 	}

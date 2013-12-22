@@ -121,7 +121,7 @@ class process:
 			'leaveGame': 	['sid'],
 			'uploadMap': 	['sid', 'name', 'map', 'maxPlayers'],
 			'getMaps': 		['sid'],
-			'getGameParams': ['sid'],
+			'getGameConsts': ['sid'],
 		}		
 		
 	def __del__(self):
@@ -247,7 +247,7 @@ class process:
 			accel=consts['accel']; maxVelocity=consts['maxVelocity']; friction=consts['friction']; gravity=consts['gravity']
 			if all(0<i<=0.1 for i in (consts['accel'], consts['friction'], consts['gravity'])) and 0<consts['maxVelocity']<1:
 				accel, friction, gravity, MaxVelocity = consts['accel'], consts['friction'], consts['gravity'], consts['maxVelocity']
-			
+			# add error message for bad game consts
 
 		cur = self.db.cursor()			
 		cur.execute('SELECT id FROM games WHERE name = %s', (par['name'],))
@@ -361,7 +361,7 @@ class process:
 			
 		return self.result(param = {'maps': res})
 
-	def getGameParams(self, par):
+	def getGameConsts(self, par):
 		id = self.valid.get_id(par['sid'])
 		cur = self.db.cursor()
 		cur.execute('SELECT game_id FROM user_game WHERE pid = %s', (id,))

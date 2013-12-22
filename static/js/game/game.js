@@ -25,9 +25,17 @@ function GameController($http)
 		}
 		MAP = MAPS[getCookie('map_id')];
 
+		alert(getCookie('login'));
+
+		var TICK = 0;
+		var SPEED = 20;
+		var JUMP = 50;
+		var VX = 0, VY = 0;
+		var DIRECTION_X = 0;
+		var DIRECTION_Y = 0;
 		var canvas = document.getElementById('canvas');
 		var CTX = canvas.getContext('2d');
-		var CTX_X = 0, CTX_Y = 0, TICK = 0, SPEED = 20;
+		var CTX_X = 0, CTX_Y = 0;
 		var onKeyUp = [];
 		var onKeyDown = [];
 
@@ -37,9 +45,10 @@ function GameController($http)
 		var respawn = new Image();
 		var players = [];
 		var handler = this;
+		var player;
 
 		for(var i = 0; i < MAP.maxPlayers; ++i)
-			players[i] = new Player(CTX);
+			players[i] = new Player(CTX, -100, -100);
 
 		block.src = '/graphics/map/block.png';
 		portal.src = '/graphics/map/portal.png';
@@ -63,6 +72,7 @@ function GameController($http)
 					'dy': 0
 				}
 			}));
+			player = players[0];
 		};
 
 		ws.onclose = function(event)
@@ -79,13 +89,15 @@ function GameController($http)
 		{
 			var data = JSON.parse(event.data);
 			TICK = data.tick;
-			//players[0].setCoords(data.players[0].x * BLOCK_SIZE, data.players[0].y * BLOCK_SIZE);
-			console.log(event.data);
+			player.setCoords(data.players[0][0] * BLOCK_SIZE - 25, data.players[0][1] * BLOCK_SIZE - 25);
+			VX = data.players[0][2];
+			VY = data.players[0][3];
+			//console.log(event.data); // for debug
 		};
 
 		ws.onerror = function(error)
-		{ 
-			console.log("Error " + error.message); 
+		{
+			console.log("Error " + error.message);
 		};
 
 		// Draw
@@ -99,7 +111,7 @@ function GameController($http)
 				{
 					!MAP.map[i][j] && CTX.drawImage(border, j * BLOCK_SIZE, i * BLOCK_SIZE);
 					MAP.map[i][j] == '#' &&	CTX.drawImage(block, j * BLOCK_SIZE, i * BLOCK_SIZE);
-					MAP.map[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE, i * BLOCK_SIZE);
+					//MAP.map[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE, i * BLOCK_SIZE);
 					/^\d+$/.test(MAP.map[i][j]) && CTX.drawImage(portal, j * BLOCK_SIZE, i * BLOCK_SIZE);
 				}
 			}
@@ -109,11 +121,7 @@ function GameController($http)
 			}
 		}
 
-		// Keys
-		onKeyDown[32] = function()
-		{
-
-		}
+		// DOWN keys
 
 		onKeyDown[37] = function()
 		{
@@ -124,9 +132,25 @@ function GameController($http)
 				{
 					'tick': TICK,
 					'dx': -SPEED,
-					'dy': 0
+					'dy': VY
 				}
 			}));
+			DIRECTION_X = -1;
+		}
+
+		onKeyDown[38] = function()
+		{
+			ws.send(JSON.stringify(
+			{
+				'action': 'move',
+				'params':
+				{
+					'tick': TICK,
+					'dx': DIRECTION_X * SPEED,
+					'dy': -JUMP
+				}
+			}));
+			DIRECTION_Y = -1;
 		}
 
 		onKeyDown[39] = function()
@@ -138,37 +162,28 @@ function GameController($http)
 				{
 					'tick': TICK,
 					'dx': SPEED,
-					'dy': 0
+					'dy': VY
 				}
 			}));
+			DIRECTION_X = 1;
 		}
-
+		// UP keys
 		onKeyUp[37] = function()
 		{
-			ws.send(JSON.stringify(
-			{
-				'action': 'move',
-				'params':
-				{
-					'tick': TICK,
-					'dx': 0,
-					'dy': 0
-				}
-			}));
+			ws.send(player.getStopJson(TICK, DIRECTION_X, DIRECTION_Y));
+			DIRECTION_X = 0;
+		}
+
+		onKeyUp[38] = function()
+		{
+			ws.send(player.getStopJson(TICK, DIRECTION_X, DIRECTION_Y));
+			DIRECTION_Y = 0;
 		}
 
 		onKeyUp[39] = function()
 		{
-			ws.send(JSON.stringify(
-			{
-				'action': 'move',
-				'params':
-				{
-					'tick': TICK,
-					'dx': 0,
-					'dy': 0
-				}
-			}));
+			ws.send(player.getStopJson(TICK, DIRECTION_X, DIRECTION_Y));
+			DIRECTION_X = 0;
 		}
 
 		document.body.onkeydown = function(e)
@@ -182,6 +197,6 @@ function GameController($http)
 		}
 
 		// Start
-		setInterval(this.draw, 30);
+		setInterval(this.draw, 33);
 	});
 }

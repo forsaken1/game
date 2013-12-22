@@ -35,10 +35,9 @@ class game:
 		})
 
 	def get_spawn(self):
-		ret = self.map.spawns[self.cur_spawn]
-		self.cur_spawn +=1
-		self.cur_spawn %= self.c_spawns
-		return ret	
+		ret = point(*self.map.spawns[self.cur_spawn])
+		self.cur_spawn = (self.cur_spawn+1) % self.c_spawns
+		return ret
 
 	def tick(self):
 		self.c_ticks += 1
@@ -49,7 +48,7 @@ class game:
 		for p in self.players:
 			p.tick()
 		for i in self.items:
-			i -= self.server.tick_size
+			i = 0 if i <= 1 else i-1
 		self.set_mess()
 		for p in self.players:
 			p.write_mess()

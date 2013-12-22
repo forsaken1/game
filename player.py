@@ -1,8 +1,16 @@
-from sympy.geometry import *
+from point import *
 import time
 
 MAX_HEALTH = 100
-ZERO = Point(0, 0)
+RESP_ITEM = 30
+ZERO = point(0, 0)
+weapons = {
+		   'P': (1, 10, 10, .3),
+		   'M': (1, 10, 5, .3),
+		   'K': (.5, 5, 3, .5),
+		   'R': (1, 30, 25, 0.5),
+		   'A': (100, 15, 15, 0.3)}
+
 
 def sign(x):
 	return 1 if x > 0 else -1
@@ -25,21 +33,9 @@ def all_types_wo_wall():
 
 types = all_types_wo_wall()
 
-def direct(vect):
-	return Point(int(vect.x>=0), int(vect.y>=0))
-
-def point2turple(p):
-	return (p.x, p.y)
-
-def norm(vect):
-	return vect/(vect.distance(ZERO))
-
-def cell_index(a):
-	return (int(a.x), int(a.y))
-
 def add_col(collisions, time, val):
 	if collisions.has_key(time):
-		cillision[time].append(val)
+		collisions[time].append(val)
 	collisions[time] = [val]		
 
 class player:
@@ -48,15 +44,19 @@ class player:
 		self.eps = server.eps
 
 		self.health = MAX_HEALTH
-		self.status = 0
-		self.respawn = -1
+		self.respawn = 1
+		
+		self.pos = point(0, 0)
+		self.speed = point(0, 0)
+		self.dv = point(0, 0)
 
-		self.pos, self.speed, self.dv = ZERO, ZERO, ZERO
 		self.is_start, self.was_action = False, False
+
+		self.weapon = 'K'; self.last_fire_tick = 0
 
 		self.connects = []
 
-	#----------------------------------function for using on client mess---------------------------------#
+	#---------------------------function for using on client mess---------------------------------#
 	def action(self, msg):
 		if not self.is_start:
 			self.is_start = True
@@ -71,168 +71,197 @@ class player:
 			self.game.sync_tick()
 
 	def move(self, params):
-		self.dv += Point(params['dx'],params['dy'])
+		self.dv += point(params['dx'],params['dy'])
+
+
+
 	#def fire(self, params):
+		
+
 
 	#----------------------------------function for using on tick---------------------------------#
 	def resp(self):
 		spawn = self.game.get_spawn()
-		self.pos = spawn + Point(0.5, 0.5)
-		self.speed = ZERO
-		self.status = 1
-		self.heals = MAX_HEALTH
+		self.pos = spawn + point(0.5, 0.5)
+		self.speed = point(0,0)
+		self.health = MAX_HEALTH
 
 	def cur_consist(self):
-		self.game.pl_mess.append({
-			'x': float(self.pos.x)-1,
-			'y': float(self.pos.y)-1,
-			'vx': float(self.speed.x),
-			'vy': float(self.speed.y),
-			'health': self.health,
-			'status': 'alive' if self.status else 'dead',
-			'respawn': self.respawn
-			})
+		self.game.pl_mess.append([
+			self.pos.x-1,
+			self.pos.y-1,
+			self.speed.x,
+			self.speed.y,
+			self.health,
+			self.login,
+			self.respawn
+			])
 
 	def above_floor(self):
-		if self.map.is_wall(self.pos.translate(-0.5 + self.eps, 0.5 + self.eps)) or\
-			self.map.is_wall(self.pos.translate(0.5 - self.eps, 0.5 + self.eps)):
+		if self.map.is_wall(self.pos + point(.5-self.eps, .5+self.eps)) or\
+			self.map.is_wall(self.pos + point(-.5+self.eps, .5+self.eps)):
 			return True
 		else: return False
 
 	def speed_calc(self):
 		if self.above_floor():
 			if self.dv.y < -self.eps:
-				self.speed = Point(self.speed.x, -self.game.MAX_SPEED)
+				self.speed.y = -self.game.MAX_SPEED
 			if abs(self.dv.x) < self.eps:
 				if abs(self.speed.x) < self.game.RUB:
-					self.speed = Point(0, self.speed.y)
-				else:
-					self.speed -= Point(sign(self.speed.x)*self.game.RUB, 0)
+					self.speed.x = 0
+				else: 
+					self.speed.x -= sign(self.speed.x)*self.game.RUB  
 		else:
-			self.speed += Point(0, self.game.GRAVITY)
+			self.speed.y += self.game.GRAVITY
 
 		if abs(self.dv.x) > self.eps:
-			self.speed += Point(sign(self.dv.x)*self.game.ACCEL, 0)
+			self.speed.x += sign(self.dv.x)*self.game.ACCEL
 		
 		if abs(self.speed.x) > self.game.MAX_SPEED:
-			self.speed = Point(sign(self.speed.x)*self.game.MAX_SPEED, self.speed.y)
+			self.speed.x = sign(self.speed.x)*self.game.MAX_SPEED
 		if abs(self.speed.y) > self.game.MAX_SPEED:
-			self.speed = Point(self.speed.x, sign(self.speed.y)*self.game.MAX_SPEED)
+			self.speed.y = sign(self.speed.y)*self.game.MAX_SPEED
 		
 		self.dv = ZERO
 
-	def take_weapon(self, dot):
-		pass
-
 	def take_item(self, dot):
-		pass
+		item = self.map.items[dot]
+		if not self.game.items[item[0]]:
+			self.game.items[item[0]] = RESP_ITEM
+			if item[1] == 'm':
+				self.health = MAX_HEALTH
+			else: 
+				self.weapon = item[1]
 
 
 	def teleport(self, dot):
-		self.pos = self.map.tps[dot]
+		self.pos = point(*self.map.tps[dot.to_turple()])
 		return
 
 	def peak2peak(self, dist, speed):
-		dist_size = dist.distance(ZERO)
-		speed_size = speed.distance(ZERO)
+		dist_size = dist.size()
+		speed_size = speed.size()
 		return speed_size > dist_size and\
-				(dist_size < self.eps or\
-				abs(speed.x) < self.eps and abs(dist.x) < self.eps or\
+				(abs(speed.x) < self.eps and abs(dist.x) < self.eps or\
 				abs(speed.y) < self.eps and abs(dist.y) < self.eps or\
-				(speed.scale(dist_size/speed_size, dist_size/speed_size) - dist).distance(ZERO)<self.eps)
+				(speed.scale(dist_size/speed_size) - dist).size()<self.eps)
 
 	def go(self):
-		if self.speed.distance(ZERO) < self.eps: return
-		dir = direct(self.speed)
-		dir1 = Point(1 if dir.x else -1, 1 if dir.y else -1)
+		speed = self.speed
+		if speed.size() < self.eps: return
+		dir = speed.direct()
+		dir1 = point(1 if dir.x else -1, 1 if dir.y else -1)
 		#undir = dir.scale(-1,-1)
-		center_cell = Point(*cell_index(self.pos))
-		forward = self.pos + dir1.scale(.5-self.eps, .5-self.eps)
-		forward_cell = Point(*cell_index(forward))
+		center_cell = point(*self.pos.index())
+		forward = self.pos + dir1.scale(.5-self.eps)
+		forward_cell = point(*forward.index())
+		forward = self.pos + dir1.scale(.5)
 		
 		collisions = {}
 
-		dist = forward_cell+dir-forward-dir1.scale(self.eps, self.eps) 
-		is_reach_x = abs(self.speed.x) > abs(dist.x); is_reach_y = abs(self.speed.y) > abs(dist.y);
-		if self.peak2peak(dist, self.speed):
-			add_col(collisions,  dist.x/self.speed.x, (0,2))
+		dist = forward_cell + dir - forward
+		is_reach_x = abs(speed.x) > abs(dist.x); is_reach_y = abs(speed.y) > abs(dist.y);
+		if dist.size() < self.eps:
+			add_col(collisions,  dist.size()/speed.size(), (0,3))
+		elif self.peak2peak(dist, speed):
+			add_col(collisions,  dist.size()/speed.size(), (0,2))
 		else:
 			if is_reach_x:
-				add_col(collisions, dist.x/self.speed.x, (0,0))						# (a,b)-collision description a(1-center, 0-forward), b(0-x, 1-y, 2-angle)
+				# (a,b)-collision descriptor a(1-center, 0-forward), b(0-x, 1-y, 2-angle)
+				add_col(collisions, dist.x/speed.x, (0,0))		
 			if is_reach_y:
-				add_col(collisions, dist.y/self.speed.y, (0,1))
+				add_col(collisions, dist.y/speed.y, (0,1))
 				 
 		dist = center_cell + dir - self.pos		
-		is_reach_x = abs(self.speed.x) > abs(dist.x); is_reach_y = abs(self.speed.y) > abs(dist.y);
+		is_reach_x = abs(speed.x) > abs(dist.x); is_reach_y = abs(speed.y) > abs(dist.y);
 		if self.peak2peak(dist, self.speed):
-			add_col(collisions,  dist.x/self.speed.x, (1,2))
+			add_col(collisions,  dist.x/speed.x, (1,2))
 		else:
 			if is_reach_x:
-				add_col(collisions, dist.x/self.speed.x, (1,0)) 
+				add_col(collisions, dist.x/speed.x, (1,0))
 			if is_reach_y:
-				add_col(collisions, dist.y/self.speed.y, (1,1)) 
+				add_col(collisions, dist.y/speed.y, (1,1))
 
+		was_coll = [0,0]
 		passed_time = 0
-		for time in collisions.keys():
+		times = collisions.keys()
+		times.sort()
+		for time in times:
 			for coll in collisions[time]:
-
-				offset = dir1.scale(int(bool(coll[1] - 1)), int(bool(coll[1])))
+				offset = dir1 * point(int(bool(coll[1] - 1)), int(bool(coll[1])))
 				if coll[0]:
+					if was_coll[0] and coll[1] == 0 or was_coll[1] and coll[0] == 1:
+						continue
 					coll_cell = center_cell + offset
-					el = self.map.el_by_point(coll_cell)
+					if coll[1] == 2:
+						coll_cell -= point(*was_coll)*dir1
+						 
+					el = self.map.map[coll_cell.y][coll_cell.x]
 					if '0'<=el<='9': self.teleport(coll_cell); return
-					elif 'a'<=el<='z': self.take_item(coll_item)
-					elif 'A'<=el<='Z': self.take_weapon(coll_item)
+					elif 'a'<=el<='Z': self.take_item(coll_item)
 
 				else:				# todo (0,0) collision
-					null_x = abs(self.speed.x) < self.eps; null_y = abs(self.speed.y) < self.eps
-					if coll[1] == 2 and (null_x or null_y):
-						if self.map.is_wall(forward_cell + offset.scale(null_y, null_x)):
-							self.pos += self.speed*(time - passed_time)
-							self.speed = ZERO
-							return
-						break
 					coll_cell = forward_cell + offset
+					x_neib_wall = self.map.map[coll_cell.y][coll_cell.x - dir1.x] == '#'
+					y_neib_wall = self.map.map[coll_cell.y - dir1.y][coll_cell.x] == '#'
+					coll_cell_wall = self.map.map[coll_cell.y][coll_cell.x] == '#'
+					if coll[1] == 3:
+						if x_neib_wall:
+							self.speed.y = 0
+							was_coll[1] = 1
+						if y_neib_wall:
+							self.speed.x = 0
+							was_coll[0] = 1
+						if abs(self.speed.x) > self.eps and abs(self.speed.y) > self.eps and coll_cell_wall \
+							and not y_neib_wall and not x_neib_wall:
+							self.speed.y = 0
+							was_coll[1] = 1
 
-					if self.map.is_wall(coll_cell):
-						if time < self.eps and coll[1] == 2 and dir.y == 1:
-							self.speed.scale(1, 0)
-							break
-						self.pos += self.speed*(time - passed_time)
-						passed_time = time
-						self.speed = self.speed.scale(int(not offset.x), int(not offset.y))
-						return
-						# trace += cur dot
-					else:
-						if offset.x:					# add multi intersection proofer if maxVel > 0.5
-							neighbor = coll_cell.translate(0, -offset.y)
-							if abs(self.speed.y) > self.eps and self.map.is_wall(neighbor):
-								self.pos += self.speed*(time - passed_time)
-								passed_time = time
-								self.speed = Point(0, self.speed.y)
-						if offset.y:
-							neighbor = coll_cell.translate(-offset.x, 0)
-							if abs(self.speed.x) > self.eps and self.map.is_wall(coll_cell):
-								self.pos += self.speed*(time - passed_time)
-								passed_time = time
-								self.speed = Point(self.speed.x, 0)
-		self.pos += self.speed.scale(1-passed_time, 1-passed_time)
+					elif coll[1] == 2:	  
+						if x_neib_wall:
+							self.speed.y = 0
+							was_coll[1] = 1
+						if y_neib_wall:
+							self.speed.x = 0
+							was_coll[0] = 1
+						if abs(self.speed.x) > self.eps and abs(self.speed.y) > self.eps and coll_cell_wall\
+							and not y_neib_wall and not x_neib_wall:
+							self.speed = point(0,0)
+							was_coll = [1,1]
 
+					elif coll[1] == 1:
+						if coll_cell_wall or x_neib_wall:
+							self.speed.y = 0
+							was_coll[1] = 1
+					
+					elif coll[1] == 0:
+						if coll_cell_wall or y_neib_wall:
+							self.speed.x = 0
+							was_coll[0] = 1
+
+				if was_coll[0] and was_coll[1]: break
+
+		self.pos += speed
+		if was_coll[0]:
+			self.pos.x = forward_cell.x + .5
+		if was_coll[1]:
+			self.pos.y = forward_cell.y + .5
 
 	def tick(self):
 		if not self.is_start:
 			return
 
-		elif self.status == 0:
-			self.respawn -= self.server.tick_size
-			if self.respawn <= 0:
+		elif self.respawn > 0:
+			self.respawn -= 1
+			if self.respawn == 0:
 				self.resp()
 
 		else:
-			#t = time.time()
+			t = time.time()
 			self.speed_calc()
-			#print (time.time()-t)*1000
 			self.go()
+			print (time.time()-t)*1000
 		self.cur_consist()
 		return
 
