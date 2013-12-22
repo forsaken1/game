@@ -18,6 +18,8 @@ def tester(case = 'ALL'):
 	suite = unittest.TestSuite()
 	suite.addTest(StartTestCase("test_getGameConsts_ok"))
 	runner.run(suite)
+	if case == 'ALL':
+		unittest.main(testRunner=runner)
 	cases = {
 	'A': AuthTestCase,
 	'C': ChatTestCase,
@@ -28,7 +30,11 @@ def tester(case = 'ALL'):
 		suite = unittest.TestLoader().loadTestsFromTestCase(cases[case])
 		runner.run(suite)
 	else:
-		unittest.main(testRunner=runner)
+		for c in cases.values():
+			if hasattr(c, case):
+				suite = unittest.TestSuite()
+				suite.addTest(c(case))
+				runner.run(suite)
 	f.close()		
 	
 	

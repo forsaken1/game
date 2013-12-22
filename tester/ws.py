@@ -313,7 +313,6 @@ class WebSocketTestCase(BaseTestCase):
 #		assert self.equal(pl[2], 0) and self.equal(pl[3], 0)\
 #		    and self.equal(pl[1], 1.5) and self.equal(pl[0], 3.5), pl
 
-
 	#def test_take_item(self):
 	#	map = [	"$A..#."]
 	#	ws = self.connect(map)	
@@ -328,18 +327,57 @@ class WebSocketTestCase(BaseTestCase):
 	#	resp = self.recv_ws(ws)
 	#	pl = resp['players'][0]
 	#	it = resp['items']
-	#	assert it == [30], it
+	#	assert it == [300] and pl[4] == 'A' and pl[5] == -1, (it, pl[4], pl[5])
 
-	def test_uncommon_consts(self):
-		map = [	"$.........."]
-		ws = self.connect(map, accel = 0.05, gravity = 0.05, fric = .05, max_speed = 0.5)
+	#def test_uncommon_consts(self):
+	#	map = [	"$.........."]
+	#	ws = self.connect(map, accel = 0.05, gravity = 0.05, fric = .05, max_speed = 0.5)
+	#	vx = 0; x = .5
+	#	while vx < 0.5:
+	#		resp = self.recv_ws(ws)
+	#		pl = resp['players'][0]
+	#		assert self.equal(pl[2], vx) and self.equal(pl[0], x), (pl, vx, x)
+	#		self.move(ws, resp['tick'], 1)
+	#		vx += 0.05; x += vx 
+	#	resp = self.recv_ws(ws)
+	#	pl = resp['players'][0]
+	#	assert self.equal(pl[2], 0.5) , pl
+
+	def test_jump_in_cave(self):
+		map = [	"$.....",
+				"##..##",
+				".....#",
+				"....##",]
+		ws = self.connect(map)
 		vx = 0; x = .5
-		while vx < 0.5:
+		while x < 2.5:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
 			assert self.equal(pl[2], vx) and self.equal(pl[0], x), (pl, vx, x)
 			self.move(ws, resp['tick'], 1)
-			vx += 0.05; x += vx 
+			vx += ACCEL
+			if vx > MAX_SPEED: 
+				vx = MAX_SPEED
+			x += vx 
+		vy = 0; y = .5
+		while y < 2.5:
+			resp = self.recv_ws(ws)
+			pl = resp['players'][0]
+			assert self.equal(pl[3], vy) and self.equal(pl[1], y), (pl, vy, y)
+			self.move(ws, resp['tick'], 1)
+			vy += ACCEL; 
+			if vy > MAX_SPEED: vy = MAX_SPEED;
+			y += vy
+		vx = ACCEL; x = 3.5 + vx
+		while x < 5.5:
+			resp = self.recv_ws(ws)
+			pl = resp['players'][0]
+			assert self.equal(pl[2], vx) and self.equal(pl[0], x), (pl, vx, x)
+			self.move(ws, resp['tick'], 1)
+			vx += ACCEL; 
+			if vx > MAX_SPEED: vx = MAX_SPEED;
+			x += vx 
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[2], 0.5) , pl
+		assert self.equal(pl[0], 4.5) and self.equal(pl[1], 2.5) and self.equal(pl[2], 0)\
+			and self.equal(pl[3], 0), pl

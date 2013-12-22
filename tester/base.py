@@ -5,7 +5,7 @@ def_map_scheme = [	"#$........#",
 
 
 class BaseTestCase(unittest.TestCase):
-	HOST, PORT = '192.168.0.101', '5000'
+	HOST, PORT = 'localhost', '5000'
 	counter = {'user':0, 'game':0, 'map': 0}
 	defMap = 0
 
@@ -37,6 +37,7 @@ class BaseTestCase(unittest.TestCase):
 			resp = json.loads(resp.text)
 		except:
 			assert resp == 0, resp
+		print resp
 		assert resp.has_key('result'), resp
 		return resp
 
@@ -124,7 +125,7 @@ class BaseTestCase(unittest.TestCase):
 		if sid_returned: return [id, sid]
 		return id
 
-	def upload_map(self, map = [def_map_scheme], is_ret = False, name = None, maxPlayers = 8, sid = None):
+	def upload_map(self, map = def_map_scheme, is_ret = False, name = None, maxPlayers = 8, sid = None):
 		if name is None: name = self.default('map')
 		if sid is None: sid = self.signin_user()
 		resp = self.send("uploadMap",

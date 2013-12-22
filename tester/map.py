@@ -8,6 +8,10 @@ class MapTestCase(BaseTestCase):
 	def test_uploadMap_badMap(self):
 		resp = self.upload_map(map = ['.**..'], is_ret = True)
 		assert resp["result"] == "badMap", resp
+
+	def test_uploadMap_badMap_unexpected_letter(self):
+		resp = self.upload_map(map = ['.q..'], is_ret = True)
+		assert resp["result"] == "badMap", resp
 	
 	def test_uploadMap_badMap_singleStr(self):
 		resp = self.upload_map(map = '...', is_ret = True)
@@ -39,18 +43,18 @@ class MapTestCase(BaseTestCase):
 		assert resp.has_key('maps'), resp
 		maps = [
 			{
-				"name": default('map', 3),
-				"map": ['..', '..'],
+				"name": self.default('map', 3),
+				"map": def_map_scheme,
 				"maxPlayers": 8,
 			},		
 			{
-				"name": default('map', 2),
-				"map": ['..', '..'],
+				"name": self.default('map', 2),
+				"map": def_map_scheme,
 				"maxPlayers": 8,
 			},
 			{
-				"name": default('map', 1),
-				"map": ['..', '..'],
+				"name": self.default('map', 1),
+				"map": def_map_scheme,
 				"maxPlayers": 8,
 			}
 		]

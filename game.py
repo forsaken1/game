@@ -1,5 +1,6 @@
 from sympy.geometry import *
 from player import *
+from projectile import *
 import json
 from datetime import datetime
 
@@ -17,7 +18,7 @@ class game:
 		self.pl_mess, self.pr_mess = [], []
 
 		self.c_ticks = 0
-		self.players, self.projects = [], []
+		self.players, self.projectiles = [], []
 		
 
 	def join(self, player):

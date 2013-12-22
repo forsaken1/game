@@ -1,4 +1,5 @@
 import MySQLdb, re, os, hashlib, time, json
+from projectile import weapons
 
 MINLOGIN, MAXLOGIN = 4, 40
 LONGBLOB = 65535
@@ -61,8 +62,8 @@ class param_validator:
 			return False
 		else: return True		
 
-	def valid_dot(self, c):
-		return 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or c=='.' or c=='$' or c=='#' 
+	def valid_dot(self, c):										# add new item here
+		return c == 'a' or weapons.has_key(c) or '0'<=c<='9' or c=='.' or c=='$' or c=='#' 
 	
 	def badMap(self, map):
 		if type(map) != list or len(map) < 1: return False
@@ -70,9 +71,9 @@ class param_validator:
 		tp = [0]*10
 		for row in map:
 			if type(row) != unicode or len(row) != size or not all(self.valid_dot(d) for d in row):
-				for dot in row:
-					if '0' <= dot <= '9': tp[int(dot)] +=1
 				return False
+			for dot in row:
+				if '0' <= dot <= '9': tp[int(dot)] +=1
 		for t in tp:
 			if t != 2 and t != 0:
 				return False
@@ -128,7 +129,7 @@ class process:
 		self.db.close()
 
 	def process(self, req):
-		print req
+		#print req
 		try:
 			req = json.loads(req)
 			action = req['action']	
