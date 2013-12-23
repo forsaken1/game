@@ -25,6 +25,9 @@ function GameController($http, $interval)
 			MAPS[index].maxPlayers = data.maps[i].maxPlayers;
 		}
 		MAP = MAPS[getCookie('map_id')];
+		MAP.map[MAP.map.length] = Array(MAP.map[0].length);
+		for(var i = 0; i < MAP.map[0].length; ++i)
+			MAP.map[MAP.map.length - 1][i] = '#';
 
 		var TICK = 0;
 		var SPEED = 20;
@@ -36,14 +39,17 @@ function GameController($http, $interval)
 		var N = null; // player`s number in array
 		var canvas = document.getElementById('canvas');
 		var CTX = canvas.getContext('2d');
-		var CTX_X = 0, CTX_Y = 0;
+		var CTX_X = 0;
+		var CTX_Y = 0;
+		var DX = 0;
+		var DY = 0;
 		var onKeyUp = [];
 		var onKeyDown = [];
 
 		var block = new Image();
 		var portal = new Image();
-		var border = new Image();
 		var respawn = new Image();
+		var background = new Image();
 		var players = [];
 		var handler = this;
 		var player;
@@ -51,10 +57,10 @@ function GameController($http, $interval)
 		for(var i = 0; i < MAP.maxPlayers; ++i)
 			players[i] = new Player(CTX, -1000, -1000);
 
-		block.src = '/graphics/map/block.png';
+		background.src = '/graphics/map/background.png';
+		block.src = '/graphics/map/ground.png';
 		portal.src = '/graphics/map/portal.png';
 		respawn.src = '/graphics/map/respawn.png';
-		border.src = '/graphics/map/border.png'; //todo: сделать границу
 
 		// Sockets
 		var ws = new WebSocket('ws://' + SERVER_URL_DOMAIN + '/websocket');
@@ -116,21 +122,15 @@ function GameController($http, $interval)
 					return i;
 		}
 
-		var FILL_WIDTH  = (w = MAP.map[0].length * BLOCK_SIZE) > canvas.width ? w : canvas.width;
-		var FILL_HEIGHT = (w = MAP.map.length * BLOCK_SIZE) > canvas.height ? w : canvas.height;
-		var DX = 0;
-		var DY = 0;
-
 		// Draw
 		this.draw = function()
 		{
-			CTX.fillRect(0, 0, FILL_WIDTH, FILL_HEIGHT);
+			CTX.drawImage(background, 0, 0);
 
 			for(var i = 0; i < MAP.map.length; ++i)
 			{
 				for(var j = 0; j < MAP.map[i].length; ++j)
 				{
-					!MAP.map[i][j] && CTX.drawImage(border, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					MAP.map[i][j] == '#' &&	CTX.drawImage(block, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					//MAP.map[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE, i * BLOCK_SIZE);
 					/^\d+$/.test(MAP.map[i][j]) && CTX.drawImage(portal, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
