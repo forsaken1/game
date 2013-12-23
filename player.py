@@ -1,32 +1,14 @@
 from point import *
 import time
+from projectile import *
 
 MAX_HEALTH = 100
 RESP_ITEM = 300
+RESP_PLAYER = 300
 ZERO = point(0, 0)
-
-
 
 def sign(x):
 	return 1 if x > 0 else -1
-
-def all_types_wo_wall():
-	types = ''
-	i = ord('0')
-	while chr(i) < '9':
-		i+=1
-		types += chr(i)
-	i = ord('a')
-	while chr(i) < 'z':
-		i+=1
-		types += chr(i)
-	i = ord('A')
-	while chr(i) < 'Z':
-		i+=1
-		types += chr(i)
-	return types
-
-types = all_types_wo_wall()
 
 def add_col(collisions, time, val):
 	if collisions.has_key(time):
@@ -71,7 +53,8 @@ class player:
 
 
 
-	#def fire(self, params):
+	def fire(self, params):
+		self.game.projectiles.append(projectile(player, self.weapon, point(params['dx'],params['dy'])))
 		
 
 
@@ -134,7 +117,6 @@ class player:
 				self.health = MAX_HEALTH
 			else: 
 				self.weapon = item[1]
-
 
 	def teleport(self, dot):
 		self.pos = point(*self.map.tps[dot.to_turple()])
@@ -268,4 +250,13 @@ class player:
 
 	def write_mess(self):
 		for c in self.connects:
-			c.sendMessage(self.game.mess)			
+			c.sendMessage(self.game.mess)		
+			
+	def hit(self, dmg):
+		self.health -= dmg
+		if self.health <= 0:
+		   self.health = 0
+		   self.respawn = RESP_PLAYER
+		   self.death += 1
+		   return True
+		return False

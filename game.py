@@ -26,7 +26,7 @@ class game:
 
 	def leave(self, pid):
 		for pl in self.players:
-			if pl.pid == pid: del pl
+			if pl.pid == pid: self.players.remove(pl)
 
 	def set_mess(self):
 		self.mess = json.dumps({
@@ -45,12 +45,13 @@ class game:
 		self.c_ticks += 1
 
 		self.pl_mess, self.pr_mess = [], []
-		#for p in project
-		#
-		for p in self.players:
-			p.tick()
 		for i in self.items:
 			i = 0 if i <= 1 else i-1
+		for p in self.players:
+			p.tick()
+		for p in project:
+			p.tick()
+
 		self.set_mess()
 		for p in self.players:
 			p.write_mess()
