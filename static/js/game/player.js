@@ -14,9 +14,14 @@ function Player(ctx, x, y)
 		handler.y = y;
 	}
 
-	this.draw = function()
+	this.draw = function(dx, dy)
 	{
-		handler.ctx.drawImage(handler.sprite, handler.x, handler.y);
+		handler.ctx.drawImage(handler.sprite, handler.x + dx, handler.y + dy);
+	}
+
+	this.drawMe = function()
+	{
+		handler.ctx.drawImage(handler.sprite, 800 / 2, 600 / 2); //todo
 	}
 
 	this.getStopJson = function(tick, x, y)
