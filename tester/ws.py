@@ -21,6 +21,7 @@ class WebSocketTestCase(BaseTestCase):
 
 	def recv_ws(self, ws):
 		mess = json.loads(ws.recv())
+		self.tick = mess['tick']
 		print '+++++', mess
 		return mess
 
@@ -41,7 +42,9 @@ class WebSocketTestCase(BaseTestCase):
 			return ws
 		else: return False
 
-	def move(self, ws, tick, x = 0, y = 0):
+	def move(self, ws, tick = None, x = 0, y = 0):
+		if tick is None:
+			tick = self.tick
 		if not x and not y:		self.send_ws('empty', {'tick': tick}, ws)
 		else:					self.send_ws('move', {'tick': tick, 'dx': x, 'dy': y}, ws)
 			
@@ -381,3 +384,6 @@ class WebSocketTestCase(BaseTestCase):
 		pl = resp['players'][0]
 		assert self.equal(pl[0], 4.5) and self.equal(pl[1], 2.5) and self.equal(pl[2], 0)\
 			and self.equal(pl[3], 0), pl
+
+
+		## todo leavegame test

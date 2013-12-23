@@ -1,5 +1,5 @@
 from point import *
-import time
+
 from projectile import *
 
 MAX_HEALTH = 100
@@ -52,9 +52,8 @@ class player:
 		self.dv += point(params['dx'],params['dy'])
 
 
-
 	def fire(self, params):
-		self.game.projectiles.append(projectile(player, self.weapon, point(params['dx'],params['dy'])))
+		self.game.projectiles.append(projectile(self, self.weapon, point(params['dx'] + 1,params['dy'] + 1) - self.pos))
 		
 
 
@@ -136,9 +135,9 @@ class player:
 		dir = speed.direct()
 		dir1 = point(1 if dir.x else -1, 1 if dir.y else -1)
 		#undir = dir.scale(-1,-1)
-		center_cell = point(*self.pos.index())
+		center_cell = self.pos.index()
 		forward = self.pos + dir1.scale(.5-self.eps)
-		forward_cell = point(*forward.index())
+		forward_cell = forward.index()
 		forward = self.pos + dir1.scale(.5)
 		
 		collisions = {}
@@ -241,10 +240,8 @@ class player:
 				self.resp()
 
 		else:
-			t = time.time()
 			self.speed_calc()
 			self.go()
-			print (time.time()-t)*1000
 		self.cur_consist()
 		return
 

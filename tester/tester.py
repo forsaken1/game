@@ -8,6 +8,7 @@ from game_preparing import GamePreparingTestCase
 from chat import ChatTestCase	
 from start import StartTestCase
 from ws import WebSocketTestCase
+from fire import FireTestCase
 	
 def tester(case = 'ALL'):
 	f = open('log.txt', "w")
@@ -20,21 +21,27 @@ def tester(case = 'ALL'):
 	runner.run(suite)
 	if case == 'ALL':
 		unittest.main(testRunner=runner)
-	cases = {
-	'A': AuthTestCase,
-	'C': ChatTestCase,
-	'GP': GamePreparingTestCase,
-	'M': MapTestCase,
-	'WS': WebSocketTestCase}
-	if cases.has_key(case):
-		suite = unittest.TestLoader().loadTestsFromTestCase(cases[case])
-		runner.run(suite)
 	else:
-		for c in cases.values():
-			if hasattr(c, case):
-				suite = unittest.TestSuite()
-				suite.addTest(c(case))
-				runner.run(suite)
+		cases = {
+		'A': AuthTestCase,
+		'C': ChatTestCase,
+		'GP': GamePreparingTestCase,
+		'M': MapTestCase,
+		'WS': WebSocketTestCase,
+		'F': FireTestCase}
+		if cases.has_key(case):
+			suite = unittest.TestLoader().loadTestsFromTestCase(cases[case])
+			runner.run(suite)
+		else:
+			has_test = False
+			for c in cases.values():
+				if hasattr(c, case):
+					has_test = True 
+					suite = unittest.TestSuite()
+					suite.addTest(c(case))
+					runner.run(suite)
+					break
+			if not has_test: print "not such test/test case"
 	f.close()		
 	
 	

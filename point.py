@@ -10,7 +10,7 @@ class point:
 		return point(self.x - other.x, self.y - other.y)
 
 	def index(self):
-		return (int(self.x), int(self.y))
+		return point(int(self.x), int(self.y))
 
 	def to_turple(self):
 		return (self.x, self.y)
@@ -25,4 +25,4 @@ class point:
 		return (self.x*self.x+self.y*self.y)**.5
 
 	def direct(self):
-		return point(int(self.x>=0), int(self.y>=0))
+		return point(self.x>=0, self.y>=0)

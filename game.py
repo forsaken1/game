@@ -3,7 +3,7 @@ from player import *
 from projectile import *
 import json
 from datetime import datetime
-
+import time
 
 class game:
 
@@ -42,19 +42,20 @@ class game:
 		return ret
 
 	def tick(self):
+		t = time.time()
 		self.c_ticks += 1
-
 		self.pl_mess, self.pr_mess = [], []
 		for i in self.items:
 			i = 0 if i <= 1 else i-1
 		for p in self.players:
 			p.tick()
-		for p in project:
+		for p in self.projectiles:
 			p.tick()
 
 		self.set_mess()
 		for p in self.players:
 			p.write_mess()
+		print (time.time()-t)*1000
 
 	def sync_tick(self):
 		if self.server.sync_mode:
