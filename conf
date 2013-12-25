@@ -1,1 +1,4 @@
 testing: yes
+logging: yes
+eps: 1e-6
+tick: 30

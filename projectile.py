@@ -1,13 +1,16 @@
 from point import *
+from config import *
+
+INF = 1e6
 
 weapons = {			# (speed, damage, recharge)
 		   'P': (1, 10, 10,'P'),
 		   'M': (1, 10, 5, 'M'),
 		   'K': (.5, 5, 3, 'K'),
 		   'R': (1, 30, 25, 'R'),
-		   'A': (100000, 15, 15, 'A')}
+		   'A': (INF, 15, 15, 'A')}
 
-class projectile():
+class projectile():	
 	def __init__(self, player, weapon, v):					# todo zero division
 		self.game = player.game; self.map = player.map; self.player = player
 		self.weapon = weapons[weapon]; self.v = v.scale(self.weapon[0]/ v.size())
@@ -16,6 +19,10 @@ class projectile():
 		self.dir = v.direct()
 		self.dir1 = point(1 if self.dir.x else -1, 1 if self.dir.y else -1)
 		self.was_coll = False; self.life_time = 0;
+
+	#def getx(self, y):
+
+	#def gety(self, x)
 
 	def go(self):
 		index = self.index

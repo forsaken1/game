@@ -1,7 +1,7 @@
 from point import *
-
 from projectile import *
 
+from config import *
 MAX_HEALTH = 100
 RESP_ITEM = 300
 RESP_PLAYER = 300
@@ -18,7 +18,6 @@ def add_col(collisions, time, val):
 class player:
 	def __init__(self, pid, login, game, server):
 		self.pid, self.login, self.game, self.server, self.map = pid, login, game, server, game.map
-		self.eps = server.eps
 
 		self.health = MAX_HEALTH
 		self.respawn = 1
@@ -80,16 +79,16 @@ class player:
 			])
 
 	def above_floor(self):
-		if self.map.is_wall(self.pos + point(.5-self.eps, .5+self.eps)) or\
-			self.map.is_wall(self.pos + point(-.5+self.eps, .5+self.eps)):
+		if self.map.is_wall(self.pos + point(.5-EPS, .5+EPS)) or\
+			self.map.is_wall(self.pos + point(-.5+EPS, .5+EPS)):
 			return True
 		else: return False
 
 	def speed_calc(self):
 		if self.above_floor():
-			if self.dv.y < -self.eps:
+			if self.dv.y < -EPS:
 				self.speed.y = -self.game.MAX_SPEED
-			if abs(self.dv.x) < self.eps:
+			if abs(self.dv.x) < EPS:
 				if abs(self.speed.x) < self.game.RUB:
 					self.speed.x = 0
 				else: 
@@ -97,7 +96,7 @@ class player:
 		else:
 			self.speed.y += self.game.GRAVITY
 
-		if abs(self.dv.x) > self.eps:
+		if abs(self.dv.x) > EPS:
 			self.speed.x += sign(self.dv.x)*self.game.ACCEL
 		
 		if abs(self.speed.x) > self.game.MAX_SPEED:
@@ -125,18 +124,18 @@ class player:
 		dist_size = dist.size()
 		speed_size = speed.size()
 		return speed_size > dist_size and\
-				(abs(speed.x) < self.eps and abs(dist.x) < self.eps or\
-				abs(speed.y) < self.eps and abs(dist.y) < self.eps or\
-				(speed.scale(dist_size/speed_size) - dist).size()<self.eps)
+				(abs(speed.x) < EPS and abs(dist.x) < EPS or\
+				abs(speed.y) < EPS and abs(dist.y) < EPS or\
+				(speed.scale(dist_size/speed_size) - dist).size()<EPS)
 
 	def go(self):
 		speed = self.speed
-		if speed.size() < self.eps: return
+		if speed.size() < EPS: return
 		dir = speed.direct()
 		dir1 = point(1 if dir.x else -1, 1 if dir.y else -1)
 		#undir = dir.scale(-1,-1)
 		center_cell = self.pos.index()
-		forward = self.pos + dir1.scale(.5-self.eps)
+		forward = self.pos + dir1.scale(.5-EPS)
 		forward_cell = forward.index()
 		forward = self.pos + dir1.scale(.5)
 		
@@ -144,7 +143,7 @@ class player:
 
 		dist = forward_cell + dir - forward
 		is_reach_x = abs(speed.x) > abs(dist.x); is_reach_y = abs(speed.y) > abs(dist.y);
-		if dist.size() < self.eps:
+		if dist.size() < EPS:
 			add_col(collisions,  dist.size()/speed.size(), (0,3))
 		elif self.peak2peak(dist, speed):
 			add_col(collisions,  dist.size()/speed.size(), (0,2))
@@ -195,7 +194,7 @@ class player:
 						if y_neib_wall:
 							self.speed.x = 0
 							was_coll[0] = 1
-						if abs(self.speed.x) > self.eps and abs(self.speed.y) > self.eps and coll_cell_wall \
+						if abs(self.speed.x) > EPS and abs(self.speed.y) > EPS and coll_cell_wall \
 							and not y_neib_wall and not x_neib_wall:
 							self.speed.y = 0
 							was_coll[1] = 1
@@ -207,7 +206,7 @@ class player:
 						if y_neib_wall:
 							self.speed.x = 0
 							was_coll[0] = 1
-						if abs(self.speed.x) > self.eps and abs(self.speed.y) > self.eps and coll_cell_wall\
+						if abs(self.speed.x) > EPS and abs(self.speed.y) > EPS and coll_cell_wall\
 							and not y_neib_wall and not x_neib_wall:
 							self.speed = point(0,0)
 							was_coll = [1,1]
@@ -242,11 +241,12 @@ class player:
 		else:
 			self.speed_calc()
 			self.go()
-		self.cur_consist()
 		return
 
 	def write_mess(self):
 		for c in self.connects:
+			if LOGGING:
+				log(self.game.mess)
 			c.sendMessage(self.game.mess)		
 			
 	def hit(self, dmg):

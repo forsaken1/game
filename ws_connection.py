@@ -1,5 +1,6 @@
 from autobahn.websocket import WebSocketServerFactory, WebSocketServerProtocol
 import json
+from config import *
 
 class ws_factory(WebSocketServerFactory):
 	def __init__(self, proc, url = None, debug=False, debugCodePaths=False):
@@ -15,6 +16,8 @@ class ws_connection(WebSocketServerProtocol):
 		return WebSocketServerProtocol.onConnect(self, req)
 
 	def onMessage(self, msg, binary):
+		if LOGGING:
+			log(msg)
 		msg = json.loads(msg)
 		if self.player is None:
 			self.factory.process.valid.get_id(msg['params']['sid'])

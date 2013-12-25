@@ -52,6 +52,8 @@ class game:
 		for p in self.projectiles:
 			p.tick()
 
+		for p in self.players:
+			p.cur_consist()
 		self.set_mess()
 		for p in self.players:
 			p.write_mess()

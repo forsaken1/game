@@ -1,6 +1,6 @@
 import MySQLdb, re, os, hashlib, time, json
 from projectile import weapons
-
+from config import *
 MINLOGIN, MAXLOGIN = 4, 40
 LONGBLOB = 65535
 
@@ -129,7 +129,6 @@ class process:
 		self.db.close()
 
 	def process(self, req):
-		#print req
 		try:
 			req = json.loads(req)
 			action = req['action']	
@@ -150,8 +149,7 @@ class process:
 		else: return action(params)
 	
 	def start_testing(self, params):
-		data = open("conf", "r").read()
-		if (self.config()['testing'] != 'yes'):
+		if not TESTING:
 			return self.result('notInTestMode')
 		cursor = self.db.cursor()
 		cursor.execute('show tables')
@@ -165,11 +163,6 @@ class process:
 		result = {"result": "ok", "message": "okey"} if not error else {"result": error, "message": "error"}
 		if param: result = dict(result.items()+param.items())
 		return json.dumps(result)
-	
-	def config(self):
-		config = open("conf", "r").read()
-		config = '{"' + config.replace('\n', '","').replace(': ', '": "') + '"}'
-		return json.loads(config)	
 	
 	def hash(self, body):
 		m = hashlib.sha256()
@@ -372,7 +365,7 @@ class process:
 			return self.result('notInGame')
 		game = game[0]
 		cur.execute('SELECT accel, maxVelocity, gravity, friction FROM games WHERE id = %s', (game,))
-		param = {"tickSize": self.server.tick_size, "accuracy": self.server.eps}
+		param = {"tickSize": TICK, "accuracy": EPS}
 		keys = ('accel', 'maxVelocity', 'gravity', 'friction')
 		vals = cur.fetchone()
 		for i in range(4):

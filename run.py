@@ -1,5 +1,4 @@
 import sys
-from twisted.python import log
 from twisted.web.server import Site
 from twisted.web.static import File
 from twisted.internet.task import LoopingCall
@@ -11,7 +10,8 @@ from db import create_db
 from process import process
 from server import *
 from ws_connection import *
-TICK, EPS = 30, 1e-6
+
+from config import *
 
 class post(Resource):
 	
@@ -24,8 +24,11 @@ class post(Resource):
 
 	def render_POST(self, request):
 		text = request.content.getvalue()
+		if LOGGING: 
+			log('<<<<'+text)
 		resp = self.p.process(text)
-		#print resp
+		if LOGGING: 
+			log('>>>>'+resp)
 		request.setHeader('Access-Control-Allow-Origin', '*')
 		request.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 		request.setHeader("Content-Type", "application/json")
@@ -37,18 +40,13 @@ class post(Resource):
 		request.setHeader("Content-Type", "application/json")
 		return "good" 
 
+
 if __name__ == '__main__':
 	create_db()
-	s = server(TICK, EPS)	
+	s = server()	
 	p = process(s) 
 
-	if len(sys.argv) > 1 and sys.argv[1] == 'debug':
-		log.startLogging(sys.stdout)
-		debug = True
-	else:
-		debug = False
-
-	factory = ws_factory(p, "ws://0.0.0.0:5000", debug = debug, debugCodePaths = debug)
+	factory = ws_factory(p, "ws://0.0.0.0:5000")
 	resource = WebSocketResource(factory)
 
 	root = File(".")

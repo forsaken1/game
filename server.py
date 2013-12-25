@@ -1,16 +1,16 @@
 from player import *
 from game import *
 from map import *
+from config import *
 
 class server:
-	def __init__(self, tick, eps):
+	def __init__(self):
 		print 'start'
-		self.tick_size, self.eps = tick, eps
 		self.games, self.players, self.maps = {}, {}, {}
 		self.sync_mode = False
 
 	def equal(self, x, y):
-		return abs(x-y) < self.eps
+		return abs(x-y) < EPS
 
 	def add_game(self, map_id, id, accel, friction, gravity, MaxVelocity):
 		self.games[id] = game(self.maps[map_id], self, accel, friction, gravity, MaxVelocity)

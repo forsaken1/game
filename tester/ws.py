@@ -95,7 +95,7 @@ class WebSocketTestCase(BaseTestCase):
 		map  = [".........",
 				".........",
 				"#$$......"]
-		ws1, game = self.connect(map, game_ret = True)
+		ws1, game, sid = self.connect(map, game_ret = True)
 		resp1 = self.recv_ws(ws1)
 		ws2 = self.connect(game = game)
 		self.move(ws1, resp1['tick'])
@@ -216,7 +216,7 @@ class WebSocketTestCase(BaseTestCase):
 
 	def test_players_collision(self):
 		map = ["$$"]
-		ws1, game = self.connect(map, game_ret = True)
+		ws1, game, sid = self.connect(map, game_ret = True)
 		resp1 = self.recv_ws(ws1)
 		ws2 = self.connect(game = game)
 		self.move(ws1, resp1['tick'])
