@@ -2,7 +2,8 @@ from websocket import create_connection
 import json
 from base import *
 
-ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.02, 0.02, 0.02, 0.2	
+ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.02, 0.02, 0.02, 0.2
+X,Y,VX,VY,WEAPON,WEAPON_ANGLE,LOGIN,HEALTH,RESPAWN,KILLS,DEATHS = range(11)
 
 def s(t, v = .0, a = ACCEL):
 	return v*t + a*(t + t*t)/2.
@@ -56,8 +57,8 @@ class WebSocketTestCase(BaseTestCase):
 		resp = self.recv_ws(ws)
 		assert resp['projectiles'] == [] and resp['items'] == [], resp
 		pl = resp['players'][0]
-		assert self.equal(pl[0], 1.5) and self.equal(pl[1], 1.5) and self.equal(pl[3], 0)\
-			and self.equal(pl[2], 0), pl
+		assert self.equal(pl[X], 1.5) and self.equal(pl[Y], 1.5) and self.equal(pl[VY], 0)\
+			and self.equal(pl[VX], 0), pl
 
 	def test_async_mode(self):
 		self.startTesting(False)
@@ -76,20 +77,20 @@ class WebSocketTestCase(BaseTestCase):
 		ws = self.connect(map)
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]		
-		assert self.equal(pl[0], 1.5) and self.equal(pl[1], 1.5) and self.equal(pl[3], 0)\
-			and self.equal(pl[2], 0), pl		
+		assert self.equal(pl[X], 1.5) and self.equal(pl[Y], 1.5) and self.equal(pl[VY], 0)\
+			and self.equal(pl[VX], 0), pl		
 
 		self.move(ws, resp['tick'], 1, 0)
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[0], 1.5 + s(1.)) and self.equal(pl[1], 1.5) and self.equal(pl[3], 0)\
-			and self.equal(pl[2], ACCEL), pl		
+		assert self.equal(pl[X], 1.5 + s(1.)) and self.equal(pl[Y], 1.5) and self.equal(pl[VY], 0)\
+			and self.equal(pl[VX], ACCEL), pl		
 
 		self.move(ws, resp['tick'], 1, -1)
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[0], 1.5 + s(2.)) and self.equal(pl[1], 1.5 + s(1, a = -MAX_SPEED))\
-		    and self.equal(pl[3], -MAX_SPEED) and self.equal(pl[2], 2*ACCEL), pl		
+		assert self.equal(pl[X], 1.5 + s(2.)) and self.equal(pl[Y], 1.5 + s(1, a = -MAX_SPEED))\
+		    and self.equal(pl[VY], -MAX_SPEED) and self.equal(pl[VX], 2*ACCEL), pl		
 
 	def test_multi_players_with_friction(self):
 		map  = [".........",
@@ -104,10 +105,10 @@ class WebSocketTestCase(BaseTestCase):
 		pl1 = resp1['players'][0]
 		pl2 = resp2['players'][1]
 		assert resp1 == resp2, (resp1, resp2)
-		assert self.equal(pl1[0], 1.5) and self.equal(pl1[1], 2.5) and self.equal(pl1[3], 0)\
-			and self.equal(pl1[2], 0), pl1
-		assert self.equal(pl2[0], 2.5) and self.equal(pl2[1], 2.5) and self.equal(pl2[3], 0)\
-			and self.equal(pl2[2], 0), pl2	
+		assert self.equal(pl1[X], 1.5) and self.equal(pl1[Y], 2.5) and self.equal(pl1[VY], 0)\
+			and self.equal(pl1[VX], 0), pl1
+		assert self.equal(pl2[X], 2.5) and self.equal(pl2[Y], 2.5) and self.equal(pl2[VY], 0)\
+			and self.equal(pl2[VX], 0), pl2	
 
 		self.move(ws1, resp1['tick'], 1, 0)
 		self.move(ws2, resp1['tick'], 1, -1)
@@ -115,10 +116,10 @@ class WebSocketTestCase(BaseTestCase):
 		resp2 = self.recv_ws(ws2)
 		pl1 = resp1['players'][0]
 		pl2 = resp1['players'][1]
-		assert self.equal(pl1[0], 1.5 + s(1.)) and self.equal(pl1[1], 2.5) and self.equal(pl1[3], 0)\
-			and self.equal(pl1[2], ACCEL), pl1			
-		assert self.equal(pl2[0], 2.5 + s(1.)) and self.equal(pl2[1], 2.5 + s(1, a = -MAX_SPEED))\
-		    and self.equal(pl2[3], -MAX_SPEED) and self.equal(pl2[2], ACCEL),\
+		assert self.equal(pl1[X], 1.5 + s(1.)) and self.equal(pl1[Y], 2.5) and self.equal(pl1[VY], 0)\
+			and self.equal(pl1[VX], ACCEL), pl1			
+		assert self.equal(pl2[X], 2.5 + s(1.)) and self.equal(pl2[Y], 2.5 + s(1, a = -MAX_SPEED))\
+		    and self.equal(pl2[VY], -MAX_SPEED) and self.equal(pl2[VX], ACCEL),\
 		    (pl2, 2.5 + s(1.), 	s(1, a = -MAX_SPEED))
 		
 		self.move(ws1, resp1['tick'])
@@ -127,11 +128,11 @@ class WebSocketTestCase(BaseTestCase):
 		resp2 = self.recv_ws(ws2)
 		pl1 = resp1['players'][0]
 		pl2 = resp1['players'][1]				
-		assert self.equal(pl1[0], 1.5 + s(1.)) and self.equal(pl1[1], 2.5) and self.equal(pl1[3], 0)\
-			and self.equal(pl1[2], 0), pl1			
-		assert self.equal(pl2[0], 2.5 + s(1.) + s(1,v = ACCEL, a = 0)) and self.equal(pl2[1],\
+		assert self.equal(pl1[X], 1.5 + s(1.)) and self.equal(pl1[Y], 2.5) and self.equal(pl1[VY], 0)\
+			and self.equal(pl1[VX], 0), pl1			
+		assert self.equal(pl2[X], 2.5 + s(1.) + s(1,v = ACCEL, a = 0)) and self.equal(pl2[Y],\
 		    2.5 + s(1, a = -MAX_SPEED) + s(1, v = -MAX_SPEED ,a = GRAVITY))\
-		    and self.equal(pl2[3], -MAX_SPEED + GRAVITY) and self.equal(pl2[2], ACCEL), pl2	
+		    and self.equal(pl2[VY], -MAX_SPEED + GRAVITY) and self.equal(pl2[VX], ACCEL), pl2	
 
 	def test_fall(self):
 		map = [	"$........",
@@ -140,8 +141,8 @@ class WebSocketTestCase(BaseTestCase):
 		ws = self.connect(map)
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]		
-		assert self.equal(pl[0], 0.5) and self.equal(pl[1], 0.5) and self.equal(pl[3], 0)\
-			and self.equal(pl[2], 0), pl			
+		assert self.equal(pl[X], 0.5) and self.equal(pl[Y], 0.5) and self.equal(pl[VY], 0)\
+			and self.equal(pl[VX], 0), pl			
 			
 		t = 0
 		while(s(t) < 1 - BaseTestCase.accuracy):
@@ -149,17 +150,17 @@ class WebSocketTestCase(BaseTestCase):
 			self.move(ws, resp['tick'], 1, 0)
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[1], 0.5), (pl, t)
+			assert self.equal(pl[Y], 0.5), (pl, t)
 						
 		self.move(ws, resp['tick'])	
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[3], GRAVITY) and self.equal(pl[1], 0.5 + s(t = 1, a = GRAVITY)), pl
+		assert self.equal(pl[VY], GRAVITY) and self.equal(pl[Y], 0.5 + s(t = 1, a = GRAVITY)), pl
 		
 		self.move(ws, resp['tick'])			
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[3], 2*GRAVITY) and self.equal(pl[1], 0.5 + s(t = 2, a = GRAVITY)), pl		
+		assert self.equal(pl[VY], 2*GRAVITY) and self.equal(pl[Y], 0.5 + s(t = 2, a = GRAVITY)), pl		
 
 	def test_teleportation(self):
 		map = [	"1........",
@@ -171,7 +172,7 @@ class WebSocketTestCase(BaseTestCase):
 		while(tps < 2):
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[1], s) and self.equal(pl[3], v), (pl, s, v)
+			assert self.equal(pl[Y], s) and self.equal(pl[VY], v), (pl, s, v)
 			self.move(ws, resp['tick'])
 			v += GRAVITY
 			if v >= MAX_SPEED: v = MAX_SPEED
@@ -186,13 +187,13 @@ class WebSocketTestCase(BaseTestCase):
 		while v <= MAX_SPEED:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[2], v), (pl, v)
+			assert self.equal(pl[VX], v), (pl, v)
 			self.move(ws, resp['tick'], 1)
 			v+=ACCEL
 
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[2], MAX_SPEED), (pl, v)
+		assert self.equal(pl[VX], MAX_SPEED), (pl, v)
 
 	def test_tp_angle(self):
 		map = [	"1.....",
@@ -206,13 +207,13 @@ class WebSocketTestCase(BaseTestCase):
 		while y > 1:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[3], vy) and self.equal(pl[1], y) and self.equal(pl[2], ACCEL), (pl, vy, y)
+			assert self.equal(pl[VY], vy) and self.equal(pl[Y], y) and self.equal(pl[VX], ACCEL), (pl, vy, y)
 			self.move(ws, resp['tick'])
 			vy+=GRAVITY; y += vy
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[2], ACCEL) and self.equal(pl[3], vy)\
-		    and self.equal(pl[1], 1.5) and self.equal(pl[0], 2.5), pl
+		assert self.equal(pl[VX], ACCEL) and self.equal(pl[VY], vy)\
+		    and self.equal(pl[Y], 1.5) and self.equal(pl[X], 2.5), pl
 
 	def test_players_collision(self):
 		map = ["$$"]
@@ -229,7 +230,7 @@ class WebSocketTestCase(BaseTestCase):
 			resp1 = self.recv_ws(ws1); resp2 = self.recv_ws(ws2)
 
 		pl1 = resp1['players'][0]; pl2 = resp2['players'][1]
-		assert pl1[0] >=  1.5 and pl2[0] <= 0.5, (pl1, pl2)		###change to equal, when wall collision will done 
+		assert pl1[X] >=  1.5 and pl2[X] <= 0.5, (pl1, pl2)		###change to equal, when wall collision will done 
 
 	def test_wall(self):
 		map = [	"......",
@@ -242,13 +243,13 @@ class WebSocketTestCase(BaseTestCase):
 		while x < 1.5:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[2], vx) and self.equal(pl[0], x), (pl, vx, x)
+			assert self.equal(pl[VX], vx) and self.equal(pl[X], x), (pl, vx, x)
 			self.move(ws, resp['tick'], 1)
 			vx += ACCEL; x += vx 
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[2], 0) and self.equal(pl[3], 0)\
-		    and self.equal(pl[1], 1.5) and self.equal(pl[0], 1.5), pl			
+		assert self.equal(pl[VX], 0) and self.equal(pl[VY], 0)\
+		    and self.equal(pl[Y], 1.5) and self.equal(pl[X], 1.5), pl			
 	
 	def test_jump_and_down(self):
 		map = [	"......",
@@ -262,13 +263,13 @@ class WebSocketTestCase(BaseTestCase):
 		while y < 2.5:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[3], vy) and self.equal(pl[1], y), (pl, vy, y)
+			assert self.equal(pl[VY], vy) and self.equal(pl[Y], y), (pl, vy, y)
 			self.move(ws, resp['tick'])
 			vy += GRAVITY; y += vy 
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[2], 0) and self.equal(pl[3], 0)\
-		    and self.equal(pl[1], 2.5) and self.equal(pl[0], 2.5), pl
+		assert self.equal(pl[VX], 0) and self.equal(pl[VY], 0)\
+		    and self.equal(pl[Y], 2.5) and self.equal(pl[X], 2.5), pl
 
 	def test_jump_throw_angle(self):
 		map = [	"..##..",
@@ -282,19 +283,19 @@ class WebSocketTestCase(BaseTestCase):
 		while y > 1.5:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[3], vy) and self.equal(pl[1], y), (pl, vy, y)
+			assert self.equal(pl[VY], vy) and self.equal(pl[Y], y), (pl, vy, y)
 			self.move(ws, resp['tick'], -1)
 			vy += GRAVITY; y += vy 
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[2], 0) and self.equal(pl[3], 0)\
-		    and self.equal(pl[1], 1.5) and self.equal(pl[0], 2.5), pl
+		assert self.equal(pl[VX], 0) and self.equal(pl[VY], 0)\
+		    and self.equal(pl[Y], 1.5) and self.equal(pl[X], 2.5), pl
 
 		self.move(ws, resp['tick'], -1)
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[2], -.02) and self.equal(pl[3], 0)\
-		    and self.equal(pl[0], 2.48) and self.equal(pl[1], 1.5), pl
+		assert self.equal(pl[VX], -.02) and self.equal(pl[VY], 0)\
+		    and self.equal(pl[X], 2.48) and self.equal(pl[Y], 1.5), pl
 
 	def test_peak2peak(self):
 		map = [	"..$...",
@@ -308,13 +309,13 @@ class WebSocketTestCase(BaseTestCase):
 		while y < 1.5:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[3], vy) and self.equal(pl[1], y), (pl, vy, y)
+			assert self.equal(pl[VY], vy) and self.equal(pl[Y], y), (pl, vy, y)
 			self.move(ws, resp['tick'], 1)
 			vy += GRAVITY; y += vy 
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[2], 0) and self.equal(pl[3], 0)\
-		    and self.equal(pl[1], 1.5) and self.equal(pl[0], 3.5), pl
+		assert self.equal(pl[VX], 0) and self.equal(pl[VY], 0)\
+		    and self.equal(pl[Y], 1.5) and self.equal(pl[X], 3.5), pl
 
 	def test_take_item(self):
 		map = [	"$A..#."]
@@ -324,13 +325,13 @@ class WebSocketTestCase(BaseTestCase):
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
 			it = resp['items']
-			assert self.equal(pl[2], vx) and self.equal(pl[0], x) and it == [0], (pl, vx, x, it)
+			assert self.equal(pl[VX], vx) and self.equal(pl[X], x) and it == [0], (pl, vx, x, it)
 			self.move(ws, resp['tick'], 1)
 			vx += ACCEL; x += vx 
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
 		it = resp['items']
-		assert it == [300] and pl[4] == 'A' and pl[5] == -1, (it, pl[4], pl[5])
+		assert it == [300] and pl[WEAPON] == 'A' and pl[WEAPON_ANGLE] == -1, (it, pl[WEAPON], pl[WEAPON_ANGLE])
 
 	def test_uncommon_consts(self):
 		map = [	"$.........."]
@@ -339,12 +340,12 @@ class WebSocketTestCase(BaseTestCase):
 		while vx < 0.5:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[2], vx) and self.equal(pl[0], x), (pl, vx, x)
+			assert self.equal(pl[VX], vx) and self.equal(pl[X], x), (pl, vx, x)
 			self.move(ws, resp['tick'], 1)
 			vx += 0.05; x += vx 
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[2], 0.5) , pl
+		assert self.equal(pl[VX], 0.5) , pl
 
 	def test_jump_in_cave(self):
 		map = [	"$.....",
@@ -356,7 +357,7 @@ class WebSocketTestCase(BaseTestCase):
 		while x < 2.5:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[2], vx) and self.equal(pl[0], x), (pl, vx, x)
+			assert self.equal(pl[VX], vx) and self.equal(pl[X], x), (pl, vx, x)
 			self.move(ws, resp['tick'], 1)
 			vx += ACCEL
 			if vx > MAX_SPEED: 
@@ -366,7 +367,7 @@ class WebSocketTestCase(BaseTestCase):
 		while y < 2.5:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[3], vy) and self.equal(pl[1], y), (pl, vy, y)
+			assert self.equal(pl[VY], vy) and self.equal(pl[Y], y), (pl, vy, y)
 			self.move(ws, resp['tick'], 1)
 			vy += ACCEL; 
 			if vy > MAX_SPEED: vy = MAX_SPEED;
@@ -375,15 +376,15 @@ class WebSocketTestCase(BaseTestCase):
 		while x < 5.5:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[2], vx) and self.equal(pl[0], x), (pl, vx, x)
+			assert self.equal(pl[VX], vx) and self.equal(pl[X], x), (pl, vx, x)
 			self.move(ws, resp['tick'], 1)
 			vx += ACCEL; 
 			if vx > MAX_SPEED: vx = MAX_SPEED;
 			x += vx 
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[0], 4.5) and self.equal(pl[1], 2.5) and self.equal(pl[2], 0)\
-			and self.equal(pl[3], 0), pl
+		assert self.equal(pl[X], 4.5) and self.equal(pl[Y], 2.5) and self.equal(pl[VX], 0)\
+			and self.equal(pl[VY], 0), pl
 
 
 	def test_leave_game(self):
@@ -399,10 +400,10 @@ class WebSocketTestCase(BaseTestCase):
 		pl1 = resp1['players'][0]
 		pl2 = resp2['players'][1]
 		assert resp1 == resp2, (resp1, resp2)
-		assert self.equal(pl1[0], 1.5) and self.equal(pl1[1], 2.5) and self.equal(pl1[3], 0)\
-			and self.equal(pl1[2], 0), pl1
-		assert self.equal(pl2[0], 2.5) and self.equal(pl2[1], 2.5) and self.equal(pl2[3], 0)\
-			and self.equal(pl2[2], 0), pl2	
+		assert self.equal(pl1[X], 1.5) and self.equal(pl1[Y], 2.5) and self.equal(pl1[VY], 0)\
+			and self.equal(pl1[VX], 0), pl1
+		assert self.equal(pl2[X], 2.5) and self.equal(pl2[Y], 2.5) and self.equal(pl2[VY], 0)\
+			and self.equal(pl2[VX], 0), pl2	
 
 		ws1.close()
 		resp = self.send("leaveGame", {"sid": sid1})
@@ -411,6 +412,6 @@ class WebSocketTestCase(BaseTestCase):
 		resp2 = self.recv_ws(ws2)
 		assert len(resp2['players']) == 1, resp2['players']
 		pl2 = resp2['players'][0]
-		assert self.equal(pl2[0], 2.5) and self.equal(pl2[1], 2.5) and self.equal(pl2[3], 0)\
-			and self.equal(pl2[2], 0), pl2	
+		assert self.equal(pl2[X], 2.5) and self.equal(pl2[Y], 2.5) and self.equal(pl2[VY], 0)\
+			and self.equal(pl2[VX], 0), pl2	
 

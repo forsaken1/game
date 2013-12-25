@@ -1,3 +1,5 @@
+from math import atan2
+from math import pi
 class point:
 
 	def __init__(self, x, y):
@@ -26,3 +28,8 @@ class point:
 
 	def direct(self):
 		return point(self.x>=0, self.y>=0)
+
+	def angle(self):
+		arctg = atan2(self.y, self.x)
+		if arctg < 0: arctg+=2*pi
+		return arctg/pi*180

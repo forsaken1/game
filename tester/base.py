@@ -26,7 +26,6 @@ class BaseTestCase(unittest.TestCase):
 		BaseTestCase.defMap = self.get_map()				# there's always default map in DB
 
 	def send(self, action = None, params = None, dict = None, wo_dumps = False):
-		print action, params
 		if dict: 
 			query = dict if wo_dumps else json.dumps(dict)
 		else: 
@@ -37,7 +36,6 @@ class BaseTestCase(unittest.TestCase):
 			resp = json.loads(resp.text)
 		except:
 			assert resp == 0, resp
-		print resp
 		assert resp.has_key('result'), resp
 		return resp
 

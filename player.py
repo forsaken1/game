@@ -29,7 +29,7 @@ class player:
 		self.is_start, self.was_action = False, False
 
 		self.weapon = 'K'; self.last_fire_tick = 0; self.weapon_angle = -1
-		self.kills = 0; self.death = 0
+		self.kills = 0; self.deaths = 0
 
 		self.connects = []
 
@@ -52,7 +52,9 @@ class player:
 
 
 	def fire(self, params):
-		self.game.projectiles.append(projectile(self, self.weapon, point(params['dx'] + 1,params['dy'] + 1) - self.pos))
+		v = point(params['dx'] + 1,params['dy'] + 1) - self.pos
+		self.weapon_angle = v.angle()
+		self.game.projectiles.append(projectile(self, self.weapon,v))
 		
 
 
@@ -75,7 +77,7 @@ class player:
 			self.health,
 			self.respawn,
 			self.kills,
-			self.death
+			self.deaths
 			])
 
 	def above_floor(self):
@@ -254,6 +256,6 @@ class player:
 		if self.health <= 0:
 		   self.health = 0
 		   self.respawn = RESP_PLAYER
-		   self.death += 1
+		   self.deaths += 1
 		   return True
 		return False
