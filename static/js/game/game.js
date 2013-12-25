@@ -105,7 +105,7 @@ function GameController($http, $interval)
 			player.setCoords(x, y);
 			VX = data.players[N][2];
 			VY = data.players[N][3];
-			DX = -x + 400;
+			DX = -x + 405;
 			DY = -y + 300;
 			//console.log(event.data); // for debug
 		};
@@ -138,7 +138,7 @@ function GameController($http, $interval)
 			}
 			for(var i = 0; i < players.length; ++i)
 			{
-				players[i] && i == N ? players[N].drawMe() : players[i].draw(DX, DY);
+				players[i] && players[i].draw(i == N, DX, DY);
 			}
 		}
 
@@ -156,6 +156,8 @@ function GameController($http, $interval)
 				}
 			}));
 			DIRECTION_X = -1;
+			player.setDirection(0);
+			player.move();
 		}
 
 		onKeyDown[38] = function()
@@ -186,12 +188,15 @@ function GameController($http, $interval)
 				}
 			}));
 			DIRECTION_X = 1;
+			player.setDirection(1);
+			player.move();
 		}
 		// UP keys
 		onKeyUp[37] = function()
 		{
 			ws.send(player.getStopJson(TICK, DIRECTION_X, DIRECTION_Y));
 			DIRECTION_X = 0;
+			player.stop();
 		}
 
 		onKeyUp[38] = function()
@@ -204,6 +209,7 @@ function GameController($http, $interval)
 		{
 			ws.send(player.getStopJson(TICK, DIRECTION_X, DIRECTION_Y));
 			DIRECTION_X = 0;
+			player.stop();
 		}
 
 		document.body.onkeydown = function(e)
