@@ -1,4 +1,4 @@
-function GameController($http, $interval)
+function GameController($scope, $http, $interval)
 {
 	$interval.cancel(SET_INTERVAL_HANDLER);
 	var BLOCK_SIZE = 50;
@@ -250,4 +250,33 @@ function GameController($http, $interval)
 		// Start
 		setInterval(this.draw, 33);
 	});
+
+	$scope.leave_game = function()
+	{
+		send(
+			JSON.stringify(
+			{
+				'action': 'leaveGame',
+				'params': 
+				{
+					'sid': getCookie('sid')
+				}
+			}),
+			function(data)
+			{
+				if(!data)
+				{
+					setError('Wrong request');
+					return;
+				}
+				if(data.result == 'ok')
+				{
+					setMessage('You disconnected from game');
+				}
+				else
+					setError(data.message);
+			}
+		);
+		window.location = '#find_games';
+	}
 }

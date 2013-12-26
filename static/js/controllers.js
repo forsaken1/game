@@ -75,33 +75,6 @@ function FindGameController ($scope, $http, $interval)
 			}
 		)
 	}
-	$scope.leave_game = function()
-	{
-		send(
-			JSON.stringify(
-			{
-				'action': 'leaveGame',
-				'params': 
-				{
-					'sid': getCookie('sid')
-				}
-			}),
-			function(data)
-			{
-				if(!data)
-				{
-					setError('Wrong request');
-					return;
-				}
-				if(data.result == 'ok')
-				{
-					setMessage('You disconnected from game');
-				}
-				else
-					setError(data.message);
-			}
-		)
-	}
 }
 
 function CreateGameController ($scope, $http, $interval)
@@ -146,6 +119,13 @@ function CreateGameController ($scope, $http, $interval)
 					'name': $scope.name, 
 					'map': map_id,
 					'maxPlayers': parseInt($scope.maxPlayers)
+				},
+				'consts':
+				{
+					'accel': parseFloat($scope.accel),
+					'maxVelocity': parseFloat($scope.maxVelocity),
+					'gravity': parseFloat($scope.gravity),
+					'friction': parseFloat($scope.friction)
 				}
 			}),
 			function (data)
