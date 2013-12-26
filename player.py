@@ -2,9 +2,6 @@ from point import *
 from projectile import *
 
 from config import *
-MAX_HEALTH = 100
-RESP_ITEM = 300
-RESP_PLAYER = 300
 ZERO = point(0, 0)
 
 def sign(x):
@@ -28,7 +25,7 @@ class player:
 
 		self.is_start, self.was_action = False, False
 
-		self.weapon = 'K'; self.last_fire_tick = 0; self.weapon_angle = -1
+		self.weapon = 'K'; self.last_fire_tick = -INF; self.weapon_angle = -1
 		self.kills = 0; self.deaths = 0
 
 		self.connects = []
@@ -43,7 +40,7 @@ class player:
 
 		if self.game.c_ticks - 1 <= msg['params']['tick'] <= self.game.c_ticks: 
 			self.was_action = True
-			if msg['action'] != 'empty':
+			if msg['action'] != 'empty' and not self.respawn:
 				getattr(self, msg['action'])(msg['params'])
 			self.game.sync_tick()
 
@@ -52,9 +49,11 @@ class player:
 
 
 	def fire(self, params):
-		v = point(params['dx'] + 1,params['dy'] + 1) - self.pos
-		self.weapon_angle = v.angle()
-		self.game.projectiles.append(projectile(self, self.weapon,v))
+		if self.game.c_ticks - self.last_fire_tick >= weapons[self.weapon].recharge:
+			self.last_fire_tick = self.game.c_ticks
+			v = point(params['dx'] + 1,params['dy'] + 1) - self.pos
+			self.weapon_angle = v.angle()
+			self.game.projectiles.append(projectile(self, self.weapon,v))
 		
 
 

@@ -1,18 +1,6 @@
 from point import *
 from config import *
 
-INF = 1e6
-class weapon():
-	def __init__(self, speed, damage, recharge, letter):
-		self.speed = speed; self.damage = damage; self.recharge = recharge; self.letter = letter
-
-weapons = {
-		   'P': weapon(1, 10, 10,'P'),
-		   'M': weapon(1, 10, 5, 'M'),
-		   'K': weapon(.5, 5, 3, 'K'),
-		   'R': weapon(1, 30, 25, 'R'),
-		   'A': weapon(INF, 15, 15, 'A')}
-
 class projectile():	
 	def __init__(self, player, weapon, v):					# todo zero division
 		self.game = player.game; self.map = player.map; self.player = player
@@ -39,10 +27,10 @@ class projectile():
 		pos = self.pos
 		dir = self.dir; dir1 = self.dir1
 		end = pos + self.v
- 		end = point(int(end.x), int(end.y))
+		end = point(int(end.x), int(end.y))
 		while True:
 			last = int(self.gety(index.x+dir.x))
-			while index.y != last:
+			while index.y != last and index.y != end.y:
 				index.y += dir1.y
 				if self.map.map[index.y][index.x] == '#':
 					self.was_coll = True
@@ -52,7 +40,7 @@ class projectile():
 					return; 
 			index.x += dir1.x
 			if self.map.map[index.y][index.x] == '#':
-				self.was_coll = True
+ 				self.was_coll = True
 				self.v = self.v.scale((abs(index.x + (not dir.x) - pos.x)/self.v.x))
 				return
 			if index.y == end.y and index.x == end.x:
@@ -75,7 +63,7 @@ class projectile():
 				damaged = pl
 			else:
 				y = pl.pos.y - dir1.y*.5
-				if (y < pos.y) ^ (y < end.y) and abs(getx(y)-pl.pos.x) <= .5 and abs(y-pos.y)<min_dist:
+				if (y < pos.y) ^ (y < end.y) and abs(self.getx(y)-pl.pos.x) <= .5 and abs(y-pos.y)<min_dist:
 					min_dist = abs(y-pos.y)
 					damaged = pl
 		if damaged:

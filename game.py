@@ -45,8 +45,8 @@ class game:
 		t = time.time()
 		self.c_ticks += 1
 		self.pl_mess, self.pr_mess = [], []
-		for i in self.items:
-			i = 0 if i <= 1 else i-1
+		for i in range(len(self.items)):
+			self.items[i] = 0 if self.items[i] <= 1 else self.items[i]-1
 		for p in self.players:
 			p.tick()
 		for p in self.projectiles:
