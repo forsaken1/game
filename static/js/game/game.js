@@ -46,6 +46,11 @@ function GameController($http, $interval)
 		var onKeyUp = [];
 		var onKeyDown = [];
 
+		var pistol = new Image();
+		var minigun = new Image();
+		var railgun = new Image();
+		var sword = new Image();
+		var rocket = new Image();
 		var block = new Image();
 		var portal = new Image();
 		var respawn = new Image();
@@ -61,6 +66,11 @@ function GameController($http, $interval)
 		block.src = '/graphics/map/ground.png';
 		portal.src = '/graphics/map/portal.png';
 		respawn.src = '/graphics/map/respawn.png';
+		pistol.src = '/graphics/weapons/pistol.png';
+		minigun.src = '/graphics/weapons/minigun.png';
+		railgun.src = '/graphics/weapons/railgun.png';
+		sword.src = '/graphics/weapons/sword.png';
+		rocket.src = '/graphics/weapons/rocket.png';
 
 		// Sockets
 		var ws = new WebSocket('ws://' + SERVER_URL_DOMAIN + '/websocket');
@@ -132,6 +142,11 @@ function GameController($http, $interval)
 				for(var j = 0; j < MAP.map[i].length; ++j)
 				{
 					MAP.map[i][j] == '#' &&	CTX.drawImage(block, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					MAP.map[i][j] == 'K' &&	CTX.drawImage(sword, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					MAP.map[i][j] == 'P' &&	CTX.drawImage(pistol, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					MAP.map[i][j] == 'M' &&	CTX.drawImage(minigun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					MAP.map[i][j] == 'A' &&	CTX.drawImage(railgun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					MAP.map[i][j] == 'R' &&	CTX.drawImage(rocket, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					//MAP.map[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE, i * BLOCK_SIZE);
 					/^\d+$/.test(MAP.map[i][j]) && CTX.drawImage(portal, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 				}
