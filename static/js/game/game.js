@@ -118,7 +118,7 @@ function GameController($http, $interval)
 		this.getN = function(login, pl)
 		{
 			for(var i = 0; i < pl.length; ++i)
-				if(pl[i][5] == login)
+				if(pl[i][6] == login)
 					return i;
 		}
 

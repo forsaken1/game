@@ -1,5 +1,6 @@
 import MySQLdb, re, os, hashlib, time, json
-
+from projectile import weapons
+from config import *
 MINLOGIN, MAXLOGIN = 4, 40
 LONGBLOB = 65535
 
@@ -61,8 +62,8 @@ class param_validator:
 			return False
 		else: return True		
 
-	def valid_dot(self, c):
-		return 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or c=='.' or c=='$' or c=='#' 
+	def valid_dot(self, c):										# add new item here
+		return c == 'h' or weapons.has_key(c) or '0'<=c<='9' or c=='.' or c=='$' or c=='#' 
 	
 	def badMap(self, map):
 		if type(map) != list or len(map) < 1: return False
@@ -70,9 +71,9 @@ class param_validator:
 		tp = [0]*10
 		for row in map:
 			if type(row) != unicode or len(row) != size or not all(self.valid_dot(d) for d in row):
-				for dot in row:
-					if '0' <= dot <= '9': tp[int(dot)] +=1
 				return False
+			for dot in row:
+				if '0' <= dot <= '9': tp[int(dot)] +=1
 		for t in tp:
 			if t != 2 and t != 0:
 				return False
@@ -148,8 +149,7 @@ class process:
 		else: return action(params)
 	
 	def start_testing(self, params):
-		data = open("conf", "r").read()
-		if (self.config()['testing'] != 'yes'):
+		if not TESTING:
 			return self.result('notInTestMode')
 		cursor = self.db.cursor()
 		cursor.execute('show tables')
@@ -163,11 +163,6 @@ class process:
 		result = {"result": "ok", "message": "okey"} if not error else {"result": error, "message": "error"}
 		if param: result = dict(result.items()+param.items())
 		return json.dumps(result)
-	
-	def config(self):
-		config = open("conf", "r").read()
-		config = '{"' + config.replace('\n', '","').replace(': ', '": "') + '"}'
-		return json.loads(config)	
 	
 	def hash(self, body):
 		m = hashlib.sha256()
@@ -370,7 +365,7 @@ class process:
 			return self.result('notInGame')
 		game = game[0]
 		cur.execute('SELECT accel, maxVelocity, gravity, friction FROM games WHERE id = %s', (game,))
-		param = {"tickSize": self.server.tick_size, "accuracy": self.server.eps}
+		param = {"tickSize": TICK, "accuracy": EPS}
 		keys = ('accel', 'maxVelocity', 'gravity', 'friction')
 		vals = cur.fetchone()
 		for i in range(4):

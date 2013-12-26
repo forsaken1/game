@@ -1,37 +1,11 @@
 from point import *
-import time
+from projectile import *
 
-MAX_HEALTH = 100
-RESP_ITEM = 30
+from config import *
 ZERO = point(0, 0)
-weapons = {
-		   'P': (1, 10, 10, .3),
-		   'M': (1, 10, 5, .3),
-		   'K': (.5, 5, 3, .5),
-		   'R': (1, 30, 25, 0.5),
-		   'A': (100, 15, 15, 0.3)}
-
 
 def sign(x):
 	return 1 if x > 0 else -1
-
-def all_types_wo_wall():
-	types = ''
-	i = ord('0')
-	while chr(i) < '9':
-		i+=1
-		types += chr(i)
-	i = ord('a')
-	while chr(i) < 'z':
-		i+=1
-		types += chr(i)
-	i = ord('A')
-	while chr(i) < 'Z':
-		i+=1
-		types += chr(i)
-	return types
-
-types = all_types_wo_wall()
 
 def add_col(collisions, time, val):
 	if collisions.has_key(time):
@@ -41,7 +15,6 @@ def add_col(collisions, time, val):
 class player:
 	def __init__(self, pid, login, game, server):
 		self.pid, self.login, self.game, self.server, self.map = pid, login, game, server, game.map
-		self.eps = server.eps
 
 		self.health = MAX_HEALTH
 		self.respawn = 1
@@ -52,30 +25,34 @@ class player:
 
 		self.is_start, self.was_action = False, False
 
-		self.weapon = 'K'; self.last_fire_tick = 0
+		self.weapon = 'K'; self.last_fire_tick = -INF; self.weapon_angle = -1
+		self.kills = 0; self.deaths = 0
 
 		self.connects = []
 
 	#---------------------------function for using on client mess---------------------------------#
 	def action(self, msg):
+		self.was_action = True
 		if not self.is_start:
 			self.is_start = True
-			self.was_action = True
 			self.game.sync_tick()
 			return
 
 		if self.game.c_ticks - 1 <= msg['params']['tick'] <= self.game.c_ticks: 
-			self.was_action = True
-			if msg['action'] != 'empty':
+			if msg['action'] != 'empty' and not self.respawn:
 				getattr(self, msg['action'])(msg['params'])
-			self.game.sync_tick()
+		self.game.sync_tick()
 
 	def move(self, params):
 		self.dv += point(params['dx'],params['dy'])
 
 
-
-	#def fire(self, params):
+	def fire(self, params):
+		if self.game.c_ticks - self.last_fire_tick >= weapons[self.weapon].recharge:
+			self.last_fire_tick = self.game.c_ticks
+			v = point(params['dx'] + 1,params['dy'] + 1) - self.pos
+			self.weapon_angle = v.angle()
+			self.game.projectiles.append(projectile(self, self.weapon,v))
 		
 
 
@@ -92,22 +69,26 @@ class player:
 			self.pos.y-1,
 			self.speed.x,
 			self.speed.y,
-			self.health,
+			self.weapon,
+			self.weapon_angle,
 			self.login,
-			self.respawn
+			self.health,
+			self.respawn,
+			self.kills,
+			self.deaths
 			])
 
 	def above_floor(self):
-		if self.map.is_wall(self.pos + point(.5-self.eps, .5+self.eps)) or\
-			self.map.is_wall(self.pos + point(-.5+self.eps, .5+self.eps)):
+		if self.map.is_wall(self.pos + point(.5-EPS, .5+EPS)) or\
+			self.map.is_wall(self.pos + point(-.5+EPS, .5+EPS)):
 			return True
 		else: return False
 
 	def speed_calc(self):
 		if self.above_floor():
-			if self.dv.y < -self.eps:
+			if self.dv.y < -EPS:
 				self.speed.y = -self.game.MAX_SPEED
-			if abs(self.dv.x) < self.eps:
+			if abs(self.dv.x) < EPS:
 				if abs(self.speed.x) < self.game.RUB:
 					self.speed.x = 0
 				else: 
@@ -115,7 +96,7 @@ class player:
 		else:
 			self.speed.y += self.game.GRAVITY
 
-		if abs(self.dv.x) > self.eps:
+		if abs(self.dv.x) > EPS:
 			self.speed.x += sign(self.dv.x)*self.game.ACCEL
 		
 		if abs(self.speed.x) > self.game.MAX_SPEED:
@@ -126,6 +107,7 @@ class player:
 		self.dv = ZERO
 
 	def take_item(self, dot):
+		dot = dot.to_turple()
 		item = self.map.items[dot]
 		if not self.game.items[item[0]]:
 			self.game.items[item[0]] = RESP_ITEM
@@ -133,7 +115,6 @@ class player:
 				self.health = MAX_HEALTH
 			else: 
 				self.weapon = item[1]
-
 
 	def teleport(self, dot):
 		self.pos = point(*self.map.tps[dot.to_turple()])
@@ -143,26 +124,26 @@ class player:
 		dist_size = dist.size()
 		speed_size = speed.size()
 		return speed_size > dist_size and\
-				(abs(speed.x) < self.eps and abs(dist.x) < self.eps or\
-				abs(speed.y) < self.eps and abs(dist.y) < self.eps or\
-				(speed.scale(dist_size/speed_size) - dist).size()<self.eps)
+				(abs(speed.x) < EPS and abs(dist.x) < EPS or\
+				abs(speed.y) < EPS and abs(dist.y) < EPS or\
+				(speed.scale(dist_size/speed_size) - dist).size()<EPS)
 
 	def go(self):
 		speed = self.speed
-		if speed.size() < self.eps: return
+		if speed.size() < EPS: return
 		dir = speed.direct()
 		dir1 = point(1 if dir.x else -1, 1 if dir.y else -1)
 		#undir = dir.scale(-1,-1)
-		center_cell = point(*self.pos.index())
-		forward = self.pos + dir1.scale(.5-self.eps)
-		forward_cell = point(*forward.index())
+		center_cell = self.pos.index()
+		forward = self.pos + dir1.scale(.5-EPS)
+		forward_cell = forward.index()
 		forward = self.pos + dir1.scale(.5)
 		
 		collisions = {}
 
 		dist = forward_cell + dir - forward
 		is_reach_x = abs(speed.x) > abs(dist.x); is_reach_y = abs(speed.y) > abs(dist.y);
-		if dist.size() < self.eps:
+		if dist.size() < EPS:
 			add_col(collisions,  dist.size()/speed.size(), (0,3))
 		elif self.peak2peak(dist, speed):
 			add_col(collisions,  dist.size()/speed.size(), (0,2))
@@ -199,7 +180,7 @@ class player:
 						 
 					el = self.map.map[coll_cell.y][coll_cell.x]
 					if '0'<=el<='9': self.teleport(coll_cell); return
-					elif 'a'<=el<='Z': self.take_item(coll_item)
+					elif 'A'<=el<='z': self.take_item(coll_cell)
 
 				else:				# todo (0,0) collision
 					coll_cell = forward_cell + offset
@@ -213,7 +194,7 @@ class player:
 						if y_neib_wall:
 							self.speed.x = 0
 							was_coll[0] = 1
-						if abs(self.speed.x) > self.eps and abs(self.speed.y) > self.eps and coll_cell_wall \
+						if abs(self.speed.x) > EPS and abs(self.speed.y) > EPS and coll_cell_wall \
 							and not y_neib_wall and not x_neib_wall:
 							self.speed.y = 0
 							was_coll[1] = 1
@@ -225,7 +206,7 @@ class player:
 						if y_neib_wall:
 							self.speed.x = 0
 							was_coll[0] = 1
-						if abs(self.speed.x) > self.eps and abs(self.speed.y) > self.eps and coll_cell_wall\
+						if abs(self.speed.x) > EPS and abs(self.speed.y) > EPS and coll_cell_wall\
 							and not y_neib_wall and not x_neib_wall:
 							self.speed = point(0,0)
 							was_coll = [1,1]
@@ -258,13 +239,21 @@ class player:
 				self.resp()
 
 		else:
-			t = time.time()
 			self.speed_calc()
 			self.go()
-			print (time.time()-t)*1000
-		self.cur_consist()
 		return
 
 	def write_mess(self):
 		for c in self.connects:
-			c.sendMessage(self.game.mess)			
+			if LOGGING:
+				log(self.game.mess)
+			c.sendMessage(self.game.mess)		
+			
+	def hit(self, dmg):
+		self.health -= dmg
+		if self.health <= 0:
+		   self.health = 0
+		   self.respawn = RESP_PLAYER
+		   self.deaths += 1
+		   return True
+		return False

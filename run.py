@@ -1,9 +1,9 @@
 import sys
-from twisted.python import log
 from twisted.web.server import Site
 from twisted.web.static import File
 from twisted.internet.task import LoopingCall
 
+from twisted.python.log import startLogging
 from twisted.web.resource import Resource
 from autobahn.resource import WebSocketResource
 
@@ -11,7 +11,8 @@ from db import create_db
 from process import process
 from server import *
 from ws_connection import *
-TICK, EPS = 30, 1e-6
+
+from config import *
 
 class post(Resource):
 	
@@ -20,11 +21,15 @@ class post(Resource):
 		Resource.__init__(self)
 
 	def render_GET(self, request):
-		return File("conf")
+		return File("./static/index.html").getContent()
 
 	def render_POST(self, request):
 		text = request.content.getvalue()
+		if LOGGING: 
+			print '<<<<'+text
 		resp = self.p.process(text)
+		if LOGGING: 
+			print '>>>>'+resp
 		request.setHeader('Access-Control-Allow-Origin', '*')
 		request.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 		request.setHeader("Content-Type", "application/json")
@@ -36,25 +41,21 @@ class post(Resource):
 		request.setHeader("Content-Type", "application/json")
 		return "good" 
 
+
 if __name__ == '__main__':
+#	startLogging(sys.stdout)
 	create_db()
-	s = server(TICK, EPS)	
+	s = server()	
 	p = process(s) 
 
-	if len(sys.argv) > 1 and sys.argv[1] == 'debug':
-		log.startLogging(sys.stdout)
-		debug = True
-	else:
-		debug = False
-
-	factory = ws_factory(p, "ws://localhost:5000", debug = debug, debugCodePaths = debug)
+	factory = ws_factory(p, "ws://0.0.0.0:5000")
+	factory.setProtocolOptions(allowHixie76 = True)
 	resource = WebSocketResource(factory)
 
-	root = File(".")
+	root = File("./static")
 	root.putChild("websocket", resource)
-	root.putChild("conf", File("conf"))
 	root.putChild("", post(p))
-	site = Site(root)
+	site = Site(root, )
 
 	from twisted.internet import reactor
 	reactor.listenTCP(5000, site)
