@@ -29,6 +29,7 @@ function GameController($scope, $http, $interval)
 		for(var i = 0; i < MAP.map[0].length; ++i)
 			MAP.map[MAP.map.length - 1][i] = '#';
 
+		var AIM_SIZE = 75;
 		var TICK = 0;
 		var SPEED = 20;
 		var JUMP = 50;
@@ -174,7 +175,7 @@ function GameController($scope, $http, $interval)
 			{
 				CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX, projectiles[i][1] * BLOCK_SIZE + DY);
 			}
-
+			CTX.drawImage(aim, mousePos.x - AIM_SIZE / 2, mousePos.y - AIM_SIZE / 2, AIM_SIZE, AIM_SIZE);
 		}
 
 		// MOUSE events
