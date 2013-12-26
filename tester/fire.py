@@ -185,7 +185,7 @@ class FireTestCase(BaseTestCase):
 			if (not i%w.recharge): health -= w.damage
 			i += 1
 		pl = resp['players'][0]
-		assert pl[HEALTH] == 0 and pl[RESPAWN] == RESP_PLAYER  and pl[DEATH] == 1, pl
+		assert pl[HEALTH] == 0 and pl[RESPAWN] == RESP_PLAYER  and pl[DEATHS] == 1, pl
 		pl = resp['players'][1]
 		assert pl[KILLS] == 1, pl
 

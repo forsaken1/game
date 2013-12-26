@@ -20,15 +20,15 @@ class post(Resource):
 		Resource.__init__(self)
 
 	def render_GET(self, request):
-		return File("conf")
+		return File("./static/index.html").getContent()
 
 	def render_POST(self, request):
 		text = request.content.getvalue()
 		if LOGGING: 
-			log('<<<<'+text)
+			print '<<<<'+text
 		resp = self.p.process(text)
 		if LOGGING: 
-			log('>>>>'+resp)
+			print '>>>>'+resp
 		request.setHeader('Access-Control-Allow-Origin', '*')
 		request.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 		request.setHeader("Content-Type", "application/json")
@@ -49,9 +49,8 @@ if __name__ == '__main__':
 	factory = ws_factory(p, "ws://0.0.0.0:5000")
 	resource = WebSocketResource(factory)
 
-
+	root = File("./static")
 	root.putChild("websocket", resource)
-	root.putChild("conf", File("conf"))
 	root.putChild("", post(p))
 	site = Site(root)
 

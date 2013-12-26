@@ -55,6 +55,7 @@ class game:
 		for p in self.players:
 			p.cur_consist()
 		self.set_mess()
+		log(self.mess)
 		for p in self.players:
 			p.write_mess()
 		print (time.time()-t)*1000
