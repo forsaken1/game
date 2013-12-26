@@ -39,8 +39,6 @@ function GameController($scope, $http, $interval)
 		var N = null; // player`s number in array
 		var canvas = document.getElementById('canvas');
 		var CTX = canvas.getContext('2d');
-		var CTX_X = 0;
-		var CTX_Y = 0;
 		var DX = 0;
 		var DY = 0;
 		var onKeyUp = [];
@@ -55,9 +53,13 @@ function GameController($scope, $http, $interval)
 		var portal = new Image();
 		var respawn = new Image();
 		var background = new Image();
+		var bullet = new Image();
+		var aim = new Image();
 		var players = [];
+		var projectiles = [];
 		var handler = this;
 		var player;
+		var mousePos;
 
 		for(var i = 0; i < MAP.maxPlayers; ++i)
 			players[i] = new Player(CTX, -1000, -1000);
@@ -71,6 +73,8 @@ function GameController($scope, $http, $interval)
 		railgun.src = '/graphics/weapons/railgun.png';
 		sword.src = '/graphics/weapons/sword.png';
 		rocket.src = '/graphics/weapons/rocket.png';
+		bullet.src = '/graphics/weapons/bullet.png';
+		aim.src = '/graphics/weapons/aim.png';
 
 		// Sockets
 		var ws = new WebSocket('ws://' + SERVER_URL_DOMAIN + '/websocket');
@@ -127,6 +131,7 @@ function GameController($scope, $http, $interval)
 			VY = data.players[N][3];
 			DX = -x + 405;
 			DY = -y + 300;
+			projectiles = data.projectiles;
 			//console.log(event.data); // for debug
 		};
 
@@ -165,7 +170,40 @@ function GameController($scope, $http, $interval)
 			{
 				players[i] && players[i].draw(i == N, DX, DY);
 			}
+			for(var i = 0; i < projectiles.length; ++i)
+			{
+				CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX, projectiles[i][1] * BLOCK_SIZE + DY);
+			}
+
 		}
+
+		// MOUSE events
+		this.getMousePos = function(canvas, evt) {
+			var rect = canvas.getBoundingClientRect();
+			return {
+				x: evt.clientX - rect.left,
+				y: evt.clientY - rect.top
+			};
+		}
+
+		canvas.addEventListener('mousemove', function(evt) {
+			mousePos = handler.getMousePos(canvas, evt);
+		}, false);
+
+		canvas.addEventListener('mousedown', function(evt) {
+			mousePos = handler.getMousePos(canvas, evt);
+			ws.send(send = JSON.stringify(
+			{
+				'action': 'fire',
+				'params':
+				{
+					'tick': TICK,
+					'dx': (mousePos.x - DX) / BLOCK_SIZE,
+					'dy': (mousePos.y - DY) / BLOCK_SIZE
+				}
+			}));
+			c(send);
+		}, false);
 
 		// DOWN keys
 		onKeyDown[37] = function()
@@ -248,7 +286,7 @@ function GameController($scope, $http, $interval)
 		}
 
 		// Start
-		setInterval(this.draw, 33);
+		setInterval(this.draw, 40);
 	});
 
 	$scope.leave_game = function()
