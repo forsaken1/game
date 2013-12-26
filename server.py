@@ -26,7 +26,7 @@ class server:
 
 	def erase_player(self, sid, gid):
 		self.games[gid].leave(sid)
-		if len(self.games[gid].players) == 0: self.games.remove(games[gid])
+		if len(self.games[gid].players) == 0: del self.games[gid]
 
 	def clear(self, new_mode):
 		self.games.clear()

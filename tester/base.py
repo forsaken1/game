@@ -8,7 +8,7 @@ ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.02, 0.02, 0.02, 0.2
 X,Y,VX,VY,WEAPON,WEAPON_ANGLE,LOGIN,HEALTH,RESPAWN,KILLS,DEATHS = range(11)
 
 class BaseTestCase(unittest.TestCase):
-	HOST, PORT = '37.8.155.60', '5000'
+	HOST, PORT = 'localhost', '5000'
 	counter = {'user':0, 'game':0, 'map': 0}
 	defMap = 0
 

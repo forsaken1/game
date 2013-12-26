@@ -3,6 +3,7 @@ from twisted.web.server import Site
 from twisted.web.static import File
 from twisted.internet.task import LoopingCall
 
+from twisted.python.log import startLogging
 from twisted.web.resource import Resource
 from autobahn.resource import WebSocketResource
 
@@ -42,17 +43,19 @@ class post(Resource):
 
 
 if __name__ == '__main__':
+#	startLogging(sys.stdout)
 	create_db()
 	s = server()	
 	p = process(s) 
 
 	factory = ws_factory(p, "ws://0.0.0.0:5000")
+	factory.setProtocolOptions(allowHixie76 = True)
 	resource = WebSocketResource(factory)
 
 	root = File("./static")
 	root.putChild("websocket", resource)
 	root.putChild("", post(p))
-	site = Site(root)
+	site = Site(root, )
 
 	from twisted.internet import reactor
 	reactor.listenTCP(5000, site)

@@ -63,7 +63,7 @@ class param_validator:
 		else: return True		
 
 	def valid_dot(self, c):										# add new item here
-		return c == 'a' or weapons.has_key(c) or '0'<=c<='9' or c=='.' or c=='$' or c=='#' 
+		return c == 'h' or weapons.has_key(c) or '0'<=c<='9' or c=='.' or c=='$' or c=='#' 
 	
 	def badMap(self, map):
 		if type(map) != list or len(map) < 1: return False
