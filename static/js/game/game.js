@@ -172,7 +172,7 @@ function GameController($scope, $http, $interval)
 			{
 				projectiles[i] && CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX, projectiles[i][1] * BLOCK_SIZE + DY);
 			}
-			mousePos && CTX.drawImage(aim, mousePos.x - AIM_SIZE / 2, mousePos.y - AIM_SIZE / 2, AIM_SIZE, AIM_SIZE);
+			//mousePos && CTX.drawImage(aim, mousePos.x - AIM_SIZE / 2, mousePos.y - AIM_SIZE / 2, AIM_SIZE, AIM_SIZE); //todo: aim
 		}
 
 		// MOUSE events
@@ -184,15 +184,15 @@ function GameController($scope, $http, $interval)
 			};
 		}
 
-		canvas.addEventListener('mousemove', function(evt)
+		/*canvas.addEventListener('mousemove', function(evt) // todo: aim
 		{
 			mousePos = handler.getMousePos(canvas, evt);
-		}, false);
+		}, true);*/
 
 		canvas.addEventListener('mousedown', function(evt)
 		{
 			mousePos = handler.getMousePos(canvas, evt);
-			ws.send(send = JSON.stringify(
+			ws.send(JSON.stringify(
 			{
 				'action': 'fire',
 				'params':

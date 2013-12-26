@@ -46,7 +46,7 @@ function FindGameController ($scope, $http, $interval)
 	{
 		$scope.games = data.games;
 	});
-	$scope.join_game = function(game_id)
+	$scope.join_game = function(game_id, map_id)
 	{
 		send(
 			JSON.stringify(
@@ -68,6 +68,7 @@ function FindGameController ($scope, $http, $interval)
 				if(data.result == 'ok')
 				{
 					setMessage('You will be redirected to game...');
+					localStorage.setItem('map_id', map_id);
 					window.location = '#game';
 				}
 				else
@@ -228,7 +229,7 @@ function SignoutController ($scope, $interval)
 				return;
 			}
 
-			deleteCookie('sid');
+			localStorage.removeItem('sid');
 			window.location = '#signin';
 		}
 	)

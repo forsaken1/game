@@ -27,7 +27,7 @@
 		</thead>
 
 		<tbody>
-			<tr ng-repeat = 'game in games'><td>[[ game.id ]]</td><td>[[ game.name ]]</td><td>[[ game.players.length ]]</td><td>[[ game.maxPlayers ]]</td><td>[[ game.status ]]</td><td><input class = 'btn btn-primary' type = button value = 'Join' ng-click = 'join_game(game.id)'></td></tr>
+			<tr ng-repeat = 'game in games'><td>[[ game.id ]]</td><td>[[ game.name ]]</td><td>[[ game.players.length ]]</td><td>[[ game.maxPlayers ]]</td><td>[[ game.status ]]</td><td><input class = 'btn btn-primary' type = button value = 'Join' ng-click = 'join_game(game.id, game.map)'></td></tr>
 		</tbody>
 	</table>
 </div>
