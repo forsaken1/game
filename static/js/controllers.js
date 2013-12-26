@@ -8,7 +8,7 @@ function CreateMapController($scope, $interval)
 				'action': 'uploadMap',
 				'params':
 				{
-					'sid': getCookie('sid'),
+					'sid': localStorage.getItem('sid'),
 					'name': $scope.name,
 					'maxPlayers': parseInt($scope.maxPlayers),
 					'map': $('#map').val().split("\n")
@@ -40,7 +40,7 @@ function FindGameController ($scope, $http, $interval)
 		'action': 'getGames',
 		'params':
 		{
-			sid: getCookie('sid')
+			sid: localStorage.getItem('sid')
 		}
 	})).success(function(data) 
 	{
@@ -54,7 +54,7 @@ function FindGameController ($scope, $http, $interval)
 				'action': 'joinGame',
 				'params': 
 				{
-					'sid': getCookie('sid'),
+					'sid': localStorage.getItem('sid'),
 					'game': game_id
 				}
 			}),
@@ -85,7 +85,7 @@ function CreateGameController ($scope, $http, $interval)
 		'action': 'getMaps',
 		'params':
 		{
-			sid: getCookie('sid')
+			sid: localStorage.getItem('sid')
 		}
 	})).success(function(data) 
 	{
@@ -115,7 +115,7 @@ function CreateGameController ($scope, $http, $interval)
 				'action': 'createGame', 
 				'params': 
 				{
-					'sid': getCookie('sid'), 
+					'sid': localStorage.getItem('sid'), 
 					'name': $scope.name, 
 					'map': map_id,
 					'maxPlayers': parseInt($scope.maxPlayers)
@@ -138,7 +138,7 @@ function CreateGameController ($scope, $http, $interval)
 				if(data.result == 'ok')
 				{
 					setMessage('Game successfully created');
-					setCookie('map_id', map_id);
+					localStorage.setItem('map_id', map_id);
 					window.location = '#game';
 				}
 				else
@@ -158,9 +158,9 @@ function LobbyController ($scope, $http, $interval)
 			'action': 'getMessages',
 			'params':
 			{
-				sid: getCookie('sid'),
-				game: g = getCookie('game') ? g : '', 
-				since: parseInt(getCookie('time'))
+				sid: localStorage.getItem('sid'),
+				game: g = localStorage.getItem('game') ? g : '', 
+				since: parseInt(localStorage.getItem('time'))
 			}
 		})).success(function(data) 
 		{
@@ -169,11 +169,6 @@ function LobbyController ($scope, $http, $interval)
 
 			for(var i = 0; data.messages[i] != null; ++i)
 				data.messages[i].time = toDateTime(data.messages[i].time);
-
-			/*if(data.messages[0].time)
-				setCookie('time', data.messages[0].time);
-			else
-				setCookie('time', 0);*/
 
 			$scope.messages = data.messages;
 		});
@@ -191,8 +186,8 @@ function LobbyController ($scope, $http, $interval)
 				'action': 'sendMessage', 
 				'params': 
 				{
-					'sid': getCookie('sid'), 
-					'game': g = getCookie('game') ? g : '', 
+					'sid': localStorage.getItem('sid'), 
+					'game': g = localStorage.getItem('game') ? g : '', 
 					'text': $scope.text
 				}
 			}),
@@ -222,7 +217,7 @@ function SignoutController ($scope, $interval)
 			'action': 'signout' ,
 			'params':
 			{
-				'sid': getCookie('sid')
+				'sid': localStorage.getItem('sid')
 			}
 		}),
 		function (data)
@@ -269,8 +264,8 @@ function SigninController ($scope, $interval)
 				else
 					setError(data.message);
 
-				setCookie('sid', data.sid);
-				setCookie('login', $scope.login);
+				localStorage.setItem('sid', data.sid);
+				localStorage.setItem('login', $scope.login);
 			}
 		);
 	}

@@ -1,5 +1,5 @@
 var app = angular.module('game', ['ngRoute'])
-setCookie('time', 0);
+localStorage.setItem('time', 0);
 SERVER_URL_DOMAIN = 'http://192.168.226.38:3000';
 SERVER_URL_DOMAIN = 'localhost:5000';
 SERVER_URL = 'http://' + SERVER_URL_DOMAIN;
