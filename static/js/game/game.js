@@ -110,6 +110,16 @@ function GameController($http, $interval)
 				N = handler.getN(LOGIN, data.players);
 				player = players[N];
 			}
+			for(var i = 0; i < data.players.length; ++i)
+			{
+				if(i != N)
+				{
+					var x = data.players[i][0] * BLOCK_SIZE - BLOCK_SIZE / 2;
+					var y = data.players[i][1] * BLOCK_SIZE - BLOCK_SIZE / 2;
+					players[i].setCoords(x, y);
+					players[i].setDirection(data.players[i][3]);
+				}
+			}
 			var x = data.players[N][0] * BLOCK_SIZE - BLOCK_SIZE / 2;
 			var y = data.players[N][1] * BLOCK_SIZE - BLOCK_SIZE / 2;
 			player.setCoords(x, y);
@@ -117,7 +127,7 @@ function GameController($http, $interval)
 			VY = data.players[N][3];
 			DX = -x + 405;
 			DY = -y + 300;
-			//console.log(event.data); // for debug
+			console.log(event.data); // for debug
 		};
 
 		ws.onerror = function(error)
@@ -171,7 +181,7 @@ function GameController($http, $interval)
 				}
 			}));
 			DIRECTION_X = -1;
-			player.setDirection(0);
+			player.setDirection(-1);
 			player.move();
 		}
 

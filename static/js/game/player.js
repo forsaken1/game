@@ -40,7 +40,7 @@ function Player(ctx, x, y)
 
 	this.setDirection = function(dir)
 	{
-		handler.direction = dir;
+		handler.direction = dir > 0 ? 1 : 0;
 	}
 
 	this.setCoords = function(x, y)
@@ -51,7 +51,7 @@ function Player(ctx, x, y)
 
 	this.draw = function(isUser, dx, dy)
 	{
-		var x = isUser ? 400 : handler.x + dx; //todo: заюзать константы
+		var x = isUser ? 400 : handler.x + dx - 5; //todo: заюзать константы
 		var y = isUser ? 300 : handler.y + dy;
 
 		if(handler.moving)
