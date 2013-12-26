@@ -117,7 +117,7 @@ function GameController($http, $interval)
 					var x = data.players[i][0] * BLOCK_SIZE - BLOCK_SIZE / 2;
 					var y = data.players[i][1] * BLOCK_SIZE - BLOCK_SIZE / 2;
 					players[i].setCoords(x, y);
-					players[i].setDirection(data.players[i][3]);
+					players[i].setDirection(data.players[i][2]);
 				}
 			}
 			var x = data.players[N][0] * BLOCK_SIZE - BLOCK_SIZE / 2;
@@ -127,7 +127,7 @@ function GameController($http, $interval)
 			VY = data.players[N][3];
 			DX = -x + 405;
 			DY = -y + 300;
-			console.log(event.data); // for debug
+			//console.log(event.data); // for debug
 		};
 
 		ws.onerror = function(error)

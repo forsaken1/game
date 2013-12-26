@@ -40,6 +40,8 @@ function Player(ctx, x, y)
 
 	this.setDirection = function(dir)
 	{
+		if(dir == 0)
+			return;
 		handler.direction = dir > 0 ? 1 : 0;
 	}
 
