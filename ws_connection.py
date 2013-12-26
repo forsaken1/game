@@ -22,8 +22,13 @@ class ws_connection(WebSocketServerProtocol):
 			print msg
 		msg = json.loads(msg)
 		if self.player is None:
-			self.factory.process.valid.get_id(msg['params']['sid'])
 			pid = self.factory.process.valid.get_id(msg['params']['sid'])
 			self.player = self.factory.process.server.players[pid]
 			self.player.connects.append(self)
 		self.player.action(msg)
+
+	def onClose(self, wasClean, code, reason):
+		print 'close'
+		if self.player:
+			self.player.connects.remove(self)
+		return WebSocketServerProtocol.onClose(self, wasClean, code, reason)

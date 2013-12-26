@@ -148,7 +148,7 @@ class BaseTestCase(unittest.TestCase):
 		if is_ret: return resp
 		assert resp.has_key('maps'), resp
 		maps = resp['maps']
-		maps[:-1] = [] #bug!
+		maps[:-1] = []
 		map = maps[0]
 		assert map.has_key('id') and type(map['id']) is int, map
 		id = map["id"]
@@ -164,16 +164,16 @@ class BaseTestCase(unittest.TestCase):
 
 
 #-----------------------------------webSocket utils----------------------------------------#
-	def take_gun(self, ws, limit = 1):
+	def take_gun(self, ws, limit = 1, dir = 1):
 		resp = {}
 		resp['tick'] = self.tick
 		while True:
-			self.move(ws, resp['tick'], 1)
+			self.move(ws, resp['tick'], dir)
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			if pl[X] > limit: return pl[X]
+			if pl[X]*dir > limit*dir: return pl[X]
 
-	def fire(self, ws, x, y, tick = None):
+	def fire(self, ws, x, y=0, tick = None):
 		if tick is None:
 			tick = self.tick
 		self.send_ws('fire', {'tick': tick, 'dx': x, 'dy': y}, ws)

@@ -23,6 +23,8 @@ class projectile():
 		return x*self.k + self.b
 
 	def go(self):
+		if self.weapon.letter == 'K':
+			self.was_coll = True
 		index = self.index
 		pos = self.pos
 		dir = self.dir; dir1 = self.dir1
@@ -40,8 +42,8 @@ class projectile():
 					return; 
 			index.x += dir1.x
 			if self.map.map[index.y][index.x] == '#':
- 				self.was_coll = True
-				self.v = self.v.scale((abs(index.x + (not dir.x) - pos.x)/self.v.x))
+				self.was_coll = True
+				self.v = self.v.scale((abs((index.x + (not dir.x) - pos.x)/self.v.x)))
 				return
 			if index.y == end.y and index.x == end.x:
 				return; 
@@ -49,13 +51,13 @@ class projectile():
 	def player_coll(self):
 		dir1 = self.dir1
 		v = self.v
-		min_dist = abs(v.y)
+		min_dist = INF
 		end = self.pos + v
 		pos = self.pos
 		k = self.k
 		damaged = 0
 		for pl in self.game.players:
-			if pl.respawn or self == pl:
+			if pl.respawn or self.player == pl:
 				continue
 			x = pl.pos.x - dir1.x*.5
 			if (x < pos.x) ^ (x < end.x) and abs(self.gety(x)-pl.pos.y) <= .5 and abs(x-pos.x)*k<min_dist:
@@ -67,10 +69,21 @@ class projectile():
 					min_dist = abs(y-pos.y)
 					damaged = pl
 		if damaged:
-			self.v = v.scale(min_dist/abs(v.y))
+			self.v = v.scale(min_dist/abs(v.size()))
 			self.was_coll = True
-			if damaged.hit(self.weapon.damage):
+			if not self.weapon.letter == 'R' and damaged.hit(self.weapon.damage):
 				self.player.kills += 1
+
+	def rocket_bang(self):
+		for pl in self.game.players:
+			if pl.respawn:
+				continue
+			dist = pl.pos - self.pos + self.v
+			if dist.size()<ROCKET_RADIUS:
+				pl.speed = dist.scale(self.game.MAX_SPEED/dist.size())
+				if pl.hit(self.weapon.damage):
+					self.player.kills += 1
+
 
 	def cur_consist(self):
 		self.game.pr_mess.append([
@@ -82,11 +95,9 @@ class projectile():
 			self.life_time
 			])
 
+	
 
 	def tick(self):
-		if self.weapon.letter == 'K' and self.life_time > 0:
-			self.game.projectiles.remove(self)
-			return
 		self.life_time += 1
 		if self.v.size() == 0:
 			self.cur_consist()
@@ -94,6 +105,8 @@ class projectile():
 		else:
 			self.go()
 			self.player_coll()
+			if self.weapon.letter == 'R' and self.was_coll:
+				self.rocket_bang()
 			self.cur_consist()
 			self.pos += self.v
 		

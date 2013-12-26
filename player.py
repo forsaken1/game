@@ -50,7 +50,7 @@ class player:
 	def fire(self, params):
 		if self.game.c_ticks - self.last_fire_tick >= weapons[self.weapon].recharge:
 			self.last_fire_tick = self.game.c_ticks
-			v = point(params['dx'] + 1,params['dy'] + 1) - self.pos
+			v = point(params['dx'],params['dy'])
 			self.weapon_angle = v.angle()
 			self.game.projectiles.append(projectile(self, self.weapon,v))
 		

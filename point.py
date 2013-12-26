@@ -4,6 +4,8 @@ MAX_HEALTH = 100
 RESP_ITEM = 300
 RESP_PLAYER = 300
 INF = 1e6
+ROCKET_RADIUS = 1
+
 class weapon():
 	def __init__(self, speed, damage, recharge, letter):
 		self.speed = speed; self.damage = damage; self.recharge = recharge; self.letter = letter
