@@ -32,17 +32,16 @@ class player:
 
 	#---------------------------function for using on client mess---------------------------------#
 	def action(self, msg):
+		self.was_action = True
 		if not self.is_start:
 			self.is_start = True
-			self.was_action = True
 			self.game.sync_tick()
 			return
 
 		if self.game.c_ticks - 1 <= msg['params']['tick'] <= self.game.c_ticks: 
-			self.was_action = True
 			if msg['action'] != 'empty' and not self.respawn:
 				getattr(self, msg['action'])(msg['params'])
-			self.game.sync_tick()
+		self.game.sync_tick()
 
 	def move(self, params):
 		self.dv += point(params['dx'],params['dy'])

@@ -16,7 +16,7 @@ class ws_connection(WebSocketServerProtocol):
 		print 'connect'
 		self.player = None
 		return WebSocketServerProtocol.onConnect(self, req)
-
+#del conect onClose
 	def onMessage(self, msg, binary):
 		if LOGGING:
 			print msg
