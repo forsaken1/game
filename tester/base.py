@@ -1,8 +1,11 @@
 import json, unittest, re, MySQLdb, time, requests, sys
-
+from websocket import create_connection
 def_map_scheme = [	"#$........#",
 					"###########"]
 
+
+ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.02, 0.02, 0.02, 0.2
+X,Y,VX,VY,WEAPON,WEAPON_ANGLE,LOGIN,HEALTH,RESPAWN,KILLS,DEATHS = range(11)
 
 class BaseTestCase(unittest.TestCase):
 	HOST, PORT = 'localhost', '5000'
@@ -157,3 +160,60 @@ class BaseTestCase(unittest.TestCase):
 			"maxPlayers": maxPlayers,
 		}], resp
 		return id	
+
+
+
+#-----------------------------------webSocket utils----------------------------------------#
+	def take_gun(self, ws, limit = 1):
+		resp = {}
+		resp['tick'] = self.tick
+		while True:
+			self.move(ws, resp['tick'], 1)
+			resp = self.recv_ws(ws)
+			pl = resp['players'][0]
+			if pl[X] > limit: return pl[X]
+
+	def fire(self, ws, x, y, tick = None):
+		if tick is None:
+			tick = self.tick
+		self.send_ws('fire', {'tick': tick, 'dx': x, 'dy': y}, ws)
+
+	def equal(self, x, y):
+		return abs(x-y) < BaseTestCase.accuracy
+
+	def send_ws(self, action = None, params = None, ws = None):
+		if ws is None: ws = create_connection("ws://" + self.HOST + ":" + self.PORT + "/websocket")
+		mess = json.dumps({'action': action,'params': params})
+		print '-----', mess
+		ws.send(mess)
+		return ws
+
+	def recv_ws(self, ws):
+		mess = json.loads(ws.recv())
+		self.tick = mess['tick']
+		print '+++++', mess
+		return mess
+
+	def connect(self, map = None, game = None, game_ret = False,\
+			  accel = 0.02, gravity = 0.02, fric = 0.02, max_speed = 0.2):
+		if map:
+			map = self.get_map(scheme = map)
+			gid, sid = self.get_game(map = map, sid_returned = True,\
+			accel = accel, gravity = gravity, fric = fric, max_speed = max_speed)
+
+			ws = self.send_ws(action = 'move', params = {'sid': sid, 'tick': 0, 'dx': 0, 'dy':0})
+			if game_ret:
+				return ws, gid, sid
+			return ws
+		elif game:
+			sid = self.join_game(game)
+			ws = self.send_ws('move', {'sid': sid, 'tick': 0, 'dx': 0, 'dy': 0})
+			return ws
+		else: return False
+
+	def move(self, ws, tick = None, x = 0, y = 0):
+		if tick is None:
+			tick = self.tick
+		if not x and not y:		self.send_ws('empty', {'tick': tick}, ws)
+		else:					self.send_ws('move', {'tick': tick, 'dx': x, 'dy': y}, ws)
+			
