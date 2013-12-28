@@ -221,5 +221,24 @@ class FireTestCase(BaseTestCase):
 		assert pl[HEALTH] == 100 - weapons['R'].damage and pl[VX] == MAX_SPEED, pl
 
 		
-
+	def test_rocket_launcher_longway(self):
+		map  = ["...............",
+				"...............",
+				"...............",
+				"...............",
+				"$R............."]
+		ws = self.connect(map)
+		self.recv_ws(ws)		
+		x = self.take_gun(ws)
+		y = 4.5
+		self.fire(ws,84,-155)
+		v = point(84,-155)
+		v = v.scale(weapons['R'].speed/v.size())
+		while y>0:
+			resp = self.recv_ws(ws)
+			pr = resp['projectiles'][0]
+			assert self.equal(pr[X], x) and self.equal(pr[Y], y) and self.equal(pr[VX], v.x) and self.equal(pr[VY], v.y), (pr, v.x,v.y)  
+			x+=v.x
+			y+=v.y
+			self.move(ws)
 
