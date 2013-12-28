@@ -10,14 +10,18 @@ class FireTestCase(BaseTestCase):
 		resp = self.recv_ws(ws)
 		assert resp['projectiles'] == [] and resp['items'] == [], resp
 
-		self.fire(ws, 3, 0.5)
-		self.move(ws, resp['tick'])
+		self.fire(ws, 3)
 		resp = self.recv_ws(ws)		
 		
 		assert len(resp['projectiles']) == 1, resp['projectiles']
 		pr = resp['projectiles'][0]
-		assert self.equal(pr[0],0.5) and self.equal(pr[1],0.5) and \
+		assert self.equal(pr[X],0.5) and self.equal(pr[Y],0.5) and \
 			self.equal(pr[VX], weapons['K'].speed) and self.equal(pr[VY], 0) and pr[WEAPON] == 'K', pr
+
+		self.move(ws, resp['tick'])
+		resp = self.recv_ws(ws)
+		pr = resp['projectiles'][0]
+		assert self.equal(pr[VX], 0) and self.equal(pr[VY], 0) and pr[WEAPON] == 'K', pr
 
 		self.move(ws, resp['tick'])
 		resp = self.recv_ws(ws)
@@ -29,7 +33,7 @@ class FireTestCase(BaseTestCase):
 		ws = self.connect(map)
 		self.recv_ws(ws)		
 		x = self.take_gun(ws)
-		self.fire(ws, 3, 0.5)
+		self.fire(ws, 3)
 		y = .5
 		vx = weapons['P'].speed; vy = 0
 		while x + vx< 5:
@@ -57,7 +61,7 @@ class FireTestCase(BaseTestCase):
 		self.recv_ws(ws)		
 		x = self.take_gun(ws)
 		y = 2.5
-		self.fire(ws, x+1, y-1)
+		self.fire(ws,1,-1)
 		vx = weapons['P'].speed/sqrt(2)
 		vy = -weapons['P'].speed/sqrt(2)
 		while y+vy>1:
@@ -88,7 +92,7 @@ class FireTestCase(BaseTestCase):
 		self.recv_ws(ws)		
 		x = self.take_gun(ws)
 		y = 2.5
-		self.fire(ws, x, y-1)
+		self.fire(ws,0,-1)
 		vy = -weapons['P'].speed
 		vx = 0
 		while y+vy>1:
@@ -107,19 +111,19 @@ class FireTestCase(BaseTestCase):
 		assert self.equal(pr[Y], 1) and self.equal(pr[VX], 0) and self.equal(pr[VY], 0), (pr, vx,vy)
 
 	def test_rails(self):
-		map  = [".....A$",
-				"##....#",
-				"##....."]
+		map  = ["....A$",
+				"##...#",
+				"##...."]
 		ws = self.connect(map)
 		resp = self.recv_ws(ws)		
 		while True:
 			self.move(ws, resp['tick'], -1)
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			if pl[X] < 6: break
+			if pl[X] < 5: break
 		x = pl[X]
 		y = .5
-		self.fire(ws, 2, 1)
+		self.fire(ws, 2-x, 1-y)
 		resp = self.recv_ws(ws)
 		pr = resp['projectiles'][0]
 		vy = 1-y
@@ -136,10 +140,10 @@ class FireTestCase(BaseTestCase):
 		self.recv_ws(ws)		
 		x = self.take_gun(ws)
 		for i in range(0, weapons['M'].recharge):
-			self.fire(ws, 3, 0.5)
+			self.fire(ws, 3)
 			prs = self.recv_ws(ws)['projectiles']
 			assert len(prs) == 1, (prs, i)
-		self.fire(ws, 3, 0.5)
+		self.fire(ws, 3)
 		prs = self.recv_ws(ws)['projectiles']
 		assert len(prs) == 2,(prs,i)
 					
@@ -168,7 +172,7 @@ class FireTestCase(BaseTestCase):
 		w = weapons['M']
 		v = v.scale(w.speed/v.size())
 		while x +v.x> 1:
-			self.fire(ws2, 1, 0.5)
+			self.fire(ws2, v.x, v.y)
 			self.move(ws1)
 			resp = self.recv_ws(ws1)
 			self.recv_ws(ws2)
@@ -178,7 +182,7 @@ class FireTestCase(BaseTestCase):
 		i = 0
 		while health > 0:
 			assert resp['players'][0][HEALTH] == health, (pl, health)
-			self.fire(ws2, 1, 0.5)
+			self.fire(ws2, v.x,v.y)
 			self.move(ws1)
 			resp = self.recv_ws(ws1)
 			self.recv_ws(ws2)
@@ -189,9 +193,52 @@ class FireTestCase(BaseTestCase):
 		pl = resp['players'][1]
 		assert pl[KILLS] == 1, pl
 
+	def test_rocket_launcher(self):
+		map  = ["$R..$."]
+		ws1, game, sid = self.connect(map, game_ret = True)
+		resp = self.recv_ws(ws1)
+		ws2 = self.connect(game = game)
+		self.move(ws1, resp['tick'])
+		resp = self.recv_ws(ws1)
+		self.recv_ws(ws2)		
 
-
+		while True:
+			self.move(ws1, x = 1)
+			self.move(ws2)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			pl = resp['players'][0]
+			if pl[X] > 1: break
+		self.fire(ws1,2)
+		x = pl[X]
+		while x < 5:
+			self.move(ws2)
+			self.move(ws1)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			x += weapons['R'].speed
+		pl = resp['players'][1]
+		assert pl[HEALTH] == 100 - weapons['R'].damage and pl[VX] == MAX_SPEED, pl
 
 		
-
+	def test_rocket_launcher_longway(self):
+		map  = ["...............",
+				"...............",
+				"...............",
+				"...............",
+				"$R............."]
+		ws = self.connect(map)
+		self.recv_ws(ws)		
+		x = self.take_gun(ws)
+		y = 4.5
+		self.fire(ws,84,-155)
+		v = point(84,-155)
+		v = v.scale(weapons['R'].speed/v.size())
+		while y>0:
+			resp = self.recv_ws(ws)
+			pr = resp['projectiles'][0]
+			assert self.equal(pr[X], x) and self.equal(pr[Y], y) and self.equal(pr[VX], v.x) and self.equal(pr[VY], v.y), (pr, v.x,v.y)  
+			x+=v.x
+			y+=v.y
+			self.move(ws)
 

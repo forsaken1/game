@@ -35,10 +35,8 @@ class player:
 		self.was_action = True
 		if not self.is_start:
 			self.is_start = True
-			self.game.sync_tick()
-			return
 
-		if self.game.c_ticks - 1 <= msg['params']['tick'] <= self.game.c_ticks: 
+		elif self.game.c_ticks - 1 <= msg['params']['tick'] <= self.game.c_ticks: 
 			if msg['action'] != 'empty' and not self.respawn:
 				getattr(self, msg['action'])(msg['params'])
 		self.game.sync_tick()
@@ -50,7 +48,7 @@ class player:
 	def fire(self, params):
 		if self.game.c_ticks - self.last_fire_tick >= weapons[self.weapon].recharge:
 			self.last_fire_tick = self.game.c_ticks
-			v = point(params['dx'] + 1,params['dy'] + 1) - self.pos
+			v = point(params['dx'],params['dy'])
 			self.weapon_angle = v.angle()
 			self.game.projectiles.append(projectile(self, self.weapon,v))
 		
@@ -111,7 +109,7 @@ class player:
 		item = self.map.items[dot]
 		if not self.game.items[item[0]]:
 			self.game.items[item[0]] = RESP_ITEM
-			if item[1] == 'm':
+			if item[1] == 'h':
 				self.health = MAX_HEALTH
 			else: 
 				self.weapon = item[1]

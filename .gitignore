@@ -24,7 +24,9 @@ local.properties
 .classpath
 .settings/
 .loadpath
-
+log_serv
+config.py
+tester/log.txt
 # External tool builders
 .externalToolBuilders/
 
