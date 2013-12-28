@@ -42,7 +42,6 @@ class game:
 		return ret
 
 	def tick(self):
-		t = time.time()
 		self.c_ticks += 1
 		self.pl_mess, self.pr_mess = [], []
 		for i in range(len(self.items)):
@@ -55,11 +54,10 @@ class game:
 		for p in self.players:
 			p.cur_consist()
 		self.set_mess()
-		if LOGGING:
-			print self.mess
+		#if LOGGING:
+		#	print self.mess
 		for p in self.players:
 			p.write_mess()
-		print (time.time()-t)*1000
 
 	def sync_tick(self):
 		if self.server.sync_mode:

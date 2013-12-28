@@ -8,7 +8,7 @@ class ws_factory(WebSocketServerFactory):
 		self.setSessionParameters()
 
 		self.process = proc
-		WebSocketServerFactory.__init__(self, url = url, debug = debug, debugCodePaths = debugCodePaths, protocols = ["Hexie-76"])
+		WebSocketServerFactory.__init__(self, url = url, debug = debug, debugCodePaths = debugCodePaths)
 
 
 class ws_connection(WebSocketServerProtocol):
@@ -18,8 +18,7 @@ class ws_connection(WebSocketServerProtocol):
 		return WebSocketServerProtocol.onConnect(self, req)
 #del conect onClose
 	def onMessage(self, msg, binary):
-		if LOGGING:
-			print msg
+	#	print 'END'
 		msg = json.loads(msg)
 		if self.player is None:
 			pid = self.factory.process.valid.get_id(msg['params']['sid'])
@@ -29,6 +28,8 @@ class ws_connection(WebSocketServerProtocol):
 
 	def onClose(self, wasClean, code, reason):
 		print 'close'
+		if PHILIPP and self.player:
+			self.player.respawn = 1
 		if self.player:
 			self.player.connects.remove(self)
 		return WebSocketServerProtocol.onClose(self, wasClean, code, reason)

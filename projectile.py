@@ -30,6 +30,8 @@ class projectile():
 		dir = self.dir; dir1 = self.dir1
 		end = pos + self.v
 		end = point(int(end.x), int(end.y))
+		if index.y == end.y and index.x == end.x:
+			return; 
 		while True:
 			last = int(self.gety(index.x+dir.x))
 			while index.y != last and index.y != end.y:
@@ -61,12 +63,12 @@ class projectile():
 				continue
 			x = pl.pos.x - dir1.x*.5
 			if (x < pos.x) ^ (x < end.x) and abs(self.gety(x)-pl.pos.y) <= .5 and abs(x-pos.x)*k<min_dist:
-				min_dist = abs(x-pos.x)*k
+				min_dist = abs((point(x, self.gety(x)) - self.pos).size())
 				damaged = pl
 			else:
 				y = pl.pos.y - dir1.y*.5
 				if (y < pos.y) ^ (y < end.y) and abs(self.getx(y)-pl.pos.x) <= .5 and abs(y-pos.y)<min_dist:
-					min_dist = abs(y-pos.y)
+					min_dist = abs((point(getx(y), y) - self.pos).size())
 					damaged = pl
 		if damaged:
 			self.v = v.scale(min_dist/abs(v.size()))
@@ -78,7 +80,7 @@ class projectile():
 		for pl in self.game.players:
 			if pl.respawn:
 				continue
-			dist = pl.pos - self.pos + self.v
+			dist = pl.pos - (self.pos + self.v)
 			if dist.size()<ROCKET_RADIUS:
 				pl.speed = dist.scale(self.game.MAX_SPEED/dist.size())
 				if pl.hit(self.weapon.damage):

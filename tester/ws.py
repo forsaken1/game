@@ -17,17 +17,8 @@ class WebSocketTestCase(BaseTestCase):
 		pl = resp['players'][0]
 		assert self.equal(pl[X], 1.5) and self.equal(pl[Y], 1.5) and self.equal(pl[VY], 0)\
 			and self.equal(pl[VX], 0), pl
+		ws.close()
 
-	def test_async_mode(self):
-		self.startTesting(False)
-		sid = self.create_game()
-		ws = self.send_ws(action = 'move', params = {'sid': sid, 'tick': 0, 'dx': 0, 'dy':0})
-		time.sleep(0.5)
-		for i in range(10):
-			self.recv_ws(ws)
-		resp = self.recv_ws(ws)
-		self.startTesting(True)
-		assert resp['tick'] >= 10, resp
 
 	def test_first_steps(self):
 		map  = [".........",

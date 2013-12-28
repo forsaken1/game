@@ -236,7 +236,7 @@ class process:
 
 	def createGame(self, par):
 		sid = par['sid']
-		accel, friction, gravity, MaxVelocity = 0.02, 0.02, 0.02, 0.2
+		accel, friction, gravity, MaxVelocity = 0.05, 0.05, 0.05, 0.5
 		if par.has_key('consts'):
 			consts = par['consts']
 			accel=consts['accel']; maxVelocity=consts['maxVelocity']; friction=consts['friction']; gravity=consts['gravity']
