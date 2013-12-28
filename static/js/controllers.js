@@ -119,14 +119,14 @@ function CreateGameController ($scope, $http, $interval)
 					'sid': localStorage.getItem('sid'), 
 					'name': $scope.name, 
 					'map': map_id,
-					'maxPlayers': parseInt($scope.maxPlayers)
-				},
-				'consts':
-				{
-					'accel': parseFloat($scope.accel),
-					'maxVelocity': parseFloat($scope.maxVelocity),
-					'gravity': parseFloat($scope.gravity),
-					'friction': parseFloat($scope.friction)
+					'maxPlayers': parseInt($scope.maxPlayers),
+					'consts':
+					{
+						'accel': parseFloat($scope.accel),
+						'maxVelocity': parseFloat($scope.maxVelocity),
+						'gravity': parseFloat($scope.gravity),
+						'friction': parseFloat($scope.friction)
+					}
 				}
 			}),
 			function (data)

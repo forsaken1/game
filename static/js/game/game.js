@@ -202,7 +202,7 @@ function GameController($scope, $http, $interval)
 					'dy': (mousePos.y - DY) / BLOCK_SIZE
 				}
 			}));
-		}, false);
+		}, true);
 
 		// DOWN keys
 		onKeyDown[65] = onKeyDown[37] = function()
@@ -285,7 +285,7 @@ function GameController($scope, $http, $interval)
 		}
 
 		// Start
-		setInterval(this.draw, 33);
+		SET_INTERVAL_HANDLER = $interval(this.draw, 33);
 	});
 
 	$scope.leave_game = function()
