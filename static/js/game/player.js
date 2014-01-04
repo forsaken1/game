@@ -12,7 +12,7 @@ function Player(ctx, x, y)
 	this.animation[0] = [];
 	this.animation[1] = [];
 	this.moving = false;
-	this.animSpeed = 2;
+	this.animSpeed = 10;
 	
 	for(var i = 0; i < this.animationPicCount; ++i)
 	{
