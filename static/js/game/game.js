@@ -172,7 +172,7 @@ function GameController($scope, $http, $interval)
 			{
 				projectiles[i] && CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX, projectiles[i][1] * BLOCK_SIZE + DY);
 			}
-			requestAnimationFrame(handler.draw);
+			requestAnimFrame(handler.draw);
 			//mousePos && CTX.drawImage(aim, mousePos.x - AIM_SIZE / 2, mousePos.y - AIM_SIZE / 2, AIM_SIZE, AIM_SIZE); //todo: aim
 		}
 
