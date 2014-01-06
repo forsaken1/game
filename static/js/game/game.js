@@ -129,7 +129,7 @@ function GameController($scope, $http, $interval)
 					MAP.map[i][j] == 'M' &&	CTX.drawImage(minigun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					MAP.map[i][j] == 'A' &&	CTX.drawImage(railgun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					MAP.map[i][j] == 'R' &&	CTX.drawImage(rocket, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					//MAP.map[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE, i * BLOCK_SIZE);
+					MAP.map[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					/^\d+$/.test(MAP.map[i][j]) && CTX.drawImage(portal, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 				}
 			}
@@ -261,7 +261,7 @@ function GameController($scope, $http, $interval)
 				'action': 'leaveGame',
 				'params': 
 				{
-					'sid': localStorage.getItem('sid')
+					'sid': SID
 				}
 			}),
 			function(data)
