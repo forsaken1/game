@@ -16,7 +16,7 @@ class param_validator:
 	def badPassword(self, password):
 		return type(password) == unicode
 	
-	def get_id(self, sid):
+	def get_pid(self, sid):
 		cur = self.db.cursor()
 		cur.execute('SELECT id FROM users WHERE sid = %s', (sid,))
 		id = cur.fetchone()
@@ -25,7 +25,7 @@ class param_validator:
 		
 	def badSid(self, sid):
 		if not self.valid_str(sid): return False
-		return self.get_id(sid)
+		return self.get_pid(sid)
 			
 
 	def badName(self, name):
@@ -123,6 +123,7 @@ class process:
 			'uploadMap': 	['sid', 'name', 'map', 'maxPlayers'],
 			'getMaps': 		['sid'],
 			'getGameConsts': ['sid'],
+			'getStats':		['sid', 'game']
 		}		
 		
 	def __del__(self):
@@ -148,6 +149,11 @@ class process:
 		if error: return self.result(error) 
 		else: return action(params)
 	
+	def is_running_game(self, gid): 
+		cur = self.db.cursor()
+		cur.execute("SELECT status FROM games WHERE id = %s", (gid,))
+		return cur.fetchone()[0]
+
 	def start_testing(self, params):
 		if not TESTING:
 			return self.result('notInTestMode')
@@ -160,7 +166,7 @@ class process:
 		return self.result()
 		
 	def result(self, error = None, param = None):
-		result = {"result": "ok", "message": "okey"} if not error else {"result": error, "message": "error"}
+		result = {"result": "ok", "message": "okey"} if not error else {"result": error, "message": error}
 		if param: result = dict(result.items()+param.items())
 		return json.dumps(result)
 	
@@ -168,11 +174,6 @@ class process:
 		m = hashlib.sha256()
 		m.update(body)
 		return m.hexdigest()
-		
-	def user_info(self, sid):
-		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
-		cur.execute('SELECT login FROM users WHERE sid = %s', (sid,))
-		return cur.fetchone()
 	
 	def signup(self, par):
 		if not (MINLOGIN <= len(par['login']) <= MAXLOGIN) or not all(ord(c) < 128 for c in par['login']):
@@ -181,7 +182,7 @@ class process:
 			return self.result('badPassword')
 
 		cur = self.db.cursor()
-		cur.execute('SELECT login FROM users WHERE login = %s', (par['login'],))		# change db lib, use query param
+		cur.execute('SELECT login FROM users WHERE login = %s', (par['login'],))
 		if cur.fetchone():
 			return self.result('userExists')
 		
@@ -210,10 +211,10 @@ class process:
 		return self.result()
 		
 	def sendMessage(self, par):
-		id , gid, text = self.valid.get_id(par['sid']), par['game'], par['text']
+		id , gid, text = self.valid.get_pid(par['sid']), par['game'], par['text']
 		cur = self.db.cursor()
 
-		cur.execute('SELECT game_id FROM user_game WHERE pid = %s', (id,))
+		cur.execute('SELECT gid FROM user_game WHERE pid = %s and kills IS NULL', (id,))
 		gid_fact = cur.fetchone()
 		gid_fact = gid_fact[0] if gid_fact else ""
 		if gid_fact != gid:
@@ -221,7 +222,7 @@ class process:
 
 		cur.execute('SELECT login FROM users WHERE id = %s', (id,))
 		login = cur.fetchone()[0]
-		query = 'INSERT INTO messages (login, text, time, game_id) VALUES (%s, %s, %s,'+(str(gid) if gid else "NULL")+')'
+		query = 'INSERT INTO messages (login, text, time, gid) VALUES (%s, %s, %s,'+(str(gid) if gid else "NULL")+')'
 		cur.execute(query, (login, text, int(time.time())))
 		self.db.commit()
 		return self.result()
@@ -229,7 +230,7 @@ class process:
 	def getMessages(self, par):
 		gid, since = par['game'], par['since']
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
-		query = 'SELECT time, text, login FROM messages WHERE time >= %s AND game_id '+('='+str(gid) if gid else "IS NULL")+' ORDER BY time'
+		query = 'SELECT time, text, login FROM messages WHERE time >= %s AND gid '+('='+str(gid) if gid else "IS NULL")+' ORDER BY time'
 		cur.execute(query, (since, ))
 		mess = cur.fetchall()
 		return self.result(param = {'messages': mess})
@@ -265,7 +266,7 @@ class process:
 
 		ret = self.joinGame({'sid': sid, 'game': gid})
 		if json.loads(ret)['result'] == 'ok':
-			return self.result()				
+			return self.result()
 		else: 
 			cur.execute("DELETE FROM games WHERE name = %s", (par['name'],))
 			self.db.commit()		
@@ -273,67 +274,75 @@ class process:
 		
 	def getGames(self, par):
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
-		cur.execute('SELECT id, name, map, maxPlayers, status FROM games')	
-		res = cur.fetchall()	
+		qry = "SELECT id, name, map, maxPlayers, status FROM games "
+		if par.has_key('status') and par['status'] in ('running', 'finished'):
+			qry += "WHERE status = " + ("1" if par['status'] == 'running' else "0")
+		cur.execute(qry)
+		res = cur.fetchall()
 		for item in res:
 			item['status'] = 'running' if item['status'] else 'finished' 
-			cur.execute('SELECT login FROM user_game WHERE game_id = %i ORDER BY id' %item['id'])
+			cur.execute('SELECT login FROM user_game WHERE gid = %i and kills IS NULL ORDER BY id' %item['id'])
 			players = cur.fetchall()
-			item['players'] = []			
+			item['players'] = []
 			for player in players:
 				item['players'].append(player['login'])
 		return self.result(param = {'games': res})
 		
 	def joinGame(self, par):
-		id = self.valid.get_id(par['sid'])
+		pid = self.valid.get_pid(par['sid'])
 		gid = par['game']
-		cur = self.db.cursor()
-		if par['game'] == "":
+		if gid == '' or not self.is_running_game(gid):
 			return self.result('badGame')
-		cur.execute('SELECT id FROM user_game WHERE pid = %s', (id,))
+
+		cur = self.db.cursor()
+		cur.execute("SELECT id FROM user_game WHERE pid = %s AND kills IS NULL", (pid,))
 		if cur.fetchone():
-			return self.result('alreadyInGame')					
+			return self.result('alreadyInGame')
 			
 		cur.execute('SELECT maxPlayers FROM games WHERE id = %s', (gid,))
 		maxPlayers = cur.fetchone()[0]
-		cur.execute('SELECT count(*) FROM user_game WHERE game_id = %s', (gid,))
+		cur.execute('SELECT count(*) FROM user_game WHERE gid = %s and kills IS NULL', (gid,))
 		playersCount = cur.fetchone()[0]
 		if playersCount >= maxPlayers:
 			return self.result('gameFull')
-			
-		cur.execute('SELECT login FROM users WHERE id = %s', (id,))	
+		
+		cur.execute('SELECT login FROM users WHERE id = %s', (pid,))
 		login = cur.fetchone()[0]
-		cur.execute('INSERT INTO user_game (pid, login, game_id) VALUES(%s, %s, %s)', (id, login, gid))
+	
+		cur.execute('SELECT kills, deaths FROM user_game WHERE gid = %s and pid = %s', (gid, pid))
+		param = cur.fetchone()
+		if param:
+			(kills, deaths) = param
+			cur.execute('UPDATE user_game SET kills = NULL, deaths = NULL WHERE login = %s', (login,))
+			self.server.add_player(pid, login, gid, kills, deaths)
+		else:
+			cur.execute('INSERT INTO user_game (pid, login, gid) VALUES(%s, %s, %s)', (pid, login, gid))
+			self.server.add_player(pid, login, gid)
 		self.db.commit()
-
-		self.server.add_player(id, login, gid)
-
 		return self.result()
 		
 	def leaveGame(self, par):		
-		id = self.valid.get_id(par['sid'])
+		pid = self.valid.get_pid(par['sid'])
 		cur = self.db.cursor()
-		cur.execute('SELECT game_id FROM user_game WHERE pid = %s', (id,))
-		game = cur.fetchone()
-		if not game: 
+		cur.execute("SELECT gid FROM user_game WHERE pid = %s and kills IS NULL", (pid,))
+		gid = cur.fetchone()
+		if not gid:
 			return self.result('notInGame')
-		game = game[0]			
-		
-		cur.execute('DELETE from user_game WHERE pid = %s', (id, ))
-		self.db.commit()
-		
-		self.server.erase_player(id, game)
+		gid = gid[0]			 
 
-		cur.execute('SELECT count(*) FROM user_game WHERE game_id = %s', (game,))
-		if not cur.fetchone()[0]:
-			cur.execute('DELETE from games WHERE id = %s', (game,))			
+		(is_last, kills, deaths) = self.server.erase_player(pid, gid)
+		
+		cur.execute('UPDATE user_game SET kills = %s, deaths = %s WHERE pid = %s AND gid = %s', (kills, deaths, pid, gid))
+		if is_last:
+			cur.execute("UPDATE games SET status = 0 WHERE id = %s", (gid,))
+		
 		self.db.commit()
 		return self.result()
 		
 	def uploadMap(self, par):			
 		cur = self.db.cursor()
 		cur.execute('SELECT id FROM maps WHERE name = %s', (par['name'],))
-		if cur.fetchone():
+		if cur.fetchone(): 
 			return self.result('mapExists')
 		strmap = ''
 		for row in par['map']:
@@ -357,9 +366,9 @@ class process:
 		return self.result(param = {'maps': res})
 
 	def getGameConsts(self, par):
-		id = self.valid.get_id(par['sid'])
+		id = self.valid.get_pid(par['sid'])
 		cur = self.db.cursor()
-		cur.execute('SELECT game_id FROM user_game WHERE pid = %s', (id,))
+		cur.execute('SELECT gid FROM user_game WHERE pid = %s and kills IS NULL', (id,))
 		game = cur.fetchone()
 		if not game: 
 			return self.result('notInGame')
@@ -372,3 +381,15 @@ class process:
 			param[keys[i]] = vals[i]
 		return self.result(param = param)
 
+	def getStats(self, par):
+		gid = par['game']
+		if gid == '':
+			return self.result('badGame')
+		if self.is_running_game(gid):
+			return self.result('gameRunning')
+		cur = self.db.cursor()
+		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
+		cur.execute("SELECT login, kills, deaths FROM user_game WHERE gid = %s", (gid, ))
+		return self.result(param = {'players': cur.fetchall()})
+
+	
