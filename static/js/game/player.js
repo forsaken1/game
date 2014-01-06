@@ -56,6 +56,16 @@ function Player(ctx, x, y)
 		handler.y = y;
 	}
 
+	this.getCoordX = function()
+	{
+		return handler.x;
+	}
+
+	this.getCoordY = function()
+	{
+		return handler.y;
+	}
+
 	this.draw = function(isUser, dx, dy)
 	{
 		var x = isUser ? 400 : handler.x + dx - 5; //todo: заюзать константы

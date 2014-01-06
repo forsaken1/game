@@ -169,8 +169,8 @@ function GameController($scope, $http, $interval)
 				'params':
 				{
 					'tick': TICK,
-					'dx': (mousePos.x - DX) / BLOCK_SIZE,
-					'dy': (mousePos.y - DY) / BLOCK_SIZE
+					'dx': (mousePos.x - DX - player.getCoordX()) / BLOCK_SIZE,
+					'dy': (mousePos.y - DY - player.getCoordY()) / BLOCK_SIZE
 				}
 			}));
 		}, true);
