@@ -110,8 +110,7 @@ function CreateGameController ($scope, $http, $interval)
 			return;
 		}
 		var map_id = parseInt($scope.map_id);
-		send(
-			JSON.stringify(
+		var send_data = ($scope.accel && $scope.maxVelocity && $scope.gravity && $scope.friction) ?
 			{
 				'action': 'createGame', 
 				'params': 
@@ -128,7 +127,19 @@ function CreateGameController ($scope, $http, $interval)
 						'friction': parseFloat($scope.friction)
 					}
 				}
-			}),
+			} : {
+				'action': 'createGame', 
+				'params': 
+				{
+					'sid': localStorage.getItem('sid'), 
+					'name': $scope.name, 
+					'map': map_id,
+					'maxPlayers': parseInt($scope.maxPlayers)
+				}
+			};
+
+		send(
+			JSON.stringify(send_data),
 			function (data)
 			{
 				if(!data)
