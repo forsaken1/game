@@ -1,6 +1,6 @@
 import json
 from base import *
-
+from point import *
 
 def s(t, v = .0, a = ACCEL):
 	return v*t + a*(t + t*t)/2.
@@ -280,18 +280,19 @@ class WebSocketTestCase(BaseTestCase):
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
 		it = resp['items']
-		assert it == [y] and pl[WEAPON] == 'A' and pl[WEAPON_ANGLE] == -1, (it, pl[WEAPON], pl[WEAPON_ANGLE])
+		assert it == [RESP_ITEM] and pl[WEAPON] == 'A' and pl[WEAPON_ANGLE] == -1, (it, pl[WEAPON], pl[WEAPON_ANGLE])
 
 	def test_uncommon_consts(self):
+		ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.05, 0.05, 0.05, 0.5
 		map = [	"$.........."]
-		ws = self.connect(map, accel = 0.05, gravity = 0.05, fric = .05, max_speed = 0.5)
+		ws = self.connect(map, accel = ACCEL, gravity = GRAVITY, fric = FRIC, max_speed = MAX_SPEED)
 		vx = 0; x = .5
 		while vx < 0.5:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
 			assert self.equal(pl[VX], vx) and self.equal(pl[X], x), (pl, vx, x)
 			self.move(ws, resp['tick'], 1)
-			vx += 0.05; x += vx 
+			vx += ACCEL; x += vx 
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
 		assert self.equal(pl[VX], 0.5) , pl
@@ -364,3 +365,23 @@ class WebSocketTestCase(BaseTestCase):
 		assert self.equal(pl2[X], 2.5) and self.equal(pl2[Y], 2.5) and self.equal(pl2[VY], 0)\
 			and self.equal(pl2[VX], 0), pl2	
 
+	def test_jump_near_wall(self):
+		ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.05, 0.05, 0.05, 0.5
+		map  = ["..",
+				"..",
+				"..",
+				"..",
+				"$."]
+		ws = self.connect(map, accel = ACCEL, gravity = GRAVITY, fric = FRIC, max_speed = MAX_SPEED)
+		for i in range(10, 20):
+			for j in range(i):
+				resp = self.recv_ws(ws)
+				pl = resp['players'][0]
+				assert 0.5-BaseTestCase.accuracy < pl[X] < 1.5+BaseTestCase.accuracy, pl
+				self.move(ws, resp['tick'], 1, -1)
+			for j in range(i):
+				resp = self.recv_ws(ws)
+				pl = resp['players'][0]
+				assert 0.5-BaseTestCase.accuracy < pl[X] < 1.5+BaseTestCase.accuracy, pl
+				self.move(ws, resp['tick'], -1, -1)			
+		

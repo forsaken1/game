@@ -13,8 +13,9 @@ def add_col(collisions, time, val):
 	collisions[time] = [val]		
 
 class player:
-	def __init__(self, pid, login, game, server):
+	def __init__(self, pid, login, game, server, kills, deaths):
 		self.pid, self.login, self.game, self.server, self.map = pid, login, game, server, game.map
+		self.kills = kills; self.deaths = deaths
 
 		self.health = MAX_HEALTH
 		self.respawn = 1
@@ -26,7 +27,6 @@ class player:
 		self.is_start, self.was_action = False, False
 
 		self.weapon = 'K'; self.last_fire_tick = -INF; self.weapon_angle = -1
-		self.kills = 0; self.deaths = 0
 
 		self.connects = []
 

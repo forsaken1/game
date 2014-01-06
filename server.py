@@ -15,9 +15,9 @@ class server:
 	def add_game(self, map_id, id, accel, friction, gravity, MaxVelocity):
 		self.games[id] = game(self.maps[map_id], self, accel, friction, gravity, MaxVelocity)
 
-	def add_player(self, pid, login, gid):
+	def add_player(self, pid, login, gid, kills = 0, deaths = 0):
 		game = self.games[gid]
-		pl = player(pid, login, game, self)
+		pl = player(pid, login, game, self, kills, deaths)
 		game.join(pl)	
 		self.players[pid] = pl
 
@@ -25,8 +25,11 @@ class server:
 		self.maps[id] = map(scheme, self)
 
 	def erase_player(self, sid, gid):
-		self.games[gid].leave(sid)
-		if len(self.games[gid].players) == 0: del self.games[gid]
+		(kills, death) = self.games[gid].leave(sid)
+		if not len(self.games[gid].players): 
+			del self.games[gid]
+			return (True, kills, death)
+		return (False, kills, death) 
 
 	def clear(self, new_mode):
 		self.games.clear()
