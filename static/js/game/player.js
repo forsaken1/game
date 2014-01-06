@@ -34,8 +34,13 @@ function Player(ctx, x, y)
 
 	this.incAnimationCurrentNumber = function()
 	{
-		this.animationCurrentNumber = this.animationCurrentNumber < this.animationPicCount * handler.animSpeed - 1 ?
-			++this.animationCurrentNumber : 0;
+		handler.animationCurrentNumber = handler.animationCurrentNumber < handler.animationPicCount * handler.animSpeed - 1 ?
+			++handler.animationCurrentNumber : 0;
+	}
+
+	this.getDirection = function()
+	{
+		return handler.direction ? 1 : -1;
 	}
 
 	this.setDirection = function(dir)
@@ -65,7 +70,7 @@ function Player(ctx, x, y)
 		handler.ctx.drawImage(handler.animation[handler.direction][parseInt(handler.animationCurrentNumber / handler.animSpeed)], x, y, 59, 59);
 	}
 
-	this.getStopJson = function(tick, x, y) //todo: вынести в отдельный класс
+	this.getStopJson = function(tick) //todo: вынести в отдельный класс
 	{
 		return JSON.stringify(
 		{	
@@ -73,8 +78,8 @@ function Player(ctx, x, y)
 			'params':
 			{
 				'tick': tick,
-				'dx': x,
-				'dy': y
+				'dx': 0,
+				'dy': 0
 			}
 		})
 	}

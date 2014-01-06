@@ -1,17 +1,30 @@
 function GameController($scope, $http, $interval)
 {
 	$interval.cancel(SET_INTERVAL_HANDLER);
+
 	var BLOCK_SIZE = 50;
 	var MAX_MAP_SIZE = 100;
 	var MAX_MAPS_COUNT = 100;
-	var MAPS = Array(MAX_MAPS_COUNT);
+	var MAPS = [];
+	var AIM_SIZE = 75;
+	var TICK = 0;
+	var SPEED = 20;
+	var JUMP = 50;
+	var DX = 0;
+	var DY = 0;
+	var VX = 0;
+	var VY = 0;
+	var N = null; // player`s number in array
+	var LOGIN = localStorage.getItem('login');
+	var MAP_ID = localStorage.getItem('map_id');
+	var SID = localStorage.getItem('sid');
 
 	$http.post(SERVER_URL, JSON.stringify(
 	{
 		'action': 'getMaps',
 		'params':
 		{
-			sid: localStorage.getItem('sid')
+			sid: SID
 		}
 	})).success(function(data) 
 	{
@@ -24,24 +37,11 @@ function GameController($scope, $http, $interval)
 			MAPS[index].name = data.maps[i].name;
 			MAPS[index].maxPlayers = data.maps[i].maxPlayers;
 		}
-		MAP = MAPS[localStorage.getItem('map_id')];
-
-		var AIM_SIZE = 75;
-		var TICK = 0;
-		var SPEED = 20;
-		var JUMP = 50;
-		var VX = 0, VY = 0;
-		var DIRECTION_X = 0;
-		var DIRECTION_Y = 0;
-		var LOGIN = localStorage.getItem('login');
-		var N = null; // player`s number in array
+		var MAP = MAPS[MAP_ID];
 		var canvas = document.getElementById('canvas');
 		var CTX = canvas.getContext('2d');
-		var DX = 0;
-		var DY = 0;
 		var onKeyUp = [];
 		var onKeyDown = [];
-
 		var pistol = new Image();
 		var minigun = new Image();
 		var railgun = new Image();
@@ -60,9 +60,6 @@ function GameController($scope, $http, $interval)
 		var mousePos;
 		var currentWeapon = 0;
 
-		for(var i = 0; i < MAP.maxPlayers; ++i)
-			players[i] = new Player(CTX, -1000, -1000);
-
 		background.src = '/graphics/map/background.png';
 		block.src = '/graphics/map/ground.png';
 		portal.src = '/graphics/map/portal.png';
@@ -75,36 +72,11 @@ function GameController($scope, $http, $interval)
 		bullet.src = '/graphics/weapons/bullet.png';
 		aim.src = '/graphics/weapons/aim.png';
 
-		// Sockets
-		var ws = new WebSocket('ws://' + SERVER_URL_DOMAIN + '/websocket');
+		for(var i = 0; i < MAP.maxPlayers; ++i)
+			players[i] = new Player(CTX, -1000, -1000);
 
-		ws.onopen = function() 
-		{
-			console.log("Connection is established"); 
-			ws.send(JSON.stringify(
-			{
-				'action': 'move',
-				'params':
-				{
-					'sid': localStorage.getItem('sid'),
-					'tick': TICK,
-					'dx': 0,
-					'dy': 0
-				}
-			}));
-		};
-
-		ws.onclose = function(event)
-		{ 
-			if (event.wasClean) {
-				console.log('Connection closed');
-			} else {
-				console.log('Connection interrupted');
-			}
-			console.log('Error code: ' + event.code + ' reason: ' + event.reason);
-		};
-		 
-		ws.onmessage = function(event)
+		// Socket onMessage
+		var ws = WS(function(event)
 		{
 			var data = JSON.parse(event.data);
 			TICK = data.tick;
@@ -123,21 +95,17 @@ function GameController($scope, $http, $interval)
 					players[i].setDirection(data.players[i][2]);
 				}
 			}
-			var x = data.players[N][0] * BLOCK_SIZE - BLOCK_SIZE / 2;
-			var y = data.players[N][1] * BLOCK_SIZE - BLOCK_SIZE / 2;
+			var pl = data.players[N];
+			var x = pl[0] * BLOCK_SIZE - BLOCK_SIZE / 2;
+			var y = pl[1] * BLOCK_SIZE - BLOCK_SIZE / 2;
 			player.setCoords(x, y);
-			VX = data.players[N][2];
-			VY = data.players[N][3];
+			VX = pl[2];
+			VY = pl[3];
 			DX = -x + 405;
 			DY = -y + 300;
 			projectiles = data.projectiles;
 			//console.log(event.data); // for debug
-		};
-
-		ws.onerror = function(error)
-		{
-			console.log("Error " + error.message);
-		};
+		});
 
 		this.getN = function(login, pl)
 		{
@@ -172,7 +140,6 @@ function GameController($scope, $http, $interval)
 			for(var i = 0; i < projectiles.length; ++i)
 			{
 				projectiles[i] && CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX, projectiles[i][1] * BLOCK_SIZE + DY);
-				c(projectiles);
 			}
 			mousePos && CTX.drawImage(aim, mousePos.x - AIM_SIZE / 2, mousePos.y - AIM_SIZE / 2, AIM_SIZE, AIM_SIZE);
 			requestAnimFrame(handler.draw);
@@ -196,7 +163,6 @@ function GameController($scope, $http, $interval)
 		canvas.addEventListener('mousedown', function(evt)
 		{
 			mousePos = handler.getMousePos(canvas, evt);
-			var dd;
 			ws.send(dd = JSON.stringify(
 			{
 				'action': 'fire',
@@ -207,7 +173,6 @@ function GameController($scope, $http, $interval)
 					'dy': (mousePos.y - DY) / BLOCK_SIZE
 				}
 			}));
-			c(dd);
 		}, true);
 
 		// DOWN keys
@@ -223,7 +188,6 @@ function GameController($scope, $http, $interval)
 					'dy': VY
 				}
 			}));
-			DIRECTION_X = -1;
 			player.setDirection(-1);
 			player.move();
 		}
@@ -236,11 +200,10 @@ function GameController($scope, $http, $interval)
 				'params':
 				{
 					'tick': TICK,
-					'dx': DIRECTION_X * SPEED,
+					'dx': player.getDirection() * SPEED,
 					'dy': -JUMP
 				}
 			}));
-			DIRECTION_Y = -1;
 		}
 
 		onKeyDown[68] = onKeyDown[39] = function()
@@ -255,28 +218,24 @@ function GameController($scope, $http, $interval)
 					'dy': VY
 				}
 			}));
-			DIRECTION_X = 1;
 			player.setDirection(1);
 			player.move();
 		}
 		// UP keys
 		onKeyUp[65] = onKeyUp[37] = function()
 		{
-			ws.send(player.getStopJson(TICK, DIRECTION_X, DIRECTION_Y));
-			DIRECTION_X = 0;
+			ws.send(player.getStopJson(TICK));
 			player.stop();
 		}
 
 		onKeyUp[87] = onKeyUp[38] = function()
 		{
-			ws.send(player.getStopJson(TICK, DIRECTION_X, DIRECTION_Y));
-			DIRECTION_Y = 0;
+			ws.send(player.getStopJson(TICK));
 		}
 
 		onKeyUp[68] = onKeyUp[39] = function()
 		{
-			ws.send(player.getStopJson(TICK, DIRECTION_X, DIRECTION_Y));
-			DIRECTION_X = 0;
+			ws.send(player.getStopJson(TICK));
 			player.stop();
 		}
 
