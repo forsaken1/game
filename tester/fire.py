@@ -242,3 +242,164 @@ class FireTestCase(BaseTestCase):
 			y+=v.y
 			self.move(ws)
 
+	def test_get_stats(self):
+		map  = ["$......",
+				"#......",
+				"$M#...."]
+		ws1, game, sid1 = self.connect(map, game_ret = True)
+		resp = self.recv_ws(ws1)
+		ws2, sid2 = self.connect(game = game, game_ret = True)
+		self.move(ws1, resp['tick'])
+		resp = self.recv_ws(ws1)
+		self.recv_ws(ws2)
+
+		while True:
+			self.move(ws2, resp['tick'], 1)
+			self.move(ws1)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			pl = resp['players'][1]
+			if self.equal(pl[X], 1.5): break
+
+		x = 1.5
+		v = point(1-1.5, .5-2.5)
+		w = weapons['M']
+		v = v.scale(w.speed/v.size())
+		while x +v.x> 1:
+			self.fire(ws2, v.x, v.y)
+			self.move(ws1)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			x += v.x		
+
+		health = 100
+		i = 0
+		while health > 0:
+			assert resp['players'][0][HEALTH] == health, (pl, health)
+			self.fire(ws2, v.x,v.y)
+			self.move(ws1)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			if (not i%w.recharge): health -= w.damage
+			i += 1
+		pl = resp['players'][0]
+		assert pl[HEALTH] == 0 and pl[RESPAWN] == RESP_PLAYER  and pl[DEATHS] == 1, pl
+		pl = resp['players'][1]
+		assert pl[KILLS] == 1, pl
+
+		ws1.close()
+		resp = self.send("leaveGame", {"sid": sid1})
+		assert resp["result"] == "ok", resp
+		ws2.close()
+		resp = self.send("leaveGame", {"sid": sid2})
+		assert resp["result"] == "ok", resp
+		resp = self.send("getStats", {"sid": sid1, "game": game})
+		pls = resp['players']
+		assert	{'login': self.default('user', 2), 'kills': 0, 'deaths': 1} in pls and \
+				{'login': self.default('user', 1), 'kills': 1, 'deaths': 0} in pls, resp
+
+	def test_get_stats_game_running(self):
+		map  = ["$......",
+				"#......",
+				"$M#...."]
+		ws1, game, sid1 = self.connect(map, game_ret = True)
+		resp = self.recv_ws(ws1)
+		ws2, sid2 = self.connect(game = game, game_ret = True)
+		self.move(ws1, resp['tick'])
+		resp = self.recv_ws(ws1)
+		self.recv_ws(ws2)
+
+		while True:
+			self.move(ws2, resp['tick'], 1)
+			self.move(ws1)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			pl = resp['players'][1]
+			if self.equal(pl[X], 1.5): break
+
+		x = 1.5
+		v = point(1-1.5, .5-2.5)
+		w = weapons['M']
+		v = v.scale(w.speed/v.size())
+		while x +v.x> 1:
+			self.fire(ws2, v.x, v.y)
+			self.move(ws1)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			x += v.x		
+
+		health = 100
+		i = 0
+		while health > 0:
+			assert resp['players'][0][HEALTH] == health, (pl, health)
+			self.fire(ws2, v.x,v.y)
+			self.move(ws1)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			if (not i%w.recharge): health -= w.damage
+			i += 1
+		pl = resp['players'][0]
+		assert pl[HEALTH] == 0 and pl[RESPAWN] == RESP_PLAYER  and pl[DEATHS] == 1, pl
+		pl = resp['players'][1]
+		assert pl[KILLS] == 1, pl
+
+		ws1.close()
+		resp = self.send("leaveGame", {"sid": sid1})
+		assert resp["result"] == "ok", resp
+		resp = self.send("getStats", {"sid": sid1, "game": game})
+		resp["result"] == "gameRunning", resp
+
+	def test_reconnection(self):
+		map  = ["$......",
+				"#......",
+				"$M#...."]
+		ws1, game, sid1 = self.connect(map, game_ret = True)
+		resp = self.recv_ws(ws1)
+		ws2, sid2 = self.connect(game = game, game_ret = True)
+		self.move(ws1, resp['tick'])
+		resp = self.recv_ws(ws1)
+		self.recv_ws(ws2)
+
+		while True:
+			self.move(ws2, resp['tick'], 1)
+			self.move(ws1)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			pl = resp['players'][1]
+			if self.equal(pl[X], 1.5): break
+
+		x = 1.5
+		v = point(1-1.5, .5-2.5)
+		w = weapons['M']
+		v = v.scale(w.speed/v.size())
+		while x +v.x> 1:
+			self.fire(ws2, v.x, v.y)
+			self.move(ws1)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			x += v.x		
+
+		health = 100
+		i = 0
+		while health > 0:
+			assert resp['players'][0][HEALTH] == health, (pl, health)
+			self.fire(ws2, v.x,v.y)
+			self.move(ws1)
+			resp = self.recv_ws(ws1)
+			self.recv_ws(ws2)
+			if (not i%w.recharge): health -= w.damage
+			i += 1
+		pl = resp['players'][0]
+		assert pl[HEALTH] == 0 and pl[RESPAWN] == RESP_PLAYER  and pl[DEATHS] == 1, pl
+		pl = resp['players'][1]
+		assert pl[KILLS] == 1, pl
+		ws1.close()
+		resp = self.send("leaveGame", {"sid": sid1})
+		assert resp["result"] == "ok", resp
+				
+		self.join_game(game, sid1)
+		ws1 = self.send_ws(action = 'move', params = {'sid': sid1, 'tick': 0, 'dx': 0, 'dy':0})
+		self.move(ws2)
+		resp = self.recv_ws(ws2)
+		pl = resp['players'][1]
+		assert pl[DEATHS] == 1, pl

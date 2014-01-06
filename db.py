@@ -15,7 +15,7 @@ def create_db():
 			`password` LONGBLOB,
 			PRIMARY KEY (`id`),
 			KEY `id` (`id`)
-			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=2  
+			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=2
 			ENGINE=INNODB;
 		   '''
 	cursor.execute(sql)    
@@ -24,7 +24,7 @@ def create_db():
 			`login` varchar(255) CHARACTER SET latin1 NOT NULL,
 			`text` LONGTEXT CHARACTER SET utf8 NOT NULL,
 			`time` int(11) NOT NULL,
-			`game_id` int(11),
+			`gid` int(11),
 			PRIMARY KEY (`id`)
 			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 
 			ENGINE=INNODB;
@@ -35,7 +35,7 @@ def create_db():
 			`name` varchar(256) CHARACTER SET latin1 NOT NULL,
 			`map` int(11) NOT NULL,
 			`maxPlayers` int(11) NOT NULL,
-			`status` bit(1) DEFAULT b'1' NOT NULL,
+			`status` int(1) DEFAULT 1 NOT NULL,
 			`accel` float(11) NOT NULL,
 			`maxVelocity` float(11) NOT NULL,
 			`friction` float(11) NOT NULL,
@@ -59,7 +59,9 @@ def create_db():
 			`id` int(11) NOT NULL AUTO_INCREMENT,
 			`pid` varchar(64) CHARACTER SET latin1,
 			`login` varchar(255) CHARACTER SET latin1 NOT NULL,
-			`game_id` int(11) NOT NULL,
+			`gid` int(11) NOT NULL,
+			`kills` int(11),
+			`deaths` int(11),						
 			PRIMARY KEY (`id`)
 			)DEFAULT CHARSET=utf8 AUTO_INCREMENT=1
 			ENGINE=INNODB;				

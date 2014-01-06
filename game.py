@@ -27,6 +27,7 @@ class game:
 	def leave(self, pid):
 		for pl in self.players:
 			if pl.pid == pid: self.players.remove(pl)
+			return (pl.kills, pl.deaths) 
 
 	def set_mess(self):
 		self.mess = json.dumps({
@@ -54,8 +55,8 @@ class game:
 		for p in self.players:
 			p.cur_consist()
 		self.set_mess()
-		#if LOGGING:
-		#	print self.mess
+		if LOGGING:
+			print self.mess
 		for p in self.players:
 			p.write_mess()
 
