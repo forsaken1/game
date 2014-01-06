@@ -58,6 +58,7 @@ function GameController($scope, $http, $interval)
 		var handler = this;
 		var player;
 		var mousePos;
+		var currentWeapon = 0;
 
 		for(var i = 0; i < MAP.maxPlayers; ++i)
 			players[i] = new Player(CTX, -1000, -1000);
@@ -171,13 +172,15 @@ function GameController($scope, $http, $interval)
 			for(var i = 0; i < projectiles.length; ++i)
 			{
 				projectiles[i] && CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX, projectiles[i][1] * BLOCK_SIZE + DY);
+				c(projectiles);
 			}
+			mousePos && CTX.drawImage(aim, mousePos.x - AIM_SIZE / 2, mousePos.y - AIM_SIZE / 2, AIM_SIZE, AIM_SIZE);
 			requestAnimFrame(handler.draw);
-			//mousePos && CTX.drawImage(aim, mousePos.x - AIM_SIZE / 2, mousePos.y - AIM_SIZE / 2, AIM_SIZE, AIM_SIZE); //todo: aim
 		}
 
 		// MOUSE events
-		this.getMousePos = function(canvas, evt) {
+		this.getMousePos = function(canvas, evt)
+		{
 			var rect = canvas.getBoundingClientRect();
 			return {
 				x: evt.clientX - rect.left,
@@ -185,15 +188,16 @@ function GameController($scope, $http, $interval)
 			};
 		}
 
-		/*canvas.addEventListener('mousemove', function(evt) // todo: aim
+		canvas.addEventListener('mousemove', function(evt)
 		{
 			mousePos = handler.getMousePos(canvas, evt);
-		}, true);*/
+		}, true);
 
 		canvas.addEventListener('mousedown', function(evt)
 		{
 			mousePos = handler.getMousePos(canvas, evt);
-			ws.send(JSON.stringify(
+			var dd;
+			ws.send(dd = JSON.stringify(
 			{
 				'action': 'fire',
 				'params':
@@ -203,6 +207,7 @@ function GameController($scope, $http, $interval)
 					'dy': (mousePos.y - DY) / BLOCK_SIZE
 				}
 			}));
+			c(dd);
 		}, true);
 
 		// DOWN keys
