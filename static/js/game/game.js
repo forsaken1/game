@@ -53,6 +53,7 @@ function GameController($scope, $http, $interval)
 		var player;
 		var mousePos;
 		var currentWeapon = 0;
+		var showStats = false;
 
 		background.src = '/graphics/map/background.png';
 		block.src = '/graphics/map/ground.png';
@@ -65,6 +66,8 @@ function GameController($scope, $http, $interval)
 		rocket.src = '/graphics/weapons/rocket.png';
 		bullet.src = '/graphics/weapons/bullet.png';
 		aim.src = '/graphics/weapons/aim.png';
+
+		CTX.font = 'bold 30px sans-serif';
 
 		for(var i = 0; i < MAP.maxPlayers; ++i)
 			players[i] = new Player(CTX, -1000, -1000);
@@ -81,22 +84,14 @@ function GameController($scope, $http, $interval)
 			}
 			for(var i = 0; i < data.players.length; ++i)
 			{
-				if(i != N)
-				{
-					var x = data.players[i][0] * BLOCK_SIZE - BLOCK_SIZE / 2;
-					var y = data.players[i][1] * BLOCK_SIZE - BLOCK_SIZE / 2;
-					players[i].setCoords(x, y);
-					players[i].setDirection(data.players[i][2]);
-				}
+				players[i].setVars(data.players[i]);
+				i != N && players[i].setDirection(data.players[i][2]);
 			}
 			var pl = data.players[N];
-			var x = pl[0] * BLOCK_SIZE - BLOCK_SIZE / 2;
-			var y = pl[1] * BLOCK_SIZE - BLOCK_SIZE / 2;
-			player.setVars(pl);
 			VX = pl[2];
 			VY = pl[3];
-			DX = - x + SCREEN_MIDDLE_X;
-			DY = - y + SCREEN_MIDDLE_Y;
+			DX = - (pl[0] * BLOCK_SIZE - BLOCK_SIZE / 2) + SCREEN_MIDDLE_X;
+			DY = - (pl[1] * BLOCK_SIZE - BLOCK_SIZE / 2) + SCREEN_MIDDLE_Y;
 			projectiles = data.projectiles;
 			//console.log(event.data); // for debug
 		});
@@ -112,17 +107,35 @@ function GameController($scope, $http, $interval)
 		this.draw = function()
 		{
 			CTX.drawImage(background, 0, 0);
-
+			if(showStats)
+			{
+				CTX.fillText('Player | Health | Kills | Deaths', 100, 30);
+				CTX.fillText('________________________________', 100, 40);
+				for(var i = 0; i < players.length; ++i)
+				{
+					//if(!players[i].isEnabled())
+					//	return;
+					if(i == N)
+					{
+						CTX.fillStyle = "#F00";
+						CTX.fillText(players[i].getVarsString(), 100, 80 + i * 40);
+						CTX.fillStyle = "#000";
+					}
+					else
+						CTX.fillText(players[i].getVarsString(), 100, 80 + i * 40);
+				}				
+				return requestAnimFrame(handler.draw);
+			}
 			for(var i = 0; i < MAP.map.length; ++i)
 			{
 				for(var j = 0; j < MAP.map[i].length; ++j)
 				{
-					MAP.map[i][j] == '#' &&	CTX.drawImage(block, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					MAP.map[i][j] == 'K' &&	CTX.drawImage(sword, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					MAP.map[i][j] == 'P' &&	CTX.drawImage(pistol, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					MAP.map[i][j] == '#' &&	CTX.drawImage(block,   j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					MAP.map[i][j] == 'K' &&	CTX.drawImage(sword,   j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					MAP.map[i][j] == 'P' &&	CTX.drawImage(pistol,  j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					MAP.map[i][j] == 'M' &&	CTX.drawImage(minigun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					MAP.map[i][j] == 'A' &&	CTX.drawImage(railgun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					MAP.map[i][j] == 'R' &&	CTX.drawImage(rocket, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					MAP.map[i][j] == 'R' &&	CTX.drawImage(rocket,  j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					MAP.map[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					/^\d+$/.test(MAP.map[i][j]) && CTX.drawImage(portal, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 				}
@@ -133,7 +146,7 @@ function GameController($scope, $http, $interval)
 			}
 			for(var i = 0; i < projectiles.length; ++i)
 			{
-				projectiles[i] && CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX, projectiles[i][1] * BLOCK_SIZE + DY);
+				projectiles[i] && CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX - 8, projectiles[i][1] * BLOCK_SIZE + DY - 8);
 			}
 			mousePos && CTX.drawImage(aim, mousePos.x - AIM_SIZE / 2, mousePos.y - AIM_SIZE / 2);
 			requestAnimFrame(handler.draw);
@@ -158,19 +171,24 @@ function GameController($scope, $http, $interval)
 		canvas.addEventListener('mousedown', function(evt)
 		{
 			mousePos = handler.getMousePos(canvas, evt);
-			ws.send(dd = JSON.stringify(
+			ws.send(JSON.stringify(
 			{
 				'action': 'fire',
 				'params':
 				{
 					'tick': TICK,
-					'dx': (mousePos.x - DX - player.getCoordX()) / BLOCK_SIZE,
-					'dy': (mousePos.y - DY - player.getCoordY()) / BLOCK_SIZE
+					'dx': (mousePos.x - DX) / BLOCK_SIZE - player.getCoordX(),
+					'dy': (mousePos.y - DY) / BLOCK_SIZE - player.getCoordY()
 				}
 			}));
 		}, true);
 
 		// DOWN keys
+		onKeyDown[32] = function()
+		{
+			showStats = true;
+		}
+
 		onKeyDown[65] = onKeyDown[37] = function()
 		{
 			ws.send(JSON.stringify(
@@ -217,6 +235,11 @@ function GameController($scope, $http, $interval)
 			player.move();
 		}
 		// UP keys
+		onKeyUp[32] = function()
+		{
+			showStats = false;
+		}
+
 		onKeyUp[65] = onKeyUp[37] = function()
 		{
 			ws.send(player.getStopJson(TICK));

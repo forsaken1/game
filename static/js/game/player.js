@@ -2,9 +2,15 @@ function Player(ctx, x, y)
 {
 	var handler = this;
 
+	this.enabled = false;
 	this.ctx = ctx;
 	this.x = x;
 	this.y = y;
+	this.health = 0;
+	this.login = '';
+	this.respawn = 0;
+	this.kills = 0;
+	this.deaths = 0;
 	this.animationPicCount = 10;
 	this.animationCurrentNumber = 0;
 	this.direction = 0;
@@ -42,11 +48,6 @@ function Player(ctx, x, y)
 		this.weapon[1][i].src = '/graphics/weapons/wr' + i + '.png';
 	}
 
-	this.setCurrentWeapon = function(currWeapon)
-	{
-
-	}
-
 	this.setWeaponDirection = function(mousePos)
 	{
 		this.weaponDirectionX = mousePos.x;
@@ -81,11 +82,34 @@ function Player(ctx, x, y)
 		handler.direction = dir > 0 ? 1 : 0;
 	}
 
+	this.getWeapon = function()
+	{
+
+	}
+
+	this.isEnabled = function()
+	{
+		return handler.login != '';
+	}
+
 	this.setVars = function(vars)
 	{
 		handler.x = vars[0];
 		handler.y = vars[1];
+		handler.currentWeapon = 0;//handler.getWeapon(vars[4]) //todo
+		handler.login = vars[6];
 		handler.health = vars[7];
+		handler.respawn = vars[8];
+		handler.kills = vars[9];
+		handler.deaths = vars[10];
+	}
+
+	this.getVarsString = function()
+	{
+		return handler.login + ' | ' +
+			handler.health + ' | ' +
+			handler.kills +  ' | ' +
+			handler.deaths;
 	}
 
 	this.getCoordX = function()
@@ -100,8 +124,8 @@ function Player(ctx, x, y)
 
 	this.draw = function(isUser, dx, dy)
 	{
-		var x = isUser ? SCREEN_MIDDLE_X : handler.x + dx;
-		var y = isUser ? SCREEN_MIDDLE_Y : handler.y + dy;
+		var x = isUser ? SCREEN_MIDDLE_X : handler.x * BLOCK_SIZE - BLOCK_SIZE / 2 + dx;
+		var y = isUser ? SCREEN_MIDDLE_Y : handler.y * BLOCK_SIZE - BLOCK_SIZE / 2 + dy;
 
 		if(handler.moving)
 			handler.incAnimationCurrentNumber();
@@ -135,8 +159,10 @@ function Player(ctx, x, y)
 			return 3;
 		else if(handler.health > 25)
 			return 4;
-		else
+		else if(handler.health > 0)
 			return 5;
+		else
+			return 6;
 	}
 
 	this.getStopJson = function(tick) //todo: вынести в отдельный класс
