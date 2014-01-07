@@ -92,7 +92,7 @@ function GameController($scope, $http, $interval)
 			var pl = data.players[N];
 			var x = pl[0] * BLOCK_SIZE - BLOCK_SIZE / 2;
 			var y = pl[1] * BLOCK_SIZE - BLOCK_SIZE / 2;
-			player.setCoords(x, y);
+			player.setVars(pl);
 			VX = pl[2];
 			VY = pl[3];
 			DX = - x + SCREEN_MIDDLE_X;
