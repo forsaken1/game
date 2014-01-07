@@ -1,15 +1,9 @@
 function GameController($scope, $http, $interval)
 {
 	$interval.cancel(SET_INTERVAL_HANDLER);
-
-	var BLOCK_SIZE = 50;
-	var MAX_MAP_SIZE = 100;
-	var MAX_MAPS_COUNT = 100;
+	
 	var MAPS = [];
-	var AIM_SIZE = 75;
 	var TICK = 0;
-	var SPEED = 20;
-	var JUMP = 50;
 	var DX = 0;
 	var DY = 0;
 	var VX = 0;
@@ -101,8 +95,8 @@ function GameController($scope, $http, $interval)
 			player.setCoords(x, y);
 			VX = pl[2];
 			VY = pl[3];
-			DX = -x + 405;
-			DY = -y + 300;
+			DX = - x + SCREEN_MIDDLE_X;
+			DY = - y + SCREEN_MIDDLE_Y;
 			projectiles = data.projectiles;
 			//console.log(event.data); // for debug
 		});
@@ -158,6 +152,7 @@ function GameController($scope, $http, $interval)
 		canvas.addEventListener('mousemove', function(evt)
 		{
 			mousePos = handler.getMousePos(canvas, evt);
+			player && player.setWeaponDirection(mousePos);
 		}, true);
 
 		canvas.addEventListener('mousedown', function(evt)

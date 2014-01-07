@@ -13,6 +13,14 @@ function Player(ctx, x, y)
 	this.animation[1] = [];
 	this.moving = false;
 	this.animSpeed = 10;
+
+	this.weapon = [];
+	this.weapon[0] = [];
+	this.weapon[1] = [];
+	this.weaponCount = 1;
+	this.currentWeapon = 0;
+	this.weaponDirectionX = 0;
+	this.weaponDirectionY = 0;
 	
 	for(var i = 0; i < this.animationPicCount; ++i)
 	{
@@ -20,6 +28,25 @@ function Player(ctx, x, y)
 		this.animation[0][i].src = '/graphics/players/pl' + i + '.png';
 		this.animation[1][i] = new Image();
 		this.animation[1][i].src = '/graphics/players/pr' + i + '.png';
+	}
+
+	for(var i = 0; i < this.weaponCount; ++i)
+	{
+		this.weapon[0][i] = new Image();
+		this.weapon[0][i].src = '/graphics/weapons/wl' + i + '.png';
+		this.weapon[1][i] = new Image();
+		this.weapon[1][i].src = '/graphics/weapons/wr' + i + '.png';
+	}
+
+	this.setCurrentWeapon = function(currWeapon)
+	{
+
+	}
+
+	this.setWeaponDirection = function(mousePos)
+	{
+		this.weaponDirectionX = mousePos.x;
+		this.weaponDirectionY = mousePos.y;
 	}
 
 	this.move = function()
@@ -68,14 +95,23 @@ function Player(ctx, x, y)
 
 	this.draw = function(isUser, dx, dy)
 	{
-		var x = isUser ? 400 : handler.x + dx - 5; //todo: заюзать константы
-		var y = isUser ? 300 : handler.y + dy;
+		var x = isUser ? SCREEN_MIDDLE_X : handler.x + dx;
+		var y = isUser ? SCREEN_MIDDLE_Y : handler.y + dy;
 
 		if(handler.moving)
 			handler.incAnimationCurrentNumber();
 		else
 			handler.animationCurrentNumber = 3 * handler.animSpeed;
 		
+		var y_ = y + 20;
+		var x_ = x + 30;
+		handler.ctx.save()
+		handler.ctx.translate(x_, y_);
+		handler.direction = handler.weaponDirectionX > x_ ? 1 : 0;
+		handler.ctx.rotate(Math.atan2(handler.weaponDirectionY - y_, handler.weaponDirectionX - x_) + Math.PI);
+		handler.ctx.drawImage(handler.weapon[handler.direction][handler.currentWeapon], -25, -10);
+		handler.ctx.restore();
+
 		handler.incAnimationCurrentNumber();
 		handler.ctx.drawImage(handler.animation[handler.direction][parseInt(handler.animationCurrentNumber / handler.animSpeed)], x, y, 59, 59);
 	}
