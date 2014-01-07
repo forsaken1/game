@@ -113,8 +113,6 @@ function GameController($scope, $http, $interval)
 				CTX.fillText('________________________________', 100, 40);
 				for(var i = 0; i < players.length; ++i)
 				{
-					//if(!players[i].isEnabled())
-					//	return;
 					if(i == N)
 					{
 						CTX.fillStyle = "#F00";

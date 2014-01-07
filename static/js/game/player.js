@@ -144,6 +144,10 @@ function Player(ctx, x, y)
 		handler.incAnimationCurrentNumber();
 		handler.ctx.drawImage(handler.animation[handler.direction][parseInt(handler.animationCurrentNumber / handler.animSpeed)], x, y, 59, 59);
 
+		var font = handler.ctx.font;
+		handler.ctx.font = 'bold 10px sans-serif';
+		handler.ctx.fillText(handler.login, x + 15, y - 15);
+		handler.ctx.font = font;
 		handler.ctx.drawImage(handler.healthBar, 0, 4 * handler.getHeathbar(), 32, 4, x + 10, y - 10, 32, 4);
 	}
 
