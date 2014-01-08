@@ -44,7 +44,7 @@ class post(Resource):
 
 if __name__ == '__main__':
 #	startLogging(sys.stdout)
-	if TESTING: create_db()
+	create_db()
 	s = server()	
 	p = process(s) 
 
