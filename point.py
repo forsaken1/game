@@ -11,11 +11,11 @@ class weapon():
 		self.speed = speed; self.damage = damage; self.recharge = recharge; self.letter = letter
 
 weapons = {
-		   'P': weapon(1, 10, 10,'P'),
-		   'M': weapon(1, 10, 5, 'M'),
-		   'K': weapon(.5, 5, 3, 'K'),
-		   'R': weapon(1, 30, 25, 'R'),
-		   'A': weapon(INF, 15, 15, 'A')}
+		   'P': weapon(1, 10, 2,'P'),
+		   'M': weapon(1, 10, 2, 'M'),
+		   'K': weapon(.5, 5, 2, 'K'),
+		   'R': weapon(1, 30, 2, 'R'),
+		   'A': weapon(INF, 15, 2, 'A')}
 
 
 class point:
@@ -51,3 +51,6 @@ class point:
 		arctg = atan2(self.y, self.x)
 		if arctg < 0: arctg+=2*pi
 		return arctg/pi*180
+
+	def __invert__(self):
+		return point(not self.x, not self.y)

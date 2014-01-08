@@ -26,14 +26,14 @@ class player:
 
 		self.connects = []
 
-	#---------------------------function for using on client mess---------------------------------#
+	#---------------------------function for using on client message ---------------------------------#
 	def action(self, msg):
 		
 		self.was_action = True
 		if not self.is_start:
 			self.is_start = True
 
-		elif self.game.c_ticks - 1 <= msg['params']['tick'] <= self.game.c_ticks: 
+		elif self.game.c_ticks - 3 <= msg['params']['tick'] <= self.game.c_ticks: 
 			print msg['params']['tick']
 			if msg['action'] != 'empty' and not self.respawn:
 				getattr(self, msg['action'])(msg['params'])
@@ -131,7 +131,10 @@ class player:
 		pos_cell = self.pos.index()
 		forward = self.pos + dir1.scale(.5-EPS)
 		forward_cell = forward.index()
-		forward = self.pos + dir1.scale(.5)
+
+		forward_cell = forward.index()
+		if self.map.map[forward_cell.y][forward_cell.x] == '#':
+			pass
 
 		from collections import defaultdict
 		collisions = defaultdict(list)		
@@ -155,17 +158,15 @@ class player:
 		times.sort()
 		for time in times:
 			for coll in collisions[time]:
-				offset = dir1 * point(int(bool(coll[1] - 1)), int(bool(coll[1])))
-				if coll[0]:
-					if was_coll[0] and coll[1] == 0 or was_coll[1] and coll[1] == 1:
-						continue
-					coll_cell = pos_cell + offset
-					if coll[1] == 2:
-						coll_cell -= point(*was_coll)*dir1
+				offset = dir1 * point(int(bool(coll[1] - 1)), int(bool(coll[1]))) * point(not was_coll[0], not was_coll[1])
+				if not offset.x and not offset.y:
+					continue
 
-					el = self.map.map[coll_cell.y][coll_cell.x]
-					if '0'<=el<='9': self.teleport(coll_cell); return
-					elif 'A'<=el<='z': self.take_item(coll_cell)
+				if coll[0]:
+					pos_cell += offset
+					el = self.map.map[pos_cell.y][pos_cell.x]
+					if '0'<=el<='9': self.teleport(pos_cell); return
+					elif 'A'<=el<='z': self.take_item(pos_cell)
 
 				else:
 					coll_cell = forward_cell + offset
@@ -182,20 +183,25 @@ class player:
 							was_coll[0] = True
 						if coll_cell_wall and not y_neib_wall and not x_neib_wall:
 							if time < EPS:
-								self.speed.y = 1
+								self.speed.y = 0
 								was_coll[1] = True
-							self.speed = point(0,0)
-							was_coll = [True,True]
+							else:
+								self.speed = point(0,0)
+								was_coll = [True,True]
 
 					elif coll[1] == 1:
 						if coll_cell_wall or abs(self.pos.x - int(self.pos.x) - .5) > EPS and not was_coll[0] and x_neib_wall:
 							self.speed.y = 0
 							was_coll[1] = True
+						else:
+							forward_cell = coll_cell
 					
 					elif coll[1] == 0:
 						if coll_cell_wall or abs(self.pos.y - int(self.pos.y) - .5) > EPS and not was_coll[1] and y_neib_wall:
 							self.speed.x = 0
 							was_coll[0] = True
+						else:
+							forward_cell = coll_cell
 
 				if was_coll[0] and was_coll[1]: break
 
@@ -208,10 +214,7 @@ class player:
 
 
 
-		forward = self.pos + dir1.scale(.5-EPS)
-		forward_cell = forward.index()
-		if self.map.map[forward_cell.y][forward_cell.x] == '#':
-			pass
+
 
 
 	def tick(self):
