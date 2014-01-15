@@ -36,11 +36,6 @@ function GameController($scope, $http, $interval)
 		var CTX = canvas.getContext('2d');
 		var onKeyUp = [];
 		var onKeyDown = [];
-		var pistol = new Image();
-		var minigun = new Image();
-		var railgun = new Image();
-		var sword = new Image();
-		var rocket = new Image();
 		var block = new Image();
 		var portal = new Image();
 		var respawn = new Image();
@@ -49,21 +44,19 @@ function GameController($scope, $http, $interval)
 		var aim = new Image();
 		var players = [];
 		var projectiles = [];
+		var items = [];
 		var handler = this;
 		var player;
 		var mousePos;
 		var currentWeapon = 0;
 		var showStats = false;
+		var iter = 0;
+		var mapItems = {'K': 1, 'P': 1, 'M': 1, 'A': 1, 'R': 1, 'h': 1};
 
 		background.src = '/graphics/map/background.png';
 		block.src = '/graphics/map/ground.png';
 		portal.src = '/graphics/map/portal.png';
 		respawn.src = '/graphics/map/respawn.png';
-		pistol.src = '/graphics/weapons/pistol.png';
-		minigun.src = '/graphics/weapons/minigun.png';
-		railgun.src = '/graphics/weapons/railgun.png';
-		sword.src = '/graphics/weapons/sword.png';
-		rocket.src = '/graphics/weapons/rocket.png';
 		bullet.src = '/graphics/weapons/bullet.png';
 		aim.src = '/graphics/weapons/aim.png';
 
@@ -71,6 +64,17 @@ function GameController($scope, $http, $interval)
 
 		for(var i = 0; i < MAP.maxPlayers; ++i)
 			players[i] = new Player(CTX, -1000, -1000);
+
+		for(var i = 0; i < MAP.map.length; ++i)
+		{
+			for(var j = 0; j < MAP.map[i].length; ++j)
+			{
+				if(mapItems[ MAP.map[i][j] ])
+				{
+					items[iter++] = new Item(CTX, j * BLOCK_SIZE, i * BLOCK_SIZE, MAP.map[i][j]);
+				}
+			}
+		}
 
 		// Socket onMessage
 		var ws = WS(function(event)
@@ -86,6 +90,10 @@ function GameController($scope, $http, $interval)
 			{
 				players[i].setVars(data.players[i]);
 				i != N && players[i].setDirection(data.players[i][2]);
+			}
+			for(var i = 0; i < items.length; ++i)
+			{
+				items[i].setTiming(data.items[i]);
 			}
 			var pl = data.players[N];
 			VX = pl[2];
@@ -129,14 +137,18 @@ function GameController($scope, $http, $interval)
 				for(var j = 0; j < MAP.map[i].length; ++j)
 				{
 					MAP.map[i][j] == '#' &&	CTX.drawImage(block,   j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					MAP.map[i][j] == 'K' &&	CTX.drawImage(sword,   j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					MAP.map[i][j] == 'P' &&	CTX.drawImage(pistol,  j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					MAP.map[i][j] == 'M' &&	CTX.drawImage(minigun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					MAP.map[i][j] == 'A' &&	CTX.drawImage(railgun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					MAP.map[i][j] == 'R' &&	CTX.drawImage(rocket,  j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					//MAP.map[i][j] == 'K' &&	CTX.drawImage(sword,   j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					//MAP.map[i][j] == 'P' &&	CTX.drawImage(pistol,  j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					//MAP.map[i][j] == 'M' &&	CTX.drawImage(minigun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					//MAP.map[i][j] == 'A' &&	CTX.drawImage(railgun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
+					//MAP.map[i][j] == 'R' &&	CTX.drawImage(rocket,  j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					MAP.map[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					/^\d+$/.test(MAP.map[i][j]) && CTX.drawImage(portal, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 				}
+			}
+			for(var i = 0; i < items.length; ++i)
+			{
+				items[i] && items[i].draw(DX, DY);
 			}
 			for(var i = 0; i < players.length; ++i)
 			{
