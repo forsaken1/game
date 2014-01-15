@@ -137,11 +137,6 @@ function GameController($scope, $http, $interval)
 				for(var j = 0; j < MAP.map[i].length; ++j)
 				{
 					MAP.map[i][j] == '#' &&	CTX.drawImage(block,   j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					//MAP.map[i][j] == 'K' &&	CTX.drawImage(sword,   j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					//MAP.map[i][j] == 'P' &&	CTX.drawImage(pistol,  j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					//MAP.map[i][j] == 'M' &&	CTX.drawImage(minigun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					//MAP.map[i][j] == 'A' &&	CTX.drawImage(railgun, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
-					//MAP.map[i][j] == 'R' &&	CTX.drawImage(rocket,  j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					MAP.map[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					/^\d+$/.test(MAP.map[i][j]) && CTX.drawImage(portal, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 				}

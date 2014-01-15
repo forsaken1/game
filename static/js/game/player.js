@@ -23,11 +23,12 @@ function Player(ctx, x, y)
 	this.weapon = [];
 	this.weapon[0] = [];
 	this.weapon[1] = [];
-	this.weaponCount = 1;
+	this.weaponCount = 5;
 	this.currentWeapon = 0;
 	this.weaponDirection = 0;
 	this.weaponDirectionX = 0;
 	this.weaponDirectionY = 0;
+	this.weaponHash = {'K': 0, 'P': 1, 'M': 2, 'R': 3, 'A': 4};
 
 	this.healthBar = new Image();
 	this.healthBar.src = '/graphics/players/healthBar.png';
@@ -82,11 +83,6 @@ function Player(ctx, x, y)
 		handler.direction = dir > 0 ? 1 : 0;
 	}
 
-	this.getWeapon = function()
-	{
-
-	}
-
 	this.isEnabled = function()
 	{
 		return handler.login != '';
@@ -96,7 +92,7 @@ function Player(ctx, x, y)
 	{
 		handler.x = vars[0];
 		handler.y = vars[1];
-		handler.currentWeapon = 0;//handler.getWeapon(vars[4]) //todo
+		handler.currentWeapon = handler.weaponHash[ vars[4] ];
 		handler.login = vars[6];
 		handler.health = vars[7];
 		handler.respawn = vars[8];
