@@ -6,11 +6,7 @@ ZERO = point(0, 0)
 
 def sign(x):
 	return 1 if x > 0 else -1
-
-def add_col(collisions, time, val):
-	if collisions.has_key(time):
-		collisions[time].append(val)
-	collisions[time] = [val]		
+	
 
 class player:
 	def __init__(self, pid, login, game, server, kills, deaths):
@@ -30,15 +26,19 @@ class player:
 
 		self.connects = []
 
-	#---------------------------function for using on client mess---------------------------------#
+	#---------------------------function for using on client message ---------------------------------#
 	def action(self, msg):
+		
 		self.was_action = True
 		if not self.is_start:
 			self.is_start = True
 
-		elif self.game.c_ticks - 1 <= msg['params']['tick'] <= self.game.c_ticks: 
+		elif self.game.c_ticks - 3 <= msg['params']['tick'] <= self.game.c_ticks: 
+			print msg['params']['tick']
 			if msg['action'] != 'empty' and not self.respawn:
 				getattr(self, msg['action'])(msg['params'])
+		else:
+			print msg['params']['tick'], self.game.c_ticks
 		self.game.sync_tick()
 
 	def move(self, params):
@@ -118,106 +118,90 @@ class player:
 		self.pos = point(*self.map.tps[dot.to_turple()])
 		return
 
-	def peak2peak(self, dist, speed):
-		dist_size = dist.size()
-		speed_size = speed.size()
-		return speed_size > dist_size and\
-				(abs(speed.x) < EPS and abs(dist.x) < EPS or\
-				abs(speed.y) < EPS and abs(dist.y) < EPS or\
-				(speed.scale(dist_size/speed_size) - dist).size()<EPS)
-
 	def go(self):
+
 		speed = self.speed
 		if speed.size() < EPS: return
+		if abs(self.speed.x) < EPS: self.speed.x = 0
+		if abs(self.speed.y) < EPS: self.speed.y = 0
+
 		dir = speed.direct()
 		dir1 = point(1 if dir.x else -1, 1 if dir.y else -1)
 		#undir = dir.scale(-1,-1)
-		center_cell = self.pos.index()
+		pos_cell = self.pos.index()
 		forward = self.pos + dir1.scale(.5-EPS)
 		forward_cell = forward.index()
-		forward = self.pos + dir1.scale(.5)
-		
-		collisions = {}
 
-		dist = forward_cell + dir - forward
-		is_reach_x = abs(speed.x) > abs(dist.x); is_reach_y = abs(speed.y) > abs(dist.y);
-		if dist.size() < EPS:
-			add_col(collisions,  dist.size()/speed.size(), (0,3))
-		elif self.peak2peak(dist, speed):
-			add_col(collisions,  dist.size()/speed.size(), (0,2))
-		else:
-			if is_reach_x:
-				# (a,b)-collision descriptor a(1-center, 0-forward), b(0-x, 1-y, 2-angle)
-				add_col(collisions, dist.x/speed.x, (0,0))		
-			if is_reach_y:
-				add_col(collisions, dist.y/speed.y, (0,1))
-				 
-		dist = center_cell + dir - self.pos		
-		is_reach_x = abs(speed.x) > abs(dist.x); is_reach_y = abs(speed.y) > abs(dist.y);
-		if self.peak2peak(dist, self.speed):
-			add_col(collisions,  dist.x/speed.x, (1,2))
-		else:
-			if is_reach_x:
-				add_col(collisions, dist.x/speed.x, (1,0))
-			if is_reach_y:
-				add_col(collisions, dist.y/speed.y, (1,1))
+		forward_cell = forward.index()
+		if self.map.map[forward_cell.y][forward_cell.x] == '#':
+			pass
 
-		was_coll = [0,0]
+		from collections import defaultdict
+		collisions = defaultdict(list)		
+		dists = (forward_cell + dir - forward, pos_cell + dir - self.pos)
+							#### (a,b)-collision descriptor a(1-center, 0-forward), b(0-x, 1-y, 2-angle) ####
+		for i in range(2):
+			dist = dists[i]
+			is_reach_x = speed.x and abs(speed.x) > abs(dist.x); is_reach_y = speed.y and abs(speed.y) > abs(dist.y);
+			dist_size = dist.size(); speed_size = speed.size()
+			if is_reach_x and is_reach_y and (dist_size < EPS or (speed.scale(dist_size/speed_size) - dist).size()<EPS):
+				collisions[dist.y/speed.y].append((i,2))
+			else:
+				if is_reach_x:
+					collisions[dist.x/speed.x].append((i,0))
+				if is_reach_y:
+					collisions[dist.y/speed.y].append((i,1))
+						### was_coll = [X,Y] ###
+		was_coll = [False,False]
 		passed_time = 0
 		times = collisions.keys()
 		times.sort()
 		for time in times:
 			for coll in collisions[time]:
-				offset = dir1 * point(int(bool(coll[1] - 1)), int(bool(coll[1])))
-				if coll[0]:
-					if was_coll[0] and coll[1] == 0 or was_coll[1] and coll[0] == 1:
-						continue
-					coll_cell = center_cell + offset
-					if coll[1] == 2:
-						coll_cell -= point(*was_coll)*dir1
-						 
-					el = self.map.map[coll_cell.y][coll_cell.x]
-					if '0'<=el<='9': self.teleport(coll_cell); return
-					elif 'A'<=el<='z': self.take_item(coll_cell)
+				offset = dir1 * point(int(bool(coll[1] - 1)), int(bool(coll[1]))) * point(not was_coll[0], not was_coll[1])
+				if not offset.x and not offset.y:
+					continue
 
-				else:				# todo (0,0) collision
+				if coll[0]:
+					pos_cell += offset
+					el = self.map.map[pos_cell.y][pos_cell.x]
+					if '0'<=el<='9': self.teleport(pos_cell); return
+					elif 'A'<=el<='z': self.take_item(pos_cell)
+
+				else:
 					coll_cell = forward_cell + offset
 					x_neib_wall = self.map.map[coll_cell.y][coll_cell.x - dir1.x] == '#'
 					y_neib_wall = self.map.map[coll_cell.y - dir1.y][coll_cell.x] == '#'
 					coll_cell_wall = self.map.map[coll_cell.y][coll_cell.x] == '#'
-					if coll[1] == 3:
-						if x_neib_wall:
-							self.speed.y = 0
-							was_coll[1] = 1
-						if y_neib_wall:
-							self.speed.x = 0
-							was_coll[0] = 1
-						if abs(self.speed.x) > EPS and abs(self.speed.y) > EPS and coll_cell_wall \
-							and not y_neib_wall and not x_neib_wall:
-							self.speed.y = 0
-							was_coll[1] = 1
 
-					elif coll[1] == 2:	  
+					if coll[1] == 2:	  
 						if x_neib_wall:
 							self.speed.y = 0
-							was_coll[1] = 1
+							was_coll[1] = True
 						if y_neib_wall:
 							self.speed.x = 0
-							was_coll[0] = 1
-						if abs(self.speed.x) > EPS and abs(self.speed.y) > EPS and coll_cell_wall\
-							and not y_neib_wall and not x_neib_wall:
-							self.speed = point(0,0)
-							was_coll = [1,1]
+							was_coll[0] = True
+						if coll_cell_wall and not y_neib_wall and not x_neib_wall:
+							if time < EPS:
+								self.speed.y = 0
+								was_coll[1] = True
+							else:
+								self.speed = point(0,0)
+								was_coll = [True,True]
 
 					elif coll[1] == 1:
-						if coll_cell_wall or x_neib_wall:
+						if coll_cell_wall or abs(self.pos.x - int(self.pos.x) - .5) > EPS and not was_coll[0] and x_neib_wall:
 							self.speed.y = 0
-							was_coll[1] = 1
+							was_coll[1] = True
+						else:
+							forward_cell = coll_cell
 					
 					elif coll[1] == 0:
-						if coll_cell_wall or y_neib_wall:
+						if coll_cell_wall or abs(self.pos.y - int(self.pos.y) - .5) > EPS and not was_coll[1] and y_neib_wall:
 							self.speed.x = 0
-							was_coll[0] = 1
+							was_coll[0] = True
+						else:
+							forward_cell = coll_cell
 
 				if was_coll[0] and was_coll[1]: break
 
@@ -226,6 +210,12 @@ class player:
 			self.pos.x = forward_cell.x + .5
 		if was_coll[1]:
 			self.pos.y = forward_cell.y + .5
+
+
+
+
+
+
 
 	def tick(self):
 		if not self.is_start:

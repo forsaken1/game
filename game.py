@@ -16,18 +16,18 @@ class game:
 		self.items = [0]*c_items
 		self.mess = ''
 		self.pl_mess, self.pr_mess = [], []
-
+			
 		self.c_ticks = 0
 		self.players, self.projectiles = [], []
-		
-
+			
+			
 	def join(self, player):
 		self.players.append(player)
 
 	def leave(self, pid):
 		for pl in self.players:
 			if pl.pid == pid: self.players.remove(pl)
-			return (pl.kills, pl.deaths) 
+			return (pl.kills, pl.deaths)
 
 	def set_mess(self):
 		self.mess = json.dumps({
@@ -36,12 +36,12 @@ class game:
 			'projectiles': self.pr_mess,
 			'items': self.items
 		})
-
+			
 	def get_spawn(self):
 		ret = point(*self.map.spawns[self.cur_spawn])
 		self.cur_spawn = (self.cur_spawn+1) % self.c_spawns
 		return ret
-
+			
 	def tick(self):
 		self.c_ticks += 1
 		self.pl_mess, self.pr_mess = [], []
@@ -66,3 +66,4 @@ class game:
 				for p in self.players:
 					p.was_action = False
 				self.tick()
+
