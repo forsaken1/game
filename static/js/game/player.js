@@ -130,11 +130,12 @@ function Player(ctx, x, y)
 		
 		var y_ = y + 20;
 		var x_ = x + 30;
-		handler.ctx.save()
+		handler.ctx.save();
 		handler.ctx.translate(x_, y_);
 		handler.weaponDirection = handler.weaponDirectionX > x_ ? 1 : 0;
 		handler.ctx.rotate(Math.atan2(handler.weaponDirectionY - y_, handler.weaponDirectionX - x_) + Math.PI);
-		handler.ctx.drawImage(handler.weapon[handler.weaponDirection][handler.currentWeapon], -25, -10);
+		var sprite = handler.weapon[handler.weaponDirection][handler.currentWeapon];
+		handler.ctx.drawImage(sprite, -25, -10);
 		handler.ctx.restore();
 
 		handler.incAnimationCurrentNumber();
