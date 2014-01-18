@@ -50,6 +50,11 @@ class WebSocketTestCase(BaseTestCase):
 		ws2 = self.connect(game = game)
 		self.move(ws1, resp1['tick'])
 		resp1 = self.recv_ws(ws1)
+
+		while len(resp1['players']) == 1:
+			self.move(ws1, resp1['tick'])
+			resp1 = self.recv_ws(ws1)
+		
 		resp2 = self.recv_ws(ws2)
 		pl1 = resp1['players'][0]
 		pl2 = resp2['players'][1]
@@ -170,7 +175,11 @@ class WebSocketTestCase(BaseTestCase):
 		resp1 = self.recv_ws(ws1)
 		ws2 = self.connect(game = game)
 		self.move(ws1, resp1['tick'])
-		resp1 = self.recv_ws(ws1); resp2 = self.recv_ws(ws2)
+		resp1 = self.recv_ws(ws1); 
+		while len(resp1['players']) == 1:
+			self.move(ws1, resp1['tick'])
+			resp1 = self.recv_ws(ws1)		
+		resp2 = self.recv_ws(ws2)
 		pl1 = resp1['players'][0]; pl2 = resp2['players'][1]
 		x1 = 0.5; x2 = 1.5; vx = 0
 		while x1 < 1.5:
@@ -407,3 +416,45 @@ class WebSocketTestCase(BaseTestCase):
 
 		pl = g.tick()['players'][0]
 		assert self.equal(pl[X], 1.5)
+
+	def test_tps_with_take_item(self):
+		ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.09, BaseTestCase.accuracy, BaseTestCase.accuracy, 0.9
+		map  = [".1",
+				"1.",
+				"R$"]
+		g = game(self, map, accel = ACCEL, gravity = GRAVITY, fric = FRIC, max_speed = MAX_SPEED)
+		while True:
+			g.move(0, -1, 0)
+			resp = g.tick()
+			pl = resp['players'][0]
+			assert pl[WEAPON] == 'K', pl
+			vx = pl[VX] - ACCEL
+			if abs(vx) > MAX_SPEED:
+				vx = -MAX_SPEED
+			if pl[X] + vx < 1:
+				g.move(0, -1, -1)
+				break
+
+		pl = g.tick()['players'][0]
+		assert self.equal(pl[X], 1.5) and self.equal(pl[Y], .5) and pl[WEAPON] == 'R', pl
+
+	def test_tps_before_take_item(self):
+		ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.09, BaseTestCase.accuracy, BaseTestCase.accuracy, 0.9
+		map  = [".1",
+				"R.",
+				"1$"]
+		g = game(self, map, accel = ACCEL, gravity = GRAVITY, fric = FRIC, max_speed = MAX_SPEED)
+		while True:
+			g.move(0, -1, 0)
+			resp = g.tick()
+			pl = resp['players'][0]
+			assert pl[WEAPON] == 'K', pl
+			vx = pl[VX] - ACCEL
+			if abs(vx) > MAX_SPEED:
+				vx = -MAX_SPEED
+			if pl[X] + vx < 1:
+				g.move(0, -1, -1)
+				break
+
+		pl = g.tick()['players'][0]
+		assert self.equal(pl[X], 1.5) and self.equal(pl[Y], .5) and pl[WEAPON] == 'K', pl

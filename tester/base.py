@@ -8,7 +8,7 @@ ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.02, 0.02, 0.02, 0.2
 X,Y,VX,VY,WEAPON,WEAPON_ANGLE,LOGIN,HEALTH,RESPAWN,KILLS,DEATHS = range(11)
 
 class BaseTestCase(unittest.TestCase):
-	HOST, PORT = '46.37.142.252', '3000'
+	HOST, PORT = 'localhost', '5000'
 	counter = {'user':0, 'game':0, 'map': 0}
 	defMap = 0
 
@@ -185,7 +185,7 @@ class BaseTestCase(unittest.TestCase):
 
 	def send_ws(self, action = None, params = None, ws = None):
 		if ws is None: 
-			ws = create_connection("ws://" + self.HOST + ":" + '8001')#self.PORT + "/websocket")
+			ws = create_connection("ws://" + self.HOST + ":" + self.PORT + "/websocket")
 		mess = json.dumps({'action': action,'params': params})
 		print '-----', mess
 		ws.send(mess)
