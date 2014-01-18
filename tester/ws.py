@@ -346,6 +346,10 @@ class WebSocketTestCase(BaseTestCase):
 		ws2 = self.connect(game = game)
 		self.move(ws1, resp1['tick'])
 		resp1 = self.recv_ws(ws1)
+		while len(resp1['players']) == 1:
+			self.move(ws1, resp1['tick'])
+			resp1 = self.recv_ws(ws1)
+	
 		resp2 = self.recv_ws(ws2)
 		pl1 = resp1['players'][0]
 		pl2 = resp2['players'][1]
@@ -384,4 +388,22 @@ class WebSocketTestCase(BaseTestCase):
 				pl = resp['players'][0]
 				assert 0.5-BaseTestCase.accuracy < pl[X] < 1.5+BaseTestCase.accuracy, pl
 				self.move(ws, resp['tick'], -1, -1)			
-		
+	
+	def test_collision_on_unforward_corner(self):
+		ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.09, BaseTestCase.accuracy, BaseTestCase.accuracy, 0.9
+		map  = ["............",
+				"............",
+				"#..........$"]
+		g = game(self, map, accel = ACCEL, gravity = GRAVITY, fric = FRIC, max_speed = MAX_SPEED)
+		dy = 0
+		while True:
+			g.move(0, -1, dy)
+			resp = g.tick()
+			pl = resp['players'][0]
+			if pl[X] < 2.5:
+				dy = -1
+			if pl[Y] < 1.5:
+				break;
+
+		pl = g.tick()['players'][0]
+		assert self.equal(pl[X], 1.5)

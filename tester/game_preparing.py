@@ -203,9 +203,9 @@ class GamePreparingTestCase(BaseTestCase):
 		resp = self.send("getGames", {"sid": sid})		
 		assert resp["result"] == "ok" and len(resp["games"]) == 2, resp
 		resp = self.send("getGames", {"sid": sid, "status": 'running'})
-		assert resp["result"] == "ok" and len(resp["games"]) == 1 and resp["games"][0]["status"] == 'running', resp
+		assert resp["result"] == "ok" and resp["games"][0]["status"] == 'running', resp
 		resp = self.send("getGames", {"sid": sid, "status": 'finished'})
-		assert resp["result"] == "ok" and len(resp["games"]) == 1 and resp["games"][0]["status"] == 'finished', resp
+		assert resp["result"] == "ok" and resp["games"][1]["status"] == 'finished', resp
 
 
 	def test_get_stats(self):

@@ -217,7 +217,7 @@ class FireTestCase(BaseTestCase):
 			self.recv_ws(ws2)
 			x += weapons['R'].speed
 		pl = resp['players'][1]
-		assert pl[HEALTH] == MAX_HEALTH - weapons['R'].damage and pl[VX] == MAX_SPEED, pl
+		assert pl[HEALTH] == MAX_HEALTH - weapons['R'].damage and pl[VX] == MAX_SPEED - FRIC, pl
 
 		
 	def test_rocket_launcher_longway(self):
@@ -233,7 +233,7 @@ class FireTestCase(BaseTestCase):
 		self.fire(ws,84,-155)
 		v = point(84,-155)
 		v = v.scale(weapons['R'].speed/v.size())
-		while y>0:
+		while y+v.y>0:
 			resp = self.recv_ws(ws)
 			pr = resp['projectiles'][0]
 			assert self.equal(pr[X], x) and self.equal(pr[Y], y) and self.equal(pr[VX], v.x) and self.equal(pr[VY], v.y), (pr, v.x,v.y)  
@@ -274,7 +274,7 @@ class FireTestCase(BaseTestCase):
 		i = 0
 		while health > 0:
 			print health
-			assert resp['players'][0][HEALTH] == health, (pl, health)
+			assert resp['players'][0][HEALTH] == health, (resp['players'][0], health)
 			self.fire(ws2, v.x,v.y)
 			self.move(ws1)
 			resp = self.recv_ws(ws1)
@@ -402,3 +402,4 @@ class FireTestCase(BaseTestCase):
 		resp = self.recv_ws(ws2)
 		pl = resp['players'][1]
 		assert pl[DEATHS] == 1, pl
+

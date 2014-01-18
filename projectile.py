@@ -13,6 +13,7 @@ class projectile():
 		self.dir1 = point(1 if self.dir.x else -1, 1 if self.dir.y else -1)
 		self.was_coll = False; self.life_time = 0;
 
+
 	def getx(self, y):
 		if self.is_vertical:		return self.b
 		elif self.k < EPS:			return INF
@@ -101,9 +102,9 @@ class projectile():
 
 	def tick(self):
 		self.life_time += 1
-		if self.v.size() == 0:
+		if self.was_coll:
+			self.v = point(0,0)
 			self.cur_consist()
-			self.game.projectiles.remove(self)
 		else:
 			self.go()
 			self.player_coll()
@@ -111,6 +112,3 @@ class projectile():
 				self.rocket_bang()
 			self.cur_consist()
 			self.pos += self.v
-		
-		if self.was_coll:
-			self.v = point(0,0)

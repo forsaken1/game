@@ -13,7 +13,6 @@ class ws_factory(WebSocketServerFactory):
 
 class ws_connection(WebSocketServerProtocol):
 	def onConnect(self, req):
-		print 'connect'
 		self.player = None
 		return WebSocketServerProtocol.onConnect(self, req)
 #del conect onClose

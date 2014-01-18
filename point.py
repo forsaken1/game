@@ -1,21 +1,22 @@
 from math import *
 
 MAX_HEALTH = 100
-RESP_ITEM = 300
-RESP_PLAYER = 900
+RESP_ITEM = 150
+RESP_PLAYER = 150
 INF = 1e6
-ROCKET_RADIUS = 1
+ROCKET_RADIUS = 3
+
 
 class weapon():
 	def __init__(self, speed, damage, recharge, letter):
 		self.speed = speed; self.damage = damage; self.recharge = recharge; self.letter = letter
 
 weapons = {
-		   'P': weapon(1, 10, 3,'P'),
-		   'M': weapon(1, 10, 2, 'M'),
-		   'K': weapon(.5, 5, 1, 'K'),
-		   'R': weapon(1, 30, 4, 'R'),
-		   'A': weapon(INF, 15, 5, 'A')}
+		   'P': weapon(sqrt(2), 10, 1,'P'),
+		   'M': weapon(sqrt(2), 10, 3, 'M'),
+		   'K': weapon(sqrt(.5), 7, 1, 'K'),
+		   'R': weapon(sqrt(2), 50, 10, 'R'),
+		   'A': weapon(INF, 100, 20, 'A')}
 
 
 class point:
