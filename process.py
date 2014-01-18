@@ -21,8 +21,17 @@ class param_validator:
 		cur.execute('SELECT id FROM users WHERE sid = %s', (sid,))
 		id = cur.fetchone()
 		if id: id = id[0]
+		else: return None
 		return id	
 		
+	def get_sid(self, pid):
+		cur = self.db.cursor()
+		cur.execute('SELECT sid FROM users WHERE pid = %s', (sid,))
+		id = cur.fetchone()
+		if id: id = id[0]
+		else: return None
+		return id	
+
 	def badSid(self, sid):
 		if not self.valid_str(sid): return False
 		return self.get_pid(sid)
@@ -107,6 +116,7 @@ class process:
 
 	def __init__(self, server):
 		self.server = server
+		server.proc = self
 		db_name = 'game'
 		self.db = MySQLdb.connect(host='127.0.0.1', port=3306, user='root', passwd='', db=db_name)
 		self.valid = param_validator(self.db)
@@ -124,7 +134,19 @@ class process:
 			'getMaps': 		['sid'],
 			'getGameConsts': ['sid'],
 			'getStats':		['sid', 'game']
-		}		
+		}
+		cur = self.db.cursor()
+		cur.execute('SELECT id, map FROM maps')
+		for map in cur.fetchall():
+			server.add_map(map[0], map[1].split('\n'))
+
+		cur.execute('SELECT id FROM games WHERE status = 1')
+		for game in cur.fetchall():
+			cur.execute('DELETE FROM user_game WHERE gid = %s AND kills IS NULL ', (game[0],))			
+					
+		cur.execute('DELETE FROM games WHERE status = 1')	
+		self.db.commit()
+			
 		
 	def __del__(self):
 		self.db.close()
@@ -196,7 +218,7 @@ class process:
 		res = cur.fetchone()
 		if not res:
 			return self.result('incorrect')
-		
+
 		ssid = self.hash(os.urandom(32) + 'key' + self.hash(os.urandom(32)))
 		cur.execute("UPDATE users SET sid = %s WHERE id = %s", (ssid,res[0],))
 		self.db.commit()
@@ -295,8 +317,11 @@ class process:
 			return self.result('badGame')
 
 		cur = self.db.cursor()
-		cur.execute("SELECT id FROM user_game WHERE pid = %s AND kills IS NULL", (pid,))
-		if cur.fetchone():
+		cur.execute("SELECT gid FROM user_game WHERE pid = %s AND kills IS NULL", (pid,))
+		cur_game = cur.fetchone()
+		if cur_game:
+			if cur_game[0] == gid:
+				return self.result()
 			return self.result('alreadyInGame')
 			
 		cur.execute('SELECT maxPlayers FROM games WHERE id = %s', (gid,))

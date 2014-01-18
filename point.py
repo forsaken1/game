@@ -12,10 +12,10 @@ class weapon():
 		self.speed = speed; self.damage = damage; self.recharge = recharge; self.letter = letter
 
 weapons = {
-		   'P': weapon(sqrt(2), 10, 1,'P'),
-		   'M': weapon(sqrt(2), 10, 3, 'M'),
-		   'K': weapon(sqrt(.5), 7, 1, 'K'),
-		   'R': weapon(sqrt(2), 50, 10, 'R'),
+		   'P': weapon(1, 10, 3,'P'),
+		   'M': weapon(1, 10, 1, 'M'),
+		   'K': weapon(.5, 7, 1, 'K'),
+		   'R': weapon(1, 1, 10, 'R'),
 		   'A': weapon(INF, 100, 20, 'A')}
 
 

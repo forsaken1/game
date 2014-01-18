@@ -8,6 +8,7 @@ class server:
 		print 'start'
 		self.games, self.players, self.maps = {}, {}, {}
 		self.sync_mode = False
+		self.proc = None
 
 	def equal(self, x, y):
 		return abs(x-y) < EPS

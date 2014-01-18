@@ -19,7 +19,12 @@ class game:
 			
 		self.c_ticks = 0
 		self.players, self.projectiles = [], []
-			
+		
+	def __del__(self):
+		for pl in self.players:
+			sid = self.server.proc.valid.get_sid(pl.pid)
+			if sid:
+				self.server.proc.leaveGame({'sid': sid})
 			
 	def join(self, player):
 		self.players.append(player)

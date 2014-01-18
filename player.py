@@ -140,7 +140,7 @@ class player:
 		collisions = defaultdict(list)		
 		dists = (forward_cell + dir - forward, pos_cell + dir - self.pos)
 					
-               		    #### (a,b)-collision descriptor a(1-center, 0-forward), b(0-x, 1-y, 2-angle) ####
+						#### (a,b)-collision descriptor a(1-center, 0-forward), b(0-x, 1-y, 2-angle) ####
 		for i in range(2):
 			dist = dists[i]
 			is_reach_x = speed.x and abs(speed.x) > abs(dist.x); is_reach_y = speed.y and abs(speed.y) > abs(dist.y);

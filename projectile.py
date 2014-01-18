@@ -84,7 +84,7 @@ class projectile():
 			dist = pl.pos - (self.pos + self.v)
 			if dist.size()<ROCKET_RADIUS:
 				pl.speed = dist.scale(self.game.MAX_SPEED/dist.size())
-				if pl.hit(self.weapon.damage):
+				if pl.hit(self.weapon.damage) and pl != self.player:
 					self.player.kills += 1
 
 
