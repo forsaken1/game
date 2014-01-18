@@ -52,6 +52,7 @@ function GameController($scope, $http, $interval)
 		var showStats = false;
 		var iter = 0;
 		var mapItems = {'K': 1, 'P': 1, 'M': 1, 'A': 1, 'R': 1, 'h': 1};
+		var isMoveRight = false, isMoveLeft = false, isFire = false;
 
 		background.src = '/graphics/map/background.png';
 		block.src = '/graphics/map/ground.png';
@@ -175,18 +176,56 @@ function GameController($scope, $http, $interval)
 
 		canvas.addEventListener('mousedown', function(evt)
 		{
-			mousePos = handler.getMousePos(canvas, evt);
-			ws.send(JSON.stringify(
-			{
-				'action': 'fire',
-				'params':
-				{
-					'tick': TICK,
-					'dx': (mousePos.x - DX) / BLOCK_SIZE - player.getCoordX(),
-					'dy': (mousePos.y - DY) / BLOCK_SIZE - player.getCoordY()
-				}
-			}));
+			isFire = true;
 		}, true);
+
+		canvas.addEventListener('mouseup', function(evt)
+		{
+			isFire = false;
+		}, true);
+
+		this.send = function()
+		{
+			if(isMoveLeft)
+			{
+				ws.send(JSON.stringify(
+				{
+					'action': 'move',
+					'params':
+					{
+						'tick': TICK,
+						'dx': - SPEED,
+						'dy': VY
+					}
+				}));
+			}
+			else if(isMoveRight)
+			{
+				ws.send(JSON.stringify(
+				{
+					'action': 'move',
+					'params':
+					{
+						'tick': TICK,
+						'dx': SPEED,
+						'dy': VY
+					}
+				}));
+			}
+			if(isFire)
+			{
+				ws.send(JSON.stringify(
+				{
+					'action': 'fire',
+					'params':
+					{
+						'tick': TICK,
+						'dx': (mousePos.x - DX) / BLOCK_SIZE - player.getCoordX(),
+						'dy': (mousePos.y - DY) / BLOCK_SIZE - player.getCoordY()
+					}
+				}));
+			}
+		}
 
 		// DOWN keys
 		onKeyDown[32] = function()
@@ -196,16 +235,7 @@ function GameController($scope, $http, $interval)
 
 		onKeyDown[65] = onKeyDown[37] = function()
 		{
-			ws.send(JSON.stringify(
-			{
-				'action': 'move',
-				'params':
-				{
-					'tick': TICK,
-					'dx': -SPEED,
-					'dy': VY
-				}
-			}));
+			isMoveLeft = true;
 			player.setDirection(-1);
 			player.move();
 		}
@@ -219,23 +249,14 @@ function GameController($scope, $http, $interval)
 				{
 					'tick': TICK,
 					'dx': player.getDirection() * SPEED,
-					'dy': -JUMP
+					'dy': - JUMP
 				}
 			}));
 		}
 
 		onKeyDown[68] = onKeyDown[39] = function()
 		{
-			ws.send(JSON.stringify(
-			{
-				'action': 'move',
-				'params':
-				{
-					'tick': TICK,
-					'dx': SPEED,
-					'dy': VY
-				}
-			}));
+			isMoveRight = true;			
 			player.setDirection(1);
 			player.move();
 		}
@@ -247,6 +268,7 @@ function GameController($scope, $http, $interval)
 
 		onKeyUp[65] = onKeyUp[37] = function()
 		{
+			isMoveLeft = false;
 			ws.send(player.getStopJson(TICK));
 			player.stop();
 		}
@@ -258,6 +280,7 @@ function GameController($scope, $http, $interval)
 
 		onKeyUp[68] = onKeyUp[39] = function()
 		{
+			isMoveRight = false;
 			ws.send(player.getStopJson(TICK));
 			player.stop();
 		}
@@ -274,6 +297,7 @@ function GameController($scope, $http, $interval)
 
 		// Start
 		this.draw();
+		SET_INTERVAL_HANDLER = $interval(handler.send, 33);
 	});
 
 	$scope.leave_game = function()
