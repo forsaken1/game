@@ -2,7 +2,7 @@ from math import *
 
 MAX_HEALTH = 100
 RESP_ITEM = 300
-RESP_PLAYER = 300
+RESP_PLAYER = 900
 INF = 1e6
 ROCKET_RADIUS = 1
 
@@ -11,11 +11,11 @@ class weapon():
 		self.speed = speed; self.damage = damage; self.recharge = recharge; self.letter = letter
 
 weapons = {
-		   'P': weapon(1, 10, 2,'P'),
+		   'P': weapon(1, 10, 3,'P'),
 		   'M': weapon(1, 10, 2, 'M'),
-		   'K': weapon(.5, 5, 2, 'K'),
-		   'R': weapon(1, 30, 2, 'R'),
-		   'A': weapon(INF, 15, 2, 'A')}
+		   'K': weapon(.5, 5, 1, 'K'),
+		   'R': weapon(1, 30, 4, 'R'),
+		   'A': weapon(INF, 15, 5, 'A')}
 
 
 class point:

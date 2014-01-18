@@ -40,7 +40,6 @@ class FireTestCase(BaseTestCase):
 			resp = self.recv_ws(ws)
 			pr = resp['projectiles'][0]
 			assert self.equal(pr[X], x) and self.equal(pr[Y], y) and self.equal(pr[VX], vx) and self.equal(pr[VY], vy), pr 
-			print x
 			x+=vx
 			self.move(ws)
 		resp = self.recv_ws(ws)
@@ -178,7 +177,7 @@ class FireTestCase(BaseTestCase):
 			self.recv_ws(ws2)
 			x += v.x		
 
-		health = 100
+		health = MAX_HEALTH
 		i = 0
 		while health > 0:
 			assert resp['players'][0][HEALTH] == health, (pl, health)
@@ -218,7 +217,7 @@ class FireTestCase(BaseTestCase):
 			self.recv_ws(ws2)
 			x += weapons['R'].speed
 		pl = resp['players'][1]
-		assert pl[HEALTH] == 100 - weapons['R'].damage and pl[VX] == MAX_SPEED, pl
+		assert pl[HEALTH] == MAX_HEALTH - weapons['R'].damage and pl[VX] == MAX_SPEED, pl
 
 		
 	def test_rocket_launcher_longway(self):
@@ -271,10 +270,10 @@ class FireTestCase(BaseTestCase):
 			resp = self.recv_ws(ws1)
 			self.recv_ws(ws2)
 			x += v.x		
-
-		health = 100
+		health = MAX_HEALTH
 		i = 0
 		while health > 0:
+			print health
 			assert resp['players'][0][HEALTH] == health, (pl, health)
 			self.fire(ws2, v.x,v.y)
 			self.move(ws1)
@@ -328,7 +327,7 @@ class FireTestCase(BaseTestCase):
 			self.recv_ws(ws2)
 			x += v.x		
 
-		health = 100
+		health = MAX_HEALTH
 		i = 0
 		while health > 0:
 			assert resp['players'][0][HEALTH] == health, (pl, health)
@@ -379,7 +378,7 @@ class FireTestCase(BaseTestCase):
 			self.recv_ws(ws2)
 			x += v.x		
 
-		health = 100
+		health = MAX_HEALTH
 		i = 0
 		while health > 0:
 			assert resp['players'][0][HEALTH] == health, (pl, health)

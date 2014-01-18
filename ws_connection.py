@@ -28,8 +28,6 @@ class ws_connection(WebSocketServerProtocol):
 
 	def onClose(self, wasClean, code, reason):
 		print 'close'
-		if PHILIPP and self.player:
-			self.player.respawn = 1
 		if self.player:
 			self.player.connects.remove(self)
 		return WebSocketServerProtocol.onClose(self, wasClean, code, reason)

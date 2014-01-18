@@ -34,11 +34,11 @@ class player:
 			self.is_start = True
 
 		elif self.game.c_ticks - 3 <= msg['params']['tick'] <= self.game.c_ticks: 
-			print msg['params']['tick']
+#			print msg['params']['tick']
 			if msg['action'] != 'empty' and not self.respawn:
 				getattr(self, msg['action'])(msg['params'])
-		else:
-			print msg['params']['tick'], self.game.c_ticks
+		#else:
+		#	print msg['params']['tick'], self.game.c_ticks
 		self.game.sync_tick()
 
 	def move(self, params):
@@ -127,33 +127,34 @@ class player:
 
 		dir = speed.direct()
 		dir1 = point(1 if dir.x else -1, 1 if dir.y else -1)
-		#undir = dir.scale(-1,-1)
 		pos_cell = self.pos.index()
 		forward = self.pos + dir1.scale(.5-EPS)
 		forward_cell = forward.index()
+		forward = self.pos + dir1.scale(.5)
 
-		forward_cell = forward.index()
-		if self.map.map[forward_cell.y][forward_cell.x] == '#':
-			pass
+		#forward_cell = forward.index()
+		#if self.map.map[forward_cell.y][forward_cell.x] == '#':
+		#	pass
 
 		from collections import defaultdict
 		collisions = defaultdict(list)		
 		dists = (forward_cell + dir - forward, pos_cell + dir - self.pos)
-							#### (a,b)-collision descriptor a(1-center, 0-forward), b(0-x, 1-y, 2-angle) ####
+					
+               		    #### (a,b)-collision descriptor a(1-center, 0-forward), b(0-x, 1-y, 2-angle) ####
 		for i in range(2):
 			dist = dists[i]
 			is_reach_x = speed.x and abs(speed.x) > abs(dist.x); is_reach_y = speed.y and abs(speed.y) > abs(dist.y);
 			dist_size = dist.size(); speed_size = speed.size()
 			if is_reach_x and is_reach_y and (dist_size < EPS or (speed.scale(dist_size/speed_size) - dist).size()<EPS):
-				collisions[dist.y/speed.y].append((i,2))
+				collisions[dist_size/speed_size].append((i,2))
 			else:
 				if is_reach_x:
-					collisions[dist.x/speed.x].append((i,0))
+					collisions[dist_size/speed_size].append((i,0))
 				if is_reach_y:
-					collisions[dist.y/speed.y].append((i,1))
+					collisions[dist_size/speed_size].append((i,1))
+
 						### was_coll = [X,Y] ###
 		was_coll = [False,False]
-		passed_time = 0
 		times = collisions.keys()
 		times.sort()
 		for time in times:
@@ -210,10 +211,6 @@ class player:
 			self.pos.x = forward_cell.x + .5
 		if was_coll[1]:
 			self.pos.y = forward_cell.y + .5
-
-
-
-
 
 
 
