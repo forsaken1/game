@@ -101,7 +101,7 @@ function GameController($scope, $http, $interval)
 			var pl = data.players[N];
 			VX = pl[2];
 			VY = pl[3];
-			DX = - (pl[0] * BLOCK_SIZE - BLOCK_SIZE / 2) + SCREEN_MIDDLE_X;
+			DX = - (pl[0] * BLOCK_SIZE - BLOCK_SIZE / 2) + SCREEN_MIDDLE_X + 5;
 			DY = - (pl[1] * BLOCK_SIZE - BLOCK_SIZE / 2) + SCREEN_MIDDLE_Y;
 			projectiles = data.projectiles;
 			//console.log(event.data); // for debug

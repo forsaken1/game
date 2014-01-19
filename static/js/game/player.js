@@ -120,7 +120,7 @@ function Player(ctx, x, y)
 
 	this.draw = function(isUser, dx, dy)
 	{
-		var x = isUser ? SCREEN_MIDDLE_X : handler.x * BLOCK_SIZE - BLOCK_SIZE / 2 + dx;
+		var x = isUser ? SCREEN_MIDDLE_X : handler.x * BLOCK_SIZE - BLOCK_SIZE / 2 + dx - 5;
 		var y = isUser ? SCREEN_MIDDLE_Y : handler.y * BLOCK_SIZE - BLOCK_SIZE / 2 + dy;
 
 		if(handler.moving)
