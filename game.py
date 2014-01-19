@@ -19,7 +19,12 @@ class game:
 			
 		self.c_ticks = 0
 		self.players, self.projectiles = [], []
-			
+		
+	def __del__(self):
+		for pl in self.players:
+			sid = self.server.proc.valid.get_sid(pl.pid)
+			if sid:
+				self.server.proc.leaveGame({'sid': sid})
 			
 	def join(self, player):
 		self.players.append(player)
@@ -49,14 +54,21 @@ class game:
 			self.items[i] = 0 if self.items[i] <= 1 else self.items[i]-1
 		for p in self.players:
 			p.tick()
-		for p in self.projectiles:
-			p.tick()
+		
+		i = 0
+		while i < len(self.projectiles):
+			p = self.projectiles[i]
+			if p.v.x == 0 and p.v.y == 0:
+				del self.projectiles[i]
+			else:
+				p.tick()
+				i+=1
 
 		for p in self.players:
 			p.cur_consist()
 		self.set_mess()
 		if LOGGING:
-			print self.mess
+			log(self.mess)
 		for p in self.players:
 			p.write_mess()
 

@@ -45,7 +45,7 @@ def tester(case = 'ALL'):
 	f.close()		
 	
 	
-if __name__ == '__main__':				# host, port bug
+if __name__ == '__main__':
 	if len(sys.argv) == 2:
 		tester(sys.argv[1])
 	else:

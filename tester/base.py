@@ -123,7 +123,7 @@ class BaseTestCase(unittest.TestCase):
 			"maxPlayers": maxPlayers,
 			"players": [self.default('user', 1)],
 			"status": "running"
-		}, [resp, map, name, self.default('user', 1)]
+		}, [game, map, name, self.default('user', 1)]
 
 		if sid_returned: return [id, sid]
 		return id
@@ -184,7 +184,8 @@ class BaseTestCase(unittest.TestCase):
 		return abs(x-y) < BaseTestCase.accuracy
 
 	def send_ws(self, action = None, params = None, ws = None):
-		if ws is None: ws = create_connection("ws://" + self.HOST + ":" + self.PORT + "/websocket")
+		if ws is None: 
+			ws = create_connection("ws://" + self.HOST + ":" + self.PORT + "/websocket")
 		mess = json.dumps({'action': action,'params': params})
 		print '-----', mess
 		ws.send(mess)
@@ -202,14 +203,13 @@ class BaseTestCase(unittest.TestCase):
 			map = self.get_map(scheme = map)
 			gid, sid = self.get_game(map = map, sid_returned = True,\
 			accel = accel, gravity = gravity, fric = fric, max_speed = max_speed)
-
 			ws = self.send_ws(action = 'move', params = {'sid': sid, 'tick': 0, 'dx': 0, 'dy':0})
 			if game_ret:
 				return ws, gid, sid
 			return ws
 		elif game:
 			sid = self.join_game(game)
-			ws = self.send_ws('move', {'sid': sid, 'tick': 0, 'dx': 0, 'dy': 0})
+			ws = self.send_ws(action = 'move', params = {'sid': sid, 'tick': 0, 'dx': 0, 'dy':0})
 			if game_ret:
 				return ws, sid
 			return ws
@@ -221,3 +221,43 @@ class BaseTestCase(unittest.TestCase):
 		if not x and not y:		self.send_ws('empty', {'tick': tick}, ws)
 		else:					self.send_ws('move', {'tick': tick, 'dx': x, 'dy': y}, ws)
 			
+
+class game:
+	def __init__(self, test, map = ["#######", ".......", "$P....."], add_players_count = 0, \
+			  accel = 0.02, gravity = 0.02, fric = 0.02, max_speed = 0.2):
+		self.pl_count = add_players_count + 1
+		self.was_action = [False]*(self.pl_count)
+		self.connections = []
+		self.sids = []
+		self.test = test
+		ws, game, sid = test.connect(map, game_ret = True, accel = accel, gravity = gravity, fric = fric, max_speed = max_speed)
+		self.connections.append(ws)
+		self.sids.append(sid)
+		self.resp = test.recv_ws(ws)
+		for i in range(add_players_count):
+			ws, sid = test.connect(game = game, game_ret = True)
+			self.connections.append(ws), self.sids.append(sid)
+			self.resp = test.recv_ws(ws)
+			
+	def tick(self):
+		for i in range(self.pl_count):
+			if not self.was_action[i]: 
+				self.test.send_ws(action = 'move', params = {'sid': self.sids[i], 'tick': 0, 'dx': 0, 'dy':0}, ws = self.connections[i])
+			else: self.was_action[i] = False
+
+		for i in range(self.pl_count):
+			resp = self.test.recv_ws(self.connections[i])
+		return resp
+
+
+	def move(self, pl, x = 0, y = 0):
+		if self.was_action[pl]:
+			raise Exception("second msg from player during one tick")
+		self.test.move(self.connections[pl], x = x, y = y)
+		self.was_action[pl] = True
+
+	def fire(self, pl = 0, x = 0, y = 0):
+		if self.was_action[pl]:
+			raise Exception("second msg from player during one tick")
+		self.test.fire(self.connections[pl], x = x, y = y)
+		self.was_action[pl] = True

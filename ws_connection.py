@@ -13,7 +13,6 @@ class ws_factory(WebSocketServerFactory):
 
 class ws_connection(WebSocketServerProtocol):
 	def onConnect(self, req):
-		print 'connect'
 		self.player = None
 		return WebSocketServerProtocol.onConnect(self, req)
 #del conect onClose
@@ -28,8 +27,6 @@ class ws_connection(WebSocketServerProtocol):
 
 	def onClose(self, wasClean, code, reason):
 		print 'close'
-		if PHILIPP and self.player:
-			self.player.respawn = 1
 		if self.player:
 			self.player.connects.remove(self)
 		return WebSocketServerProtocol.onClose(self, wasClean, code, reason)
