@@ -43,6 +43,7 @@ function GameController($scope, $http, $interval)
 		var bullet = new Image();
 		var aim = new Image();
 		var players = [];
+		var playersCount = 0;
 		var projectiles = [];
 		var items = [];
 		var handler = this;
@@ -87,7 +88,8 @@ function GameController($scope, $http, $interval)
 				N = handler.getN(LOGIN, data.players);
 				player = players[N];
 			}
-			for(var i = 0; i < data.players.length; ++i)
+			playersCount = data.players.length;
+			for(var i = 0; i < playersCount; ++i)
 			{
 				players[i].setVars(data.players[i]);
 				i != N && players[i].setDirection(data.players[i][2]);
@@ -120,7 +122,7 @@ function GameController($scope, $http, $interval)
 			{
 				CTX.fillText('Player | Health | Kills | Deaths', 100, 30);
 				CTX.fillText('________________________________', 100, 40);
-				for(var i = 0; i < players.length; ++i)
+				for(var i = 0; i < playersCount; ++i)
 				{
 					if(i == N)
 					{
@@ -146,13 +148,13 @@ function GameController($scope, $http, $interval)
 			{
 				items[i] && items[i].draw(DX, DY);
 			}
-			for(var i = 0; i < players.length; ++i)
-			{
-				players[i] && players[i].draw(i == N, DX, DY);
-			}
 			for(var i = 0; i < projectiles.length; ++i)
 			{
 				projectiles[i] && CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX - 8, projectiles[i][1] * BLOCK_SIZE + DY - 8);
+			}
+			for(var i = 0; i < players.length; ++i)
+			{
+				players[i] && players[i].draw(i == N, DX, DY);
 			}
 			mousePos && CTX.drawImage(aim, mousePos.x - AIM_SIZE / 2, mousePos.y - AIM_SIZE / 2);
 			requestAnimFrame(handler.draw);
