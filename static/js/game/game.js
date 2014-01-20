@@ -40,7 +40,6 @@ function GameController($scope, $http, $interval)
 		var portal = new Image();
 		var respawn = new Image();
 		var background = new Image();
-		var bullet = new Image();
 		var aim = new Image();
 		var players = [];
 		var playersCount = 0;
@@ -54,12 +53,12 @@ function GameController($scope, $http, $interval)
 		var iter = 0;
 		var mapItems = {'K': 1, 'P': 1, 'M': 1, 'A': 1, 'R': 1, 'h': 1};
 		var isMoveRight = false, isMoveLeft = false, isFire = false;
+		var weaponProjectiles = {'K': PROJ_EMPTY, 'P': PROJ_PISTOL, 'M': PROJ_PISTOL, 'A': PROJ_ROCKET, 'R': PROJ_ROCKET};
 
 		background.src = '/graphics/map/background.png';
 		block.src = '/graphics/map/ground.png';
 		portal.src = '/graphics/map/portal.png';
 		respawn.src = '/graphics/map/respawn.png';
-		bullet.src = '/graphics/weapons/bullet.png';
 		aim.src = '/graphics/weapons/aim.png';
 
 		CTX.font = 'bold 30px sans-serif';
@@ -150,7 +149,7 @@ function GameController($scope, $http, $interval)
 			}
 			for(var i = 0; i < projectiles.length; ++i)
 			{
-				projectiles[i] && CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX - 8, projectiles[i][1] * BLOCK_SIZE + DY - 8);
+				projectiles[i] && CTX.drawImage(weaponProjectiles[ projectiles[i][4] ], projectiles[i][0] * BLOCK_SIZE + DX - 4, projectiles[i][1] * BLOCK_SIZE + DY - 4);
 			}
 			for(var i = 0; i < playersCount; ++i)
 			{

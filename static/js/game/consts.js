@@ -13,11 +13,17 @@ var MINIGUN = new Image();
 var RAILGUN = new Image();
 var SWORD   = new Image();
 var ROCKET  = new Image();
+var PROJ_ROCKET = new Image();
+var PROJ_PISTOL = new Image();
+var PROJ_EMPTY  = new Image();
 HEALTH.src  = '/graphics/map/health.png';
 PISTOL.src  = '/graphics/weapons/pistol.png';
 MINIGUN.src = '/graphics/weapons/minigun.png';
 RAILGUN.src = '/graphics/weapons/railgun.png';
 SWORD.src   = '/graphics/weapons/sword.png';
 ROCKET.src  = '/graphics/weapons/rocket.png';
+PROJ_ROCKET.src = '/graphics/weapons/bullet_r.png';
+PROJ_PISTOL.src = '/graphics/weapons/bullet_p.png';
+PROJ_EMPTY.src  = '/graphics/weapons/bullet_k.png';
 
 var IMAGES = {'h': HEALTH, 'P': PISTOL, 'M': MINIGUN, 'A': RAILGUN, 'K': SWORD, 'R': ROCKET};
