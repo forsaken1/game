@@ -152,7 +152,7 @@ function GameController($scope, $http, $interval)
 			{
 				projectiles[i] && CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX - 8, projectiles[i][1] * BLOCK_SIZE + DY - 8);
 			}
-			for(var i = 0; i < players.length; ++i)
+			for(var i = 0; i < playersCount; ++i)
 			{
 				players[i] && players[i].draw(i == N, DX, DY);
 			}
