@@ -155,7 +155,10 @@ class FireTestCase(BaseTestCase):
 		resp = self.recv_ws(ws1)
 		ws2 = self.connect(game = game)
 		self.move(ws1, resp['tick'])
-		resp = self.recv_ws(ws1)
+		resp1 = self.recv_ws(ws1)
+		while len(resp1['players']) == 1:
+			self.move(ws1, resp1['tick'])
+			resp1 = self.recv_ws(ws1)
 		self.recv_ws(ws2)
 
 		while True:
@@ -198,7 +201,10 @@ class FireTestCase(BaseTestCase):
 		resp = self.recv_ws(ws1)
 		ws2 = self.connect(game = game)
 		self.move(ws1, resp['tick'])
-		resp = self.recv_ws(ws1)
+		resp1 = self.recv_ws(ws1)
+		while len(resp1['players']) == 1:
+			self.move(ws1, resp1['tick'])
+			resp1 = self.recv_ws(ws1)
 		self.recv_ws(ws2)		
 
 		while True:
@@ -249,7 +255,10 @@ class FireTestCase(BaseTestCase):
 		resp = self.recv_ws(ws1)
 		ws2, sid2 = self.connect(game = game, game_ret = True)
 		self.move(ws1, resp['tick'])
-		resp = self.recv_ws(ws1)
+		resp1 = self.recv_ws(ws1)
+		while len(resp1['players']) == 1:
+			self.move(ws1, resp1['tick'])
+			resp1 = self.recv_ws(ws1)
 		self.recv_ws(ws2)
 
 		while True:
@@ -305,7 +314,10 @@ class FireTestCase(BaseTestCase):
 		resp = self.recv_ws(ws1)
 		ws2, sid2 = self.connect(game = game, game_ret = True)
 		self.move(ws1, resp['tick'])
-		resp = self.recv_ws(ws1)
+		resp1 = self.recv_ws(ws1)
+		while len(resp1['players']) == 1:
+			self.move(ws1, resp1['tick'])
+			resp1 = self.recv_ws(ws1)
 		self.recv_ws(ws2)
 
 		while True:
@@ -356,7 +368,10 @@ class FireTestCase(BaseTestCase):
 		resp = self.recv_ws(ws1)
 		ws2, sid2 = self.connect(game = game, game_ret = True)
 		self.move(ws1, resp['tick'])
-		resp = self.recv_ws(ws1)
+		resp1 = self.recv_ws(ws1)
+		while len(resp1['players']) == 1:
+			self.move(ws1, resp1['tick'])
+			resp1 = self.recv_ws(ws1)
 		self.recv_ws(ws2)
 
 		while True:

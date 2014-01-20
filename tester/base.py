@@ -8,7 +8,7 @@ ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.02, 0.02, 0.02, 0.2
 X,Y,VX,VY,WEAPON,WEAPON_ANGLE,LOGIN,HEALTH,RESPAWN,KILLS,DEATHS = range(11)
 
 class BaseTestCase(unittest.TestCase):
-	HOST, PORT = 'localhost', '5000'
+	HOST, PORT = 'localhost', '7778'
 	counter = {'user':0, 'game':0, 'map': 0}
 	defMap = 0
 
@@ -40,7 +40,6 @@ class BaseTestCase(unittest.TestCase):
 			resp = json.loads(resp.text)
 		except:
 			assert resp == 0, resp
-		assert resp.has_key('result'), resp
 		return resp
 
 	def signup_user(self, login = None, passwd = "pass"):
@@ -165,6 +164,7 @@ class BaseTestCase(unittest.TestCase):
 
 
 
+
 #-----------------------------------webSocket utils----------------------------------------#
 	def take_gun(self, ws, limit = 1, dir = 1):
 		resp = {}
@@ -185,7 +185,9 @@ class BaseTestCase(unittest.TestCase):
 
 	def send_ws(self, action = None, params = None, ws = None):
 		if ws is None: 
-			ws = create_connection("ws://" + self.HOST + ":" + self.PORT + "/websocket")
+			ws = create_connection("ws://" + self.HOST + ":" + 
+						  #'8001')
+						  self.PORT + "/websocket")
 		mess = json.dumps({'action': action,'params': params})
 		print '-----', mess
 		ws.send(mess)

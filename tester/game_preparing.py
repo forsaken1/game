@@ -205,19 +205,4 @@ class GamePreparingTestCase(BaseTestCase):
 		resp = self.send("getGames", {"sid": sid, "status": 'running'})
 		assert resp["result"] == "ok" and resp["games"][0]["status"] == 'running', resp
 		resp = self.send("getGames", {"sid": sid, "status": 'finished'})
-		assert resp["result"] == "ok" and resp["games"][1]["status"] == 'finished', resp
-
-
-	def test_get_stats(self):
-		self.create_game()
-		[game, sid] = self.get_game(sid_returned = True)
-		sids = [sid]
-		for i in range(2):
-			sid = self.signin_user()
-			self.join_game(sid = sid, game = game)
-			sids.append(sid)
-		for sid in sids:
-			resp = self.send("leaveGame", {"sid": sid})
-			assert resp["result"] == "ok", resp
-		resp = self.send("getGames", {"sid": sid})		
-		assert resp["result"] == "ok" and len(resp["games"]) == 2, resp
+		assert resp["result"] == "ok" and resp["games"][0]["status"] == 'finished', resp
