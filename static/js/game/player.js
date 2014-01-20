@@ -18,7 +18,7 @@ function Player(ctx, x, y)
 	this.animation[0] = [];
 	this.animation[1] = [];
 	this.moving = false;
-	this.animSpeed = 10;
+	this.animSpeed = 7;
 
 	this.weapon = [];
 	this.weapon[0] = [];
@@ -67,6 +67,11 @@ function Player(ctx, x, y)
 
 	this.incAnimationCurrentNumber = function()
 	{
+		if(!handler.moving)
+		{
+			handler.animationCurrentNumber = 3 * handler.animSpeed;
+			return;
+		}
 		handler.animationCurrentNumber = handler.animationCurrentNumber < handler.animationPicCount * handler.animSpeed - 1 ?
 			++handler.animationCurrentNumber : 0;
 	}
@@ -122,12 +127,6 @@ function Player(ctx, x, y)
 	{
 		var x = isUser ? SCREEN_MIDDLE_X : handler.x * BLOCK_SIZE - BLOCK_SIZE / 2 + dx - 5;
 		var y = isUser ? SCREEN_MIDDLE_Y : handler.y * BLOCK_SIZE - BLOCK_SIZE / 2 + dy;
-
-		if(handler.moving)
-			handler.incAnimationCurrentNumber();
-		else
-			handler.animationCurrentNumber = 3 * handler.animSpeed;
-		
 		var y_ = y + 20;
 		var x_ = x + 30;
 		handler.ctx.save();

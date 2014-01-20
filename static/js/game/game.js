@@ -186,7 +186,7 @@ function GameController($scope, $http, $interval)
 			isFire = false;
 		}, true);
 
-		this.send = function()
+		this.sendWS = function()
 		{
 			if(isMoveLeft)
 			{
@@ -227,6 +227,7 @@ function GameController($scope, $http, $interval)
 					}
 				}));
 			}
+			player && player.incAnimationCurrentNumber();
 		}
 
 		// DOWN keys
@@ -299,7 +300,7 @@ function GameController($scope, $http, $interval)
 
 		// Start
 		this.draw();
-		SET_INTERVAL_HANDLER = $interval(handler.send, 33);
+		SET_INTERVAL_HANDLER = $interval(handler.sendWS, 33);
 	});
 
 	$scope.leave_game = function()
