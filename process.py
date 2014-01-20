@@ -55,7 +55,7 @@ class param_validator:
 		return True
 	
 	def badSince(self, since):
-		if type(since) != int or since < 0:
+		if since < 0:
 			return False
 		else: return True
 	
@@ -101,15 +101,24 @@ class param_validator:
 			'map': 			'badMap',
 			'maxPlayers': 	'badMaxPlayers'
 		}
-	
+
+
 	def find_error(self, formal, actual):
 		for param in formal:
-			if param == 'mapId':	
+			if param == 'mapId':
 				if not self.badMapId(actual['map']):
 					return "badMap"
 				else: continue
+			if param == 'game' and actual[param] != '':
+				actual['game'] = int(actual['game'])
+			if param == 'mapId':
+				actual['map'] = int(actual['map'])
+			if param == 'maxPlayers':
+				actual['maxPlayers'] = int(actual['maxPlayers'])
 			if not getattr(self, self.param_error[param])(actual[param]):
 				return self.param_error[param]
+
+		print 'param', actual		
 		return None	
 
 class process:		
@@ -250,7 +259,7 @@ class process:
 		return self.result()
 		
 	def getMessages(self, par):
-		gid, since = par['game'], par['since']
+		gid, since = par['game'], int(par['since'])
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
 		query = 'SELECT time, text, login FROM messages WHERE time >= %s AND gid '+('='+str(gid) if gid else "IS NULL")+' ORDER BY time'
 		cur.execute(query, (since, ))

@@ -40,9 +40,9 @@ function GameController($scope, $http, $interval)
 		var portal = new Image();
 		var respawn = new Image();
 		var background = new Image();
-		var bullet = new Image();
 		var aim = new Image();
 		var players = [];
+		var playersCount = 0;
 		var projectiles = [];
 		var items = [];
 		var handler = this;
@@ -53,12 +53,12 @@ function GameController($scope, $http, $interval)
 		var iter = 0;
 		var mapItems = {'K': 1, 'P': 1, 'M': 1, 'A': 1, 'R': 1, 'h': 1};
 		var isMoveRight = false, isMoveLeft = false, isFire = false;
+		var weaponProjectiles = {'K': PROJ_EMPTY, 'P': PROJ_PISTOL, 'M': PROJ_PISTOL, 'A': PROJ_ROCKET, 'R': PROJ_ROCKET};
 
 		background.src = '/graphics/map/background.png';
 		block.src = '/graphics/map/ground.png';
 		portal.src = '/graphics/map/portal.png';
 		respawn.src = '/graphics/map/respawn.png';
-		bullet.src = '/graphics/weapons/bullet.png';
 		aim.src = '/graphics/weapons/aim.png';
 
 		CTX.font = 'bold 30px sans-serif';
@@ -87,7 +87,8 @@ function GameController($scope, $http, $interval)
 				N = handler.getN(LOGIN, data.players);
 				player = players[N];
 			}
-			for(var i = 0; i < data.players.length; ++i)
+			playersCount = data.players.length;
+			for(var i = 0; i < playersCount; ++i)
 			{
 				players[i].setVars(data.players[i]);
 				i != N && players[i].setDirection(data.players[i][2]);
@@ -99,7 +100,7 @@ function GameController($scope, $http, $interval)
 			var pl = data.players[N];
 			VX = pl[2];
 			VY = pl[3];
-			DX = - (pl[0] * BLOCK_SIZE - BLOCK_SIZE / 2) + SCREEN_MIDDLE_X;
+			DX = - (pl[0] * BLOCK_SIZE - BLOCK_SIZE / 2) + SCREEN_MIDDLE_X + 5;
 			DY = - (pl[1] * BLOCK_SIZE - BLOCK_SIZE / 2) + SCREEN_MIDDLE_Y;
 			projectiles = data.projectiles;
 			//console.log(event.data); // for debug
@@ -120,7 +121,7 @@ function GameController($scope, $http, $interval)
 			{
 				CTX.fillText('Player | Health | Kills | Deaths', 100, 30);
 				CTX.fillText('________________________________', 100, 40);
-				for(var i = 0; i < players.length; ++i)
+				for(var i = 0; i < playersCount; ++i)
 				{
 					if(i == N)
 					{
@@ -146,13 +147,13 @@ function GameController($scope, $http, $interval)
 			{
 				items[i] && items[i].draw(DX, DY);
 			}
-			for(var i = 0; i < players.length; ++i)
-			{
-				players[i] && players[i].draw(i == N, DX, DY);
-			}
 			for(var i = 0; i < projectiles.length; ++i)
 			{
-				projectiles[i] && CTX.drawImage(bullet, projectiles[i][0] * BLOCK_SIZE + DX - 8, projectiles[i][1] * BLOCK_SIZE + DY - 8);
+				projectiles[i] && CTX.drawImage(weaponProjectiles[ projectiles[i][4] ], projectiles[i][0] * BLOCK_SIZE + DX - 4, projectiles[i][1] * BLOCK_SIZE + DY - 4);
+			}
+			for(var i = 0; i < playersCount; ++i)
+			{
+				players[i] && players[i].draw(i == N, DX, DY);
 			}
 			mousePos && CTX.drawImage(aim, mousePos.x - AIM_SIZE / 2, mousePos.y - AIM_SIZE / 2);
 			requestAnimFrame(handler.draw);
@@ -184,7 +185,7 @@ function GameController($scope, $http, $interval)
 			isFire = false;
 		}, true);
 
-		this.send = function()
+		this.sendWS = function()
 		{
 			if(isMoveLeft)
 			{
@@ -225,6 +226,7 @@ function GameController($scope, $http, $interval)
 					}
 				}));
 			}
+			player && player.incAnimationCurrentNumber();
 		}
 
 		// DOWN keys
@@ -297,7 +299,7 @@ function GameController($scope, $http, $interval)
 
 		// Start
 		this.draw();
-		SET_INTERVAL_HANDLER = $interval(handler.send, 33);
+		SET_INTERVAL_HANDLER = $interval(handler.sendWS, 33);
 	});
 
 	$scope.leave_game = function()
