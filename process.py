@@ -338,7 +338,7 @@ class process:
 		param = cur.fetchone()
 		if param:
 			(kills, deaths) = param
-			cur.execute('UPDATE user_game SET kills = NULL, deaths = NULL WHERE login = %s', (login,))
+			cur.execute('UPDATE user_game SET kills = NULL, deaths = NULL WHERE pid = %s and gid = %s', (pid,gid,))
 			self.server.add_player(pid, login, gid, kills, deaths)
 		else:
 			cur.execute('INSERT INTO user_game (pid, login, gid) VALUES(%s, %s, %s)', (pid, login, gid))

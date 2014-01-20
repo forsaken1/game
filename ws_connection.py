@@ -18,6 +18,8 @@ class ws_connection(WebSocketServerProtocol):
 #del conect onClose
 	def onMessage(self, msg, binary):
 	#	print 'END'
+		if LOGGING:
+			log(msg)
 		msg = json.loads(msg)
 		if self.player is None:
 			pid = self.factory.process.valid.get_pid(msg['params']['sid'])

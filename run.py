@@ -25,11 +25,11 @@ class post(Resource):
 
 	def render_POST(self, request):
 		text = request.content.getvalue()
-		if LOGGING: 
-			log('<<<<'+text)
+		#if LOGGING: 
+		#	log('<<<<'+text)
 		resp = self.p.process(text)
-		if LOGGING: 
-			log('>>>>'+resp)
+		#if LOGGING: 
+		#	log('>>>>'+resp)
 		request.setHeader('Access-Control-Allow-Origin', '*')
 		request.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 		request.setHeader("Content-Type", "application/json")
@@ -44,11 +44,11 @@ class post(Resource):
 
 if __name__ == '__main__':
 #	startLogging(sys.stdout)
-#	create_db()
+	create_db()
 	s = server()	
 	p = process(s) 
 
-	factory = ws_factory(p, "ws://0.0.0.0:5000")
+	factory = ws_factory(p, "ws://0.0.0.0:7778")
 	factory.setProtocolOptions(allowHixie76 = True)
 	resource = WebSocketResource(factory)
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 	site = Site(root, )
 
 	from twisted.internet import reactor
-	reactor.listenTCP(5000, site)
+	reactor.listenTCP(7778, site)
 	lc = LoopingCall(s.tick)
 	lc.start(TICK*0.001)
 	reactor.run()

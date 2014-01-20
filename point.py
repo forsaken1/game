@@ -15,7 +15,7 @@ weapons = {
 		   'P': weapon(1, 10, 3,'P'),
 		   'M': weapon(1, 10, 1, 'M'),
 		   'K': weapon(.5, 7, 1, 'K'),
-		   'R': weapon(1, 1, 10, 'R'),
+		   'R': weapon(1, 25, 10, 'R'),
 		   'A': weapon(INF, 100, 20, 'A')}
 
 

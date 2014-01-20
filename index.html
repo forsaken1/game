@@ -1,0 +1,256 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Index page</title>
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    <script src="/static/lib/jquery-2.0.3.min.js"></script>
+    <script src="/static/lib/underscore.js"></script>
+    <script src="/static/lib/backbone.js"></script>
+
+    <script src="/static/lib/paper.js"></script>
+
+
+    <script>
+        window.onload = function () {
+            new Psg.Router
+            Backbone.history.start()
+        }
+    </script>
+
+    <script id="welcome-template" type="text/template">
+        <div class="jumbotron">
+            <h1>Web shooter</h1>
+            <p>The brand new platform shooter game</p>
+        </div>
+        <div class="col-lg-8 col-lg-offset-2">
+            <ul class="nav nav-tabs">
+                <li id="nav-signin" class="active"><a href="#">Sign in</a></li>
+                <li id="nav-signup"><a href="#">Sign up</a></li>
+            </ul>
+            <form id="welcome-form" action="#" class="form-horizontal well">
+
+                <%= formData %>
+
+            </form>
+        </div>
+    </script>
+
+    <script id="welcome-data-input" type="text/template">
+        <div class="form-group" id="login-group">
+            <label for="input-login" class="col-lg-3 control-label">Login</label>
+            <div class="col-lg-6">
+                <input type="text" class="form-control" id="input-login" placeholder="Login">
+            </div>
+            <div class="row text-right col-lg-3 control-label" id="login-error"></div>
+        </div>
+        <div class="form-group" id="password-group">
+            <label for="input-password" class="col-lg-3 control-label">Password</label>
+            <div class="col-lg-6">
+                <input type="password" class="form-control" id="input-password" placeholder="Password">
+            </div>
+            <div class="row text-right col-lg-3 control-label" id="password-error"></div>
+        </div>
+    </script>
+
+    <script id="welcome-repeat-password-input" type="text/template">
+        <div class="form-group" id="repeat-password-group">
+            <label for="repeat-password" class="col-lg-3 control-label">Repeat password</label>
+            <div class="col-lg-6">
+                <input type="password" class="form-control" id="repeat-password" placeholder="Repeat password">
+            </div>
+            <div class="row text-right col-lg-3 control-label" id="repeat-password-error"></div>
+        </div>
+    </script>
+
+    <script id="welcome-submit-btn" type="text/template">
+        <div class="form-group">
+            <div class="col-lg-8 col-lg-offset-3">
+                <button id="submit-btn" type="submit" class="btn btn-default"><%= btnName %></button>
+            </div>
+        </div>
+    </script>
+
+    <script id="application-template" type="text/template">
+
+        <div class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a href="/ui" class="navbar-brand">Web shooter</a>
+                </div>
+                <div class="navbar-collapse collapse" id="navbar-main">
+                    <ul class="nav navbar-nav">
+                        <li><a href="#join">Join game</a></li>
+                        <li><a href="#create">Create game</a></li>
+                        <li><a href="#upload-map">Upload map</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <p class="navbar-text"><%= login %></p>
+                        <li><a href="#signout">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="page-header">
+                <div class="row">
+                    <h3><%= pageTitle %></h3>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div id="sidebar" class="col-lg-4"></div>
+            <div id="content" class="col-lg-8"></div>
+        </div>
+
+    </script>
+
+    <script id="message-template" type="text/template">
+        <li class="list-group-item">
+            <em><%= time %></em> <strong><%= login %>:</strong>
+            <span class="text-left"><%= text %></span>
+        </li>
+    </script>
+
+    <script id="chat-template" type="text/template">
+        <ul class="chat-log list-group well">
+        </ul>
+        <form action="" class="row">
+            <div class="form-group">
+                <div class="col-lg-8">
+                    <input type="text" class="form-control message-input" placeholder="Your text here">
+                </div>
+                <div class="col-lg-4 col-offset-8">
+                    <button class="submit-btn btn btn-default" type="submit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </script>
+
+    <script id="game-list-item-template" type="text/template">
+        <tr>
+            <td><a href="#game/<%= id %>"><%= name %></a></td>
+            <td><%= map %></td>
+            <td><%= playersNum %>/<%= maxPlayers %></td>
+            <td><%= status %></td>
+        </tr>
+    </script>
+
+    <script id="game-list-template" type="text/template">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th class="col-lg-5">Name</th>
+                    <th class="col-lg-5">Map</th>
+                    <th class="col-lg-1">Players</th>
+                    <th class="col-lg-1">Status</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </script>
+
+    <script id="map-uploader-template" type="text/template">
+        <form id="map-uploader-form" action="#" class="form-horizontal well">
+            <div id="map-upload-status" class="alert"></div>
+            <div class="form-group" id="name-group">
+                <label for="input-name" class="col-lg-2 control-label">Name</label>
+                <div class="col-lg-8">
+                    <input type="text" class="form-control" id="input-name" placeholder="Map name">
+                </div>
+            </div>
+            <div class="form-group" id="max-players-group">
+                <label for="input-max-players" class="col-lg-2 control-label">Max players</label>
+                <div class="col-lg-3">
+                    <input type="text" class="form-control" id="input-max-players" placeholder="Max players">
+                </div>
+            </div>
+            <div class="form-group" id="map-data-group">
+                <label for="input-map-data" class="col-lg-2 control-label">Map data</label>
+                <div class="col-lg-8">
+                    <textarea wrap="off" name="input-map-data" id="input-map-data" rows="20" class="form-control"></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-lg-8 col-lg-offset-2">
+                    <button id="submit-btn" type="submit" class="btn btn-default">Submit</button>
+                </div>
+            </div>
+        </form>
+    </script>
+
+    <script id="game-creator-template" type="text/template">
+        <form id="game-creator-form" action="#" class="form-horizontal well">
+            <div id="game-create-status" class="alert"></div>
+            <div class="form-group" id="name-group">
+                <label for="input-name" class="col-lg-2 control-label">Name</label>
+                <div class="col-lg-8">
+                    <input type="text" class="form-control" id="input-name" placeholder="Game name">
+                </div>
+            </div>
+            <div class="form-group" id="max-players-group">
+                <label for="input-max-players" class="col-lg-2 control-label">Max players</label>
+                <div class="col-lg-3">
+                    <input type="text" class="form-control" id="input-max-players" placeholder="Max players">
+                </div>
+            </div>
+            <div class="form-group" id="map-data-group">
+                <label for="select-map" class="col-lg-2 control-label">Map</label>
+                <div class="col-lg-4">
+                    <select name="select-map" id="select-map" class="form-control"><%= maps %></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-lg-8 col-lg-offset-2">
+                    <button id="submit-btn" type="submit" class="btn btn-default">Submit</button>
+                </div>
+            </div>
+        </form>
+    </script>
+
+    <script id="game-template" type="text/template">
+        <div class="text-right">
+            <a href="#leave">Leave game</a>
+        </div>
+        <div>
+            <canvas id="game-canvas"></canvas>
+        </div>
+    </script>
+
+    <script src="/static/src/config.js"></script>
+    <script src="/static/src/namespace.js"></script>
+    <script src="/static/src/helpers/connection.js"></script>
+    <script src="/static/src/helpers/game_connection.js"></script>
+    <script src="/static/src/helpers/gameplay_connection.js"></script>
+    <script src="/static/src/helpers/map_drawer.js"></script>
+    <script src="/static/src/helpers/map_objects.js"></script>
+    <script src="/static/src/models/user.js"></script>
+    <script src="/static/src/models/chat.js"></script>
+    <script src="/static/src/models/game_list.js"></script>
+    <script src="/static/src/models/map_uploader.js"></script>
+    <script src="/static/src/models/game_creator.js"></script>
+    <script src="/static/src/models/game.js"></script>
+    <script src="/static/src/models/application.js"></script>
+    <script src="/static/src/views/application_view.js"></script>
+    <script src="/static/src/views/welcome_view.js"></script>
+    <script src="/static/src/views/chat_view.js"></script>
+    <script src="/static/src/views/game_list_view.js"></script>
+    <script src="/static/src/views/map_uploader_view.js"></script>
+    <script src="/static/src/views/game_creator_view.js"></script>
+    <script src="/static/src/views/game_view.js"></script>
+    <script src="/static/src/router.js"></script>
+</head>
+
+
+<body>
+
+
+</body>
+
+</html>
+
+
+

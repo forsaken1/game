@@ -83,20 +83,20 @@ class player:
 		else: return False
 
 	def speed_calc(self):
+		if abs(self.dv.x) < EPS:
+			if abs(self.speed.x) < self.game.RUB:
+				self.speed.x = 0
+			else: 
+				self.speed.x -= sign(self.speed.x)*self.game.RUB  
+		else:
+			self.speed.x += sign(self.dv.x)*self.game.ACCEL
+
 		if self.above_floor():
 			if self.dv.y < -EPS:
 				self.speed.y = -self.game.MAX_SPEED
-			if abs(self.dv.x) < EPS:
-				if abs(self.speed.x) < self.game.RUB:
-					self.speed.x = 0
-				else: 
-					self.speed.x -= sign(self.speed.x)*self.game.RUB  
 		else:
 			self.speed.y += self.game.GRAVITY
 
-		if abs(self.dv.x) > EPS:
-			self.speed.x += sign(self.dv.x)*self.game.ACCEL
-		
 		if abs(self.speed.x) > self.game.MAX_SPEED:
 			self.speed.x = sign(self.speed.x)*self.game.MAX_SPEED
 		if abs(self.speed.y) > self.game.MAX_SPEED:
@@ -127,7 +127,7 @@ class player:
 
 		dir = speed.direct()
 		dir1 = point(1 if dir.x else -1, 1 if dir.y else -1)
-		pos_cell = self.pos.index()
+		pos_cell = (self.pos + dir1.scale(-EPS)).index()
 		forward = self.pos + dir1.scale(.5-EPS)
 		forward_cell = forward.index()
 		forward = self.pos + dir1.scale(.5)
@@ -143,7 +143,7 @@ class player:
 						#### (a,b)-collision descriptor a(1-center, 0-forward), b(0-x, 1-y, 2-angle) ####
 		for i in range(2):
 			dist = dists[i]
-			is_reach_x = speed.x and abs(speed.x) > abs(dist.x); is_reach_y = speed.y and abs(speed.y) > abs(dist.y);
+			is_reach_x = speed.x and abs(speed.x) > abs(dist.x) + EPS; is_reach_y = speed.y and abs(speed.y) > abs(dist.y) + EPS;
 			dist_size = dist.size(); speed_size = speed.size()
 			if is_reach_x and is_reach_y and (dist_size < EPS or (speed.scale(dist_size/speed_size) - dist).size()<EPS):
 				collisions[dist_size/speed_size].append((i,2))
