@@ -263,3 +263,7 @@ class game:
 			raise Exception("second msg from player during one tick")
 		self.test.fire(self.connections[pl], x = x, y = y)
 		self.was_action[pl] = True
+
+	def close(self):
+		for con in self.connections:
+			con.close()

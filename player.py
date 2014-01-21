@@ -60,6 +60,7 @@ class player:
 		self.pos = spawn + point(0.5, 0.5)
 		self.speed = point(0,0)
 		self.health = MAX_HEALTH
+		self.weapon = 'K'
 
 	def cur_consist(self):
 		self.game.pl_mess.append([
@@ -146,12 +147,12 @@ class player:
 			is_reach_x = speed.x and abs(speed.x) > abs(dist.x) + EPS; is_reach_y = speed.y and abs(speed.y) > abs(dist.y) + EPS;
 			dist_size = dist.size(); speed_size = speed.size()
 			if is_reach_x and is_reach_y and (dist_size < EPS or (speed.scale(dist_size/speed_size) - dist).size()<EPS):
-				collisions[dist_size/speed_size].append((i,2))
+				collisions[dist.x/speed.x].append((i,2))
 			else:
 				if is_reach_x:
-					collisions[dist_size/speed_size].append((i,0))
+					collisions[dist.x/speed.x].append((i,0))
 				if is_reach_y:
-					collisions[dist_size/speed_size].append((i,1))
+					collisions[dist.y/speed.y].append((i,1))
 
 						### was_coll = [X,Y] ###
 		was_coll = [False,False]
@@ -230,8 +231,6 @@ class player:
 
 	def write_mess(self):
 		for c in self.connects:
-			if LOGGING:
-				log(self.game.mess)
 			c.sendMessage(self.game.mess)		
 			
 	def hit(self, dmg):

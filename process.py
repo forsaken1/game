@@ -109,16 +109,8 @@ class param_validator:
 				if not self.badMapId(actual['map']):
 					return "badMap"
 				else: continue
-			if param == 'game' and actual[param] != '':
-				actual['game'] = int(actual['game'])
-			if param == 'mapId':
-				actual['map'] = int(actual['map'])
-			if param == 'maxPlayers':
-				actual['maxPlayers'] = int(actual['maxPlayers'])
 			if not getattr(self, self.param_error[param])(actual[param]):
 				return self.param_error[param]
-
-		print 'param', actual		
 		return None	
 
 class process:		
