@@ -120,7 +120,8 @@ class player:
 		return
 
 	def go(self):
-
+		if self.game.c_ticks == 17:
+			pass
 		speed = self.speed
 		if speed.size() < EPS: return
 		if abs(self.speed.x) < EPS: self.speed.x = 0
