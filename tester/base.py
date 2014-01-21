@@ -199,22 +199,18 @@ class BaseTestCase(unittest.TestCase):
 		print '+++++', mess
 		return mess
 
-	def connect(self, map = None, game = None, game_ret = False,\
+	def connect(self, map = None, game = None, \
 			  accel = 0.02, gravity = 0.02, fric = 0.02, max_speed = 0.2):
 		if map:
 			map = self.get_map(scheme = map)
 			gid, sid = self.get_game(map = map, sid_returned = True,\
 			accel = accel, gravity = gravity, fric = fric, max_speed = max_speed)
 			ws = self.send_ws(action = 'move', params = {'sid': sid, 'tick': 0, 'dx': 0, 'dy':0})
-			if game_ret:
-				return ws, gid, sid
-			return ws
+			return ws, gid, sid
 		elif game:
 			sid = self.join_game(game)
 			ws = self.send_ws(action = 'move', params = {'sid': sid, 'tick': 0, 'dx': 0, 'dy':0})
-			if game_ret:
-				return ws, sid
-			return ws
+			return ws, sid
 		else: return False
 
 	def move(self, ws, tick = None, x = 0, y = 0):
@@ -232,12 +228,14 @@ class game:
 		self.connections = []
 		self.sids = []
 		self.test = test
-		ws, game, sid = test.connect(map, game_ret = True, accel = accel, gravity = gravity, fric = fric, max_speed = max_speed)
+		ws, game, sid = test.connect(map, accel = accel, gravity = gravity, fric = fric, max_speed = max_speed)
+		test.cons = [(ws, sid)]
 		self.connections.append(ws)
 		self.sids.append(sid)
 		self.resp = test.recv_ws(ws)
 		for i in range(add_players_count):
-			ws, sid = test.connect(game = game, game_ret = True)
+			test.cons.append[(ws,sid)]
+			ws, sid = test.connect(game = game)
 			self.connections.append(ws), self.sids.append(sid)
 			self.resp = test.recv_ws(ws)
 			
@@ -263,7 +261,3 @@ class game:
 			raise Exception("second msg from player during one tick")
 		self.test.fire(self.connections[pl], x = x, y = y)
 		self.was_action[pl] = True
-
-	def close(self):
-		for con in self.connections:
-			con.close()

@@ -151,7 +151,7 @@ class FireTestCase(BaseTestCase):
 		map  = ["$......",
 				"#......",
 				"$M#...."]
-		ws1, game, sid = self.connect(map, game_ret = True)
+		ws1, game, sid = self.connect(map)
 		resp = self.recv_ws(ws1)
 		ws2 = self.connect(game = game)
 		self.move(ws1, resp['tick'])
@@ -197,7 +197,7 @@ class FireTestCase(BaseTestCase):
 
 	def test_rocket_launcher(self):
 		map  = ["$R..$."]
-		ws1, game, sid = self.connect(map, game_ret = True)
+		ws1, game, sid = self.connect(map)
 		resp = self.recv_ws(ws1)
 		ws2 = self.connect(game = game)
 		self.move(ws1, resp['tick'])
@@ -251,9 +251,9 @@ class FireTestCase(BaseTestCase):
 		map  = ["$......",
 				"#......",
 				"$M#...."]
-		ws1, game, sid1 = self.connect(map, game_ret = True)
+		ws1, game, sid1 = self.connect(map)
 		resp = self.recv_ws(ws1)
-		ws2, sid2 = self.connect(game = game, game_ret = True)
+		ws2, sid2 = self.connect(game = game)
 		self.move(ws1, resp['tick'])
 		resp1 = self.recv_ws(ws1)
 		while len(resp1['players']) == 1:
@@ -310,9 +310,9 @@ class FireTestCase(BaseTestCase):
 		map  = ["$......",
 				"#......",
 				"$M#...."]
-		ws1, game, sid1 = self.connect(map, game_ret = True)
+		ws1, game, sid1 = self.connect(map)
 		resp = self.recv_ws(ws1)
-		ws2, sid2 = self.connect(game = game, game_ret = True)
+		ws2, sid2 = self.connect(game = game)
 		self.move(ws1, resp['tick'])
 		resp1 = self.recv_ws(ws1)
 		while len(resp1['players']) == 1:
@@ -364,9 +364,9 @@ class FireTestCase(BaseTestCase):
 		map  = ["$......",
 				"#......",
 				"$M#...."]
-		ws1, game, sid1 = self.connect(map, game_ret = True)
+		ws1, game, sid1 = self.connect(map)
 		resp = self.recv_ws(ws1)
-		ws2, sid2 = self.connect(game = game, game_ret = True)
+		ws2, sid2 = self.connect(game = game)
 		self.move(ws1, resp['tick'])
 		resp1 = self.recv_ws(ws1)
 		while len(resp1['players']) == 1:

@@ -120,7 +120,7 @@ class player:
 		return
 
 	def go(self):
-		if self.game.c_ticks == 17:
+		if self.game.c_ticks == 3:
 			pass
 		speed = self.speed
 		if speed.size() < EPS: return
@@ -193,14 +193,14 @@ class player:
 								was_coll = [True,True]
 
 					elif coll[1] == 1:
-						if coll_cell_wall or abs(self.pos.x - int(self.pos.x) - .5) > EPS and not was_coll[0] and x_neib_wall:
+						if coll_cell_wall or (abs(self.pos.x - int(self.pos.x) - .5) > EPS or abs(self.speed.x) > EPS) and not was_coll[0] and x_neib_wall:
 							self.speed.y = 0
 							was_coll[1] = True
 						else:
 							forward_cell = coll_cell
 					
 					elif coll[1] == 0:
-						if coll_cell_wall or abs(self.pos.y - int(self.pos.y) - .5) > EPS and not was_coll[1] and y_neib_wall:
+						if coll_cell_wall or (abs(self.pos.y - int(self.pos.y) - .5) > EPS or abs(self.speed.y) > EPS) and not was_coll[1] and y_neib_wall:
 							self.speed.x = 0
 							was_coll[0] = True
 						else:
