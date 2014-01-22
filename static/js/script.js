@@ -1,10 +1,9 @@
 var app = angular.module('game', ['ngRoute'])
 localStorage.setItem('time', 0);
-//SERVER_URL_DOMAIN = window.location.host;
-SERVER_URL_DOMAIN = '5.100.88.174:3000';
+//SERVER_URL_DOMAIN = '5.100.88.174:3000';
+SERVER_URL_DOMAIN = window.location.host;
 SERVER_URL = 'http://' + SERVER_URL_DOMAIN;
-//SERVER_WEBSOCKET_URL = SERVER_URL + '/websocket';
-SERVER_WEBSOCKET_URL = 'http://5.100.88.174:8001'
+SERVER_WEBSOCKET_URL = SERVER_URL + '/websocket';
 SET_INTERVAL_HANDLER = null;
 
 app.

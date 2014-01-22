@@ -36,6 +36,7 @@ function GameController($scope, $http, $interval)
 		var CTX = canvas.getContext('2d');
 		var onKeyUp = [];
 		var onKeyDown = [];
+		var wall = new Image();
 		var block = new Image();
 		var portal = new Image();
 		var respawn = new Image();
@@ -59,12 +60,23 @@ function GameController($scope, $http, $interval)
 		block.src = '/graphics/map/ground.png';
 		portal.src = '/graphics/map/portal.png';
 		respawn.src = '/graphics/map/respawn.png';
+		wall.src = '/graphics/map/wall.png';
 		aim.src = '/graphics/weapons/aim.png';
 
 		CTX.font = 'bold 30px sans-serif';
 
 		for(var i = 0; i < MAP.maxPlayers; ++i)
 			players[i] = new Player(CTX, -1000, -1000);
+
+		var wall_ = '';
+		for(var i = 0; i < MAP.map[0].length; ++i)
+			wall_ += '!';
+
+		MAP.map.unshift(wall_);
+		MAP.map.push(wall_);
+
+		for(var i = 0; i < MAP.map.length; ++i)
+			MAP.map[i] = '!' + MAP.map[i] + '!';
 
 		for(var i = 0; i < MAP.map.length; ++i)
 		{
@@ -100,8 +112,8 @@ function GameController($scope, $http, $interval)
 			var pl = data.players[N];
 			VX = pl[2];
 			VY = pl[3];
-			DX = - (pl[0] * BLOCK_SIZE - BLOCK_SIZE / 2) + SCREEN_MIDDLE_X + 5;
-			DY = - (pl[1] * BLOCK_SIZE - BLOCK_SIZE / 2) + SCREEN_MIDDLE_Y;
+			DX = - (pl[0] * BLOCK_SIZE + BLOCK_SIZE / 2) + SCREEN_MIDDLE_X + 5;
+			DY = - (pl[1] * BLOCK_SIZE + BLOCK_SIZE / 2) + SCREEN_MIDDLE_Y;
 			projectiles = data.projectiles;
 			//console.log(event.data); // for debug
 		});
@@ -138,6 +150,7 @@ function GameController($scope, $http, $interval)
 			{
 				for(var j = 0; j < MAP.map[i].length; ++j)
 				{
+					MAP.map[i][j] == '!' &&	CTX.drawImage(wall,    j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					MAP.map[i][j] == '#' &&	CTX.drawImage(block,   j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					MAP.map[i][j] == '$' &&	CTX.drawImage(respawn, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);
 					/^\d+$/.test(MAP.map[i][j]) && CTX.drawImage(portal, j * BLOCK_SIZE + DX, i * BLOCK_SIZE + DY);

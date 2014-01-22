@@ -1,7 +1,6 @@
 function WS(onMessage)
 {
-//	var ws = new WebSocket('ws://' + SERVER_URL_DOMAIN + '/websocket');
-	var ws = new WebSocket('ws://5.100.88.174:8001');
+	var ws = new WebSocket('ws://' + SERVER_URL_DOMAIN + '/websocket');
 	ws.onopen = function() 
 	{
 		console.log("Connection is established"); 
