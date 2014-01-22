@@ -64,6 +64,8 @@ function GameController($scope, $http, $interval)
 		aim.src = '/graphics/weapons/aim.png';
 
 		CTX.font = 'bold 30px sans-serif';
+		CTX.lineWidth = 3;
+		CTX.strokeStyle = '#ff0000';
 
 		for(var i = 0; i < MAP.maxPlayers; ++i)
 			players[i] = new Player(CTX, -1000, -1000);
@@ -162,9 +164,24 @@ function GameController($scope, $http, $interval)
 			}
 			for(var i = 0; i < projectiles.length; ++i)
 			{
-				projectiles[i] && CTX.drawImage(weaponProjectiles[ projectiles[i][4] ], 
-					projectiles[i][0] * BLOCK_SIZE + BLOCK_SIZE + DX - 4, 
-					projectiles[i][1] * BLOCK_SIZE + BLOCK_SIZE + DY - 4);
+				if(projectiles[i])
+				{
+					if(projectiles[i][4] == 'A')
+					{
+						CTX.beginPath();
+						var x = projectiles[i][0] * BLOCK_SIZE + BLOCK_SIZE + DX - 4;
+						var y = projectiles[i][1] * BLOCK_SIZE + BLOCK_SIZE + DY - 4;
+						CTX.moveTo(x, y);
+						CTX.lineTo(x + projectiles[i][2] * BLOCK_SIZE, y + projectiles[i][3] * BLOCK_SIZE);
+						CTX.stroke();
+					}
+					else
+					{
+						CTX.drawImage(weaponProjectiles[ projectiles[i][4] ], 
+							projectiles[i][0] * BLOCK_SIZE + BLOCK_SIZE + DX - 4, 
+							projectiles[i][1] * BLOCK_SIZE + BLOCK_SIZE + DY - 4);
+					}
+				}
 			}
 			for(var i = 0; i < playersCount; ++i)
 			{
