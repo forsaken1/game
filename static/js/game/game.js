@@ -172,7 +172,7 @@ function GameController($scope, $http, $interval)
 						var x = projectiles[i][0] * BLOCK_SIZE + BLOCK_SIZE + DX - 4;
 						var y = projectiles[i][1] * BLOCK_SIZE + BLOCK_SIZE + DY - 4;
 						CTX.moveTo(x, y);
-						CTX.lineTo(x + projectiles[i][2] * BLOCK_SIZE, y + projectiles[i][3] * BLOCK_SIZE);
+						CTX.lineTo(x + projectiles[i][2] * BLOCK_SIZE + 4, y + projectiles[i][3] * BLOCK_SIZE + 4);
 						CTX.stroke();
 					}
 					else
