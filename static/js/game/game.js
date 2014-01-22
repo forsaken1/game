@@ -162,7 +162,9 @@ function GameController($scope, $http, $interval)
 			}
 			for(var i = 0; i < projectiles.length; ++i)
 			{
-				projectiles[i] && CTX.drawImage(weaponProjectiles[ projectiles[i][4] ], projectiles[i][0] * BLOCK_SIZE + DX - 4, projectiles[i][1] * BLOCK_SIZE + DY - 4);
+				projectiles[i] && CTX.drawImage(weaponProjectiles[ projectiles[i][4] ], 
+					projectiles[i][0] * BLOCK_SIZE + BLOCK_SIZE + DX - 4, 
+					projectiles[i][1] * BLOCK_SIZE + BLOCK_SIZE + DY - 4);
 			}
 			for(var i = 0; i < playersCount; ++i)
 			{
@@ -234,8 +236,8 @@ function GameController($scope, $http, $interval)
 					'params':
 					{
 						'tick': TICK,
-						'dx': (mousePos.x - DX) / BLOCK_SIZE - player.getCoordX(),
-						'dy': (mousePos.y - DY) / BLOCK_SIZE - player.getCoordY()
+						'dx': (mousePos.x - DX - BLOCK_SIZE) / BLOCK_SIZE - player.getCoordX(),
+						'dy': (mousePos.y - DY - BLOCK_SIZE) / BLOCK_SIZE - player.getCoordY()
 					}
 				}));
 			}
