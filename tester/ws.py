@@ -76,8 +76,7 @@ class WebSocketTestCase(BaseTestCase):
 		assert self.equal(pl1[X], 1.5 + s(1.)) and self.equal(pl1[Y], 2.5) and self.equal(pl1[VY], 0)\
 			and self.equal(pl1[VX], ACCEL), pl1			
 		assert self.equal(pl2[X], 2.5 + s(1.)) and self.equal(pl2[Y], 2.5 + s(1, a = -MAX_SPEED))\
-		    and self.equal(pl2[VY], -MAX_SPEED) and self.equal(pl2[VX], 0),\
-		    (pl2, 2.5 + s(1.), 	s(1, a = -MAX_SPEED))
+		    and self.equal(pl2[VY], -MAX_SPEED) and self.equal(pl2[VX], ACCEL), pl2
 		
 		self.move(ws1, resp1['tick'])
 		self.move(ws2, resp1['tick'])
@@ -87,9 +86,9 @@ class WebSocketTestCase(BaseTestCase):
 		pl2 = resp1['players'][1]				
 		assert self.equal(pl1[X], 1.5 + s(1.)) and self.equal(pl1[Y], 2.5) and self.equal(pl1[VY], 0)\
 			and self.equal(pl1[VX], 0), pl1			
-		assert self.equal(pl2[X], 2.5 + s(1.) + s(1,v = ACCEL, a = 0)) and self.equal(pl2[Y],\
+		assert self.equal(pl2[X], 2.5 + s(1.)) and self.equal(pl2[Y],\
 		    2.5 + s(1, a = -MAX_SPEED) + s(1, v = -MAX_SPEED ,a = GRAVITY))\
-		    and self.equal(pl2[VY], -MAX_SPEED + GRAVITY) and self.equal(pl2[VX], ACCEL), pl2	
+		    and self.equal(pl2[VY], -MAX_SPEED + GRAVITY) and self.equal(pl2[VX], 0), pl2	
 
 	def test_fall(self):
 		map = [	"$........",
@@ -158,18 +157,19 @@ class WebSocketTestCase(BaseTestCase):
 		ws, gid, sid = self.connect(map); self.cons = [(ws,sid)]	
 		resp = self.recv_ws(ws)			
 		vy = 0; y = 1.5
-		self.move(ws, resp['tick'], 1, -1)
+		self.move(ws, resp['tick'], 0, -1)
 		vy = -MAX_SPEED
 		y = 1.5 + vy
+		vx = 0
 		while y > 1:
 			resp = self.recv_ws(ws)
 			pl = resp['players'][0]
-			assert self.equal(pl[VY], vy) and self.equal(pl[Y], y) and self.equal(pl[VX], 0), (pl, vy, y)
-			self.move(ws, resp['tick'])
-			vy+=GRAVITY; y += vy
+			assert self.equal(pl[VY], vy) and self.equal(pl[Y], y) and self.equal(pl[VX], vx), (pl, vy, y)
+			self.move(ws, resp['tick'],1)
+			vy+=GRAVITY; y += vy; vx += ACCEL
 		resp = self.recv_ws(ws)
 		pl = resp['players'][0]
-		assert self.equal(pl[VX], ACCEL) and self.equal(pl[VY], vy)\
+		assert self.equal(pl[VX], vx) and self.equal(pl[VY], vy)\
 		    and self.equal(pl[Y], 1.5) and self.equal(pl[X], 2.5), pl
 
 	def test_players_collision(self):
@@ -281,7 +281,7 @@ class WebSocketTestCase(BaseTestCase):
 
 	def test_take_item(self):
 		map = [	"$A..#."]
-		ws, sid = self.connect(map); self.cons = [(ws,sid)]	
+		ws, gid, sid = self.connect(map); self.cons = [(ws,sid)]	
 		vx = 0; x = .5
 		while x < 1:
 			resp = self.recv_ws(ws)
@@ -417,12 +417,12 @@ class WebSocketTestCase(BaseTestCase):
 				dy = -1
 			if pl[Y] < 1.5:
 				break;
-
+		g.move(0)
 		pl = g.tick()['players'][0]
 		assert self.equal(pl[X], 1.5), pl
 
 	def test_tps_with_take_item(self):
-		ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.09, BaseTestCase.accuracy, BaseTestCase.accuracy, 0.9
+		ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.09, BaseTestCase.accuracy, BaseTestCase.accuracy, 0.55
 		map  = [".......1",
 				"1.......",
 				"R......$"]
@@ -431,15 +431,14 @@ class WebSocketTestCase(BaseTestCase):
 			g.move(0, -1, 0)
 			resp = g.tick()
 			pl = resp['players'][0]
-			if pl[X] < 1.5:
+			if pl[X]< 1.5:
 				g.move(0, -1, -1)
 				break
-
 		pl = g.tick()['players'][0]
 		assert self.equal(pl[X], 7.5) and self.equal(pl[Y], .5) and pl[WEAPON] == 'R', pl
 
 	def test_tps_before_take_item(self):
-		ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.09, BaseTestCase.accuracy, BaseTestCase.accuracy, 0.9
+		ACCEL, GRAVITY, FRIC, MAX_SPEED = 0.09, BaseTestCase.accuracy, BaseTestCase.accuracy, 0.55
 		map  = [".......1",
 				"R.......",
 				"1......$"]
@@ -451,7 +450,6 @@ class WebSocketTestCase(BaseTestCase):
 			if pl[X]< 1.5:
 				g.move(0, -1, -1)
 				break
-
 		pl = g.tick()['players'][0]
 		assert self.equal(pl[X], 7.5) and self.equal(pl[Y], .5) and pl[WEAPON] == 'K', pl
 
