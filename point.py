@@ -12,11 +12,11 @@ class weapon():
 		self.speed = speed; self.damage = damage; self.recharge = recharge; self.letter = letter
 
 weapons = {
-		   'P': weapon(1, 10, 3,'P'),
-		   'M': weapon(1, 10, 1, 'M'),
-		   'K': weapon(.5, 7, 1, 'K'),
-		   'R': weapon(1, 25, 10, 'R'),
-		   'A': weapon(INF, 100, 20, 'A')}
+		   'P': weapon(0.99, 3, 3,'P'),
+		   'M': weapon(0.99, 3, 1, 'M'),
+		   'K': weapon(.5, 3, 1, 'K'),
+		   'R': weapon(0.99, 3, 10, 'R'),
+		   'A': weapon(INF, 3, 20, 'A')}
 
 
 class point:

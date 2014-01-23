@@ -68,12 +68,13 @@ class game:
 			p.cur_consist()
 		self.set_mess()
 		if LOGGING:
-			log(self.mess)
+			log('\n'+self.mess)
 		for p in self.players:
 			p.write_mess()
 
 	def sync_tick(self):
 		if self.server.sync_mode:
+#			if all(p.was_action or not len(p.connects) for p in self.players):
 			if all(p.was_action or not len(p.connects) for p in self.players):
 				for p in self.players:
 					p.was_action = False

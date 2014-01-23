@@ -28,7 +28,6 @@ class player:
 
 	#---------------------------function for using on client message ---------------------------------#
 	def action(self, msg):
-		
 		self.was_action = True
 		if not self.is_start:
 			self.is_start = True

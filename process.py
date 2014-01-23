@@ -55,7 +55,7 @@ class param_validator:
 		return True
 	
 	def badSince(self, since):
-		if since < 0:
+		if type(since) != int or since < 0:
 			return False
 		else: return True
 	
@@ -67,7 +67,7 @@ class param_validator:
 		else: return True	
 			
 	def badMaxPlayers(self, maxPlayers):
-		if type(maxPlayers) != int or maxPlayers < 0:
+		if type(maxPlayers) != int or maxPlayers < 1:
 			return False
 		else: return True		
 
@@ -165,10 +165,10 @@ class process:
 			error = self.valid.find_error(formal_param, params)
 		except ValueError:
 			return self.result(error = 'badJSON')
-		except KeyError:
+		except (KeyError, TypeError):
 			return self.result(error = 'badRequest')
 		except AttributeError:
-			return self.result(error = 'unknownAction')
+			return self.result(error = 'badAction')
 		if error: return self.result(error) 
 		else: return action(params)
 	
@@ -237,11 +237,12 @@ class process:
 		id , gid, text = self.valid.get_pid(par['sid']), par['game'], par['text']
 		cur = self.db.cursor()
 
-		cur.execute('SELECT gid FROM user_game WHERE pid = %s and kills IS NULL', (id,))
-		gid_fact = cur.fetchone()
-		gid_fact = gid_fact[0] if gid_fact else ""
-		if gid_fact != gid:
-			return self.result('badGame')
+		if gid != "":
+			cur.execute('SELECT gid FROM user_game WHERE pid = %s and kills IS NULL', (id,))
+			gid_fact = cur.fetchone()
+			if not gid_fact or gid_fact[0] != gid:
+				return self.result('badGame')
+		
 
 		cur.execute('SELECT login FROM users WHERE id = %s', (id,))
 		login = cur.fetchone()[0]
@@ -251,7 +252,15 @@ class process:
 		return self.result()
 		
 	def getMessages(self, par):
-		gid, since = par['game'], int(par['since'])
+		pid, gid, since = self.valid.get_pid(par['sid']), par['game'], int(par['since'])
+		
+		if gid != "":
+			cur = self.db.cursor()
+			cur.execute('SELECT gid FROM user_game WHERE pid = %s and kills IS NULL', (pid,))
+			gid_fact = cur.fetchone()
+			if not gid_fact or gid_fact[0] != gid:
+				return self.result('badGame')
+
 		cur = self.db.cursor(MySQLdb.cursors.DictCursor)
 		query = 'SELECT time, text, login FROM messages WHERE time >= %s AND gid '+('='+str(gid) if gid else "IS NULL")+' ORDER BY time'
 		cur.execute(query, (since, ))
