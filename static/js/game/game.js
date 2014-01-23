@@ -179,7 +179,7 @@ function GameController($scope, $http, $interval)
 					}
 					else
 					{
-						if(projectiles[i][4] == 'R' && !projectiles[i][5])
+						if(projectiles[i][4] == 'R' && !projectiles[i][3] && !projectiles[i][2])
 							CTX.drawImage(explosion,
 								projectiles[i][0] * BLOCK_SIZE + BLOCK_SIZE + DX - 30, 
 								projectiles[i][1] * BLOCK_SIZE + BLOCK_SIZE + DY - 30);
