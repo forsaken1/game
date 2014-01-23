@@ -41,6 +41,7 @@ function GameController($scope, $http, $interval)
 		var portal = new Image();
 		var respawn = new Image();
 		var background = new Image();
+		var explosion = new Image();
 		var aim = new Image();
 		var players = [];
 		var playersCount = 0;
@@ -62,6 +63,7 @@ function GameController($scope, $http, $interval)
 		respawn.src = '/graphics/map/respawn.png';
 		wall.src = '/graphics/map/wall.png';
 		aim.src = '/graphics/weapons/aim.png';
+		explosion.src = '/graphics/weapons/explosion.png';
 
 		CTX.font = 'bold 30px sans-serif';
 		CTX.lineWidth = 3;
@@ -177,9 +179,14 @@ function GameController($scope, $http, $interval)
 					}
 					else
 					{
-						CTX.drawImage(weaponProjectiles[ projectiles[i][4] ], 
-							projectiles[i][0] * BLOCK_SIZE + BLOCK_SIZE + DX - 4, 
-							projectiles[i][1] * BLOCK_SIZE + BLOCK_SIZE + DY - 4);
+						if(projectiles[i][4] == 'R' && !projectiles[i][5])
+							CTX.drawImage(explosion,
+								projectiles[i][0] * BLOCK_SIZE + BLOCK_SIZE + DX - 30, 
+								projectiles[i][1] * BLOCK_SIZE + BLOCK_SIZE + DY - 30);
+						else
+							CTX.drawImage(weaponProjectiles[ projectiles[i][4] ], 
+								projectiles[i][0] * BLOCK_SIZE + BLOCK_SIZE + DX - 4, 
+								projectiles[i][1] * BLOCK_SIZE + BLOCK_SIZE + DY - 4);
 					}
 				}
 			}
