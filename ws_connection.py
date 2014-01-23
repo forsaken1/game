@@ -13,9 +13,10 @@ class ws_factory(WebSocketServerFactory):
 
 class ws_connection(WebSocketServerProtocol):
 	def onConnect(self, req):
+		print 'open'
 		self.player = None
 		return WebSocketServerProtocol.onConnect(self, req)
-#del conect onClose
+
 	def onMessage(self, msg, binary):
 	#	print 'END'
 		if LOGGING:
@@ -28,7 +29,7 @@ class ws_connection(WebSocketServerProtocol):
 		self.player.action(msg)
 
 	def onClose(self, wasClean, code, reason):
-		print 'close'
-		if self.player:
-			self.player.connects.remove(self)
+		print 'close', reason, code
+		#if self.player:
+		#	self.player.connects.remove(self)
 		return WebSocketServerProtocol.onClose(self, wasClean, code, reason)

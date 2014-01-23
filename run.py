@@ -25,11 +25,11 @@ class post(Resource):
 
 	def render_POST(self, request):
 		text = request.content.getvalue()
-		#if LOGGING: 
-		#	log('<<<<'+text)
+		if LOGGING: 
+			log('<<<<'+text)
 		resp = self.p.process(text)
-		#if LOGGING: 
-		#	log('>>>>'+resp)
+		if LOGGING: 
+			log('>>>>'+resp)
 		request.setHeader('Access-Control-Allow-Origin', '*')
 		request.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 		request.setHeader("Content-Type", "application/json")

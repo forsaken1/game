@@ -59,11 +59,13 @@ class projectile():
 		pos = self.pos
 		k = self.k
 		damaged = 0
+		if self.weapon.letter == 'A':
+			pass
 		for pl in self.game.players:
 			if pl.respawn or self.player == pl:
 				continue
 			x = pl.pos.x - dir1.x*.5
-			if (x < pos.x) ^ (x < end.x) and abs(self.gety(x)-pl.pos.y) <= .5 and abs(x-pos.x)*k<min_dist:
+			if (x < pos.x) ^ (x < end.x) and abs(self.gety(x)-pl.pos.y) <= .5 and abs((point(x, self.gety(x)) - self.pos).size())<min_dist:
 				min_dist = abs((point(x, self.gety(x)) - self.pos).size())
 				damaged = pl
 			else:
@@ -89,22 +91,37 @@ class projectile():
 
 
 	def cur_consist(self):
-		self.game.pr_mess.append([
-			self.pos.x-1,
-			self.pos.y-1,
-			self.v.x,
-			self.v.y,
-			self.weapon.letter,
-			self.life_time
-			])
-
+		if self.weapon.letter == 'A': 
+			self.game.pr_mess.append([
+				self.pos.x-1,
+				self.pos.y-1,
+				self.v.x,
+				self.v.y,
+				self.weapon.letter,
+				self.life_time
+				])
+		else:
+			if self.v.x == 0 and self.v.y == 0:
+				return
+			pos = self.pos + self.v
+			if self.was_coll:
+				self.v = point(0,0)
+			self.game.pr_mess.append([
+				pos.x-1,
+				pos.y-1,
+				self.v.x,
+				self.v.y,
+				self.weapon.letter,
+				self.life_time
+				])
 	
 
 	def tick(self):
 		self.life_time += 1
+		if self.game.c_ticks == 358:
+			pass
 		if self.was_coll:
-			self.v = point(0,0)
-			self.cur_consist()
+			return
 		else:
 			self.go()
 			self.player_coll()
