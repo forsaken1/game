@@ -4,4 +4,4 @@
 * Use
 
 		pip install -r requirements.txt
-		python tun.py
+		python run.py
