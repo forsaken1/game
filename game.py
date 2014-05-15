@@ -1,4 +1,3 @@
-from sympy.geometry import *
 from player import *
 from projectile import *
 import json
